@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { NavLink, Link } from 'react-router-dom';
 import { 
   Lock, 
   UserPlus, 
@@ -11,26 +12,55 @@ export default function Navbar({ onOpenAuth }) {
 
   return (
     <header>
-      {/* Main Navigation Bar */}
+      {/* Main Navigation Bar (Common across all pages) */}
       <nav className="navbar">
         <div className="container navbar-container">
           {/* Official Brand Logo */}
-          <a href="#" className="brand-logo">
+          <Link to="/" className="brand-logo">
             <img 
               src="/logo.png" 
               alt="Saptaganga Matrimony" 
               className="navbar-brand-logo-img" 
             />
-          </a>
+          </Link>
 
           {/* Desktop Navigation Links */}
           <ul className="nav-links">
-            <li><a href="#home" className="nav-link active">Home</a></li>
-            <li><a href="#search" className="nav-link">Search</a></li>
-            <li><a href="#featured" className="nav-link">Matches</a></li>
-            <li><a href="#membership" className="nav-link">Membership</a></li>
-            <li><a href="#stories" className="nav-link">Success Stories</a></li>
-            <li><a href="#how-it-works" className="nav-link">How It Works</a></li>
+            <li>
+              <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} end>
+                Home
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/search" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+                Search
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/matches" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+                Matches
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/membership" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+                Membership
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/stories" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+                Success Stories
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/how-it-works" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+                How It Works
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/contact" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+                Contact
+              </NavLink>
+            </li>
           </ul>
 
           {/* User Action CTAs */}
@@ -65,12 +95,13 @@ export default function Navbar({ onOpenAuth }) {
         {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
           <div className="mobile-nav-dropdown">
-            <a href="#home" onClick={() => setMobileMenuOpen(false)}>Home</a>
-            <a href="#search" onClick={() => setMobileMenuOpen(false)}>Search</a>
-            <a href="#featured" onClick={() => setMobileMenuOpen(false)}>Matches</a>
-            <a href="#membership" onClick={() => setMobileMenuOpen(false)}>Membership</a>
-            <a href="#stories" onClick={() => setMobileMenuOpen(false)}>Success Stories</a>
-            <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
+            <NavLink to="/" onClick={() => setMobileMenuOpen(false)}>Home</NavLink>
+            <NavLink to="/search" onClick={() => setMobileMenuOpen(false)}>Search</NavLink>
+            <NavLink to="/matches" onClick={() => setMobileMenuOpen(false)}>Matches</NavLink>
+            <NavLink to="/membership" onClick={() => setMobileMenuOpen(false)}>Membership</NavLink>
+            <NavLink to="/stories" onClick={() => setMobileMenuOpen(false)}>Success Stories</NavLink>
+            <NavLink to="/how-it-works" onClick={() => setMobileMenuOpen(false)}>How It Works</NavLink>
+            <NavLink to="/contact" onClick={() => setMobileMenuOpen(false)}>Contact</NavLink>
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
               <button 
                 onClick={() => { setMobileMenuOpen(false); onOpenAuth('login'); }}

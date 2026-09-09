@@ -1,44 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from './components/common/Navbar';
-import HeroBanner from './components/home/HeroBanner';
-import QuickSearchCard from './components/home/QuickSearchCard';
-import HowItWorks from './components/home/HowItWorks';
-import FeaturedProfiles from './components/home/FeaturedProfiles';
-import WhyChooseUs from './components/home/WhyChooseUs';
-import MembershipPlans from './components/home/MembershipPlans';
-import Footer from './components/common/Footer';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import MainLayout from './components/layout/MainLayout';
+
+// Pages
+import HomePage from './pages/HomePage';
+import SearchPage from './pages/SearchPage';
+import MatchesPage from './pages/MatchesPage';
+import MembershipPage from './pages/MembershipPage';
+import StoriesPage from './pages/StoriesPage';
+import HowItWorksPage from './pages/HowItWorksPage';
+import ContactPage from './pages/ContactPage';
 
 // Modals
 import ProfileDetailModal from './components/modals/ProfileDetailModal';
 import AuthModal from './components/modals/AuthModal';
 import SendInterestModal from './components/modals/SendInterestModal';
-import FavoritesModal from './components/modals/FavoritesModal';
 
 import { api } from './services/api';
 import './styles/index.css';
 import './styles/components.css';
 
-export default function App() {
-  // Profiles & Filter State
+function AppContent() {
+  const navigate = useNavigate();
+
+  // Profiles State
   const [profiles, setProfiles] = useState([]);
   const [activeCategory, setActiveCategory] = useState('all');
   const [loadingProfiles, setLoadingProfiles] = useState(false);
 
   // Shortlisted Favorites State
   const [shortlistedIds, setShortlistedIds] = useState(new Set(['SG-101']));
-  const [shortlistedProfiles, setShortlistedProfiles] = useState([]);
 
   // Active Modals State
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [interestProfile, setInterestProfile] = useState(null);
   const [authModal, setAuthModal] = useState({ open: false, mode: 'register' });
-  const [favoritesModalOpen, setFavoritesModalOpen] = useState(false);
 
-  // Current Logged-in User
+  // Current Logged-in User & Toast
   const [currentUser, setCurrentUser] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
 
-  // Show temporary toast notification
   const showToast = (msg) => {
     setToastMessage(msg);
     setTimeout(() => {
@@ -65,26 +66,10 @@ export default function App() {
     loadProfiles();
   }, [activeCategory]);
 
-  // Update shortlisted profiles array whenever shortlistedIds or profiles change
-  useEffect(() => {
-    const list = profiles.filter(p => shortlistedIds.has(p.id));
-    setShortlistedProfiles(list);
-  }, [shortlistedIds, profiles]);
-
-  // Handle Quick Search
+  // Handle Quick Search from Home -> navigate to search
   const handleQuickSearch = async (searchParams) => {
-    setLoadingProfiles(true);
-    const res = await api.getProfiles(searchParams);
-    if (res.success) {
-      setProfiles(res.data);
-      // Smooth scroll to profiles
-      const el = document.getElementById('featured');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
-      showToast(`Found ${res.data.length} compatible matches!`);
-    }
-    setLoadingProfiles(false);
+    navigate('/search');
+    showToast('Applied quick search filters!');
   };
 
   // Toggle Shortlist
@@ -121,84 +106,78 @@ export default function App() {
   };
 
   return (
-    <div className="app-container">
-      
-      {/* Toast Notification Alert */}
-      {toastMessage && (
-        <div style={{
-          position: 'fixed',
-          bottom: '24px',
-          right: '24px',
-          background: 'var(--primary-burgundy-dark)',
-          color: '#FFF',
-          padding: '14px 24px',
-          borderRadius: 'var(--radius-md)',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-          borderLeft: '4px solid var(--accent-gold)',
-          zIndex: 3000,
-          fontSize: '0.92rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          animation: 'fadeIn 0.3s ease-out'
-        }}>
-          <span>{toastMessage}</span>
-        </div>
-      )}
-
-      {/* Navigation Header */}
-      <Navbar 
-        onOpenAuth={handleOpenAuth}
-        onOpenFavorites={() => setFavoritesModalOpen(true)}
-        favoritesCount={shortlistedIds.size}
-      />
-
-      {/* Hero Banner with Traditional Royal Couple & Stats */}
-      <HeroBanner 
-        onStartJourney={() => handleOpenAuth('register')}
-      />
-
-      {/* Interactive Quick Match Finder Form */}
-      <QuickSearchCard 
-        onSearch={handleQuickSearch}
-        onRegisterClick={() => handleOpenAuth('register')}
-      />
-
-      {/* How It Works - 3 Simple Steps */}
-      <HowItWorks 
-        onGetStarted={() => handleOpenAuth('register')}
-      />
-
-      {/* Featured & Verified Profiles Showcase */}
-      <FeaturedProfiles 
-        profiles={profiles}
-        activeCategory={activeCategory}
-        onCategoryChange={(cat) => setActiveCategory(cat)}
-        onSelectProfile={(profile) => setSelectedProfile(profile)}
-        onSendInterest={(profile) => setInterestProfile(profile)}
-        onToggleShortlist={handleToggleShortlist}
-        shortlistedIds={shortlistedIds}
-      />
-
-      {/* Why Choose Saptaganga & Couple Success Stories */}
-      <WhyChooseUs 
-        onRegisterClick={() => handleOpenAuth('register')}
-      />
-
-      {/* Membership Packages & Pricing */}
-      <MembershipPlans 
-        onSelectPlan={(plan) => {
-          if (plan.id === 'free') {
-            handleOpenAuth('register');
-          } else {
-            handleOpenAuth('register');
-            showToast(`Selected ${plan.name}. Complete registration to upgrade.`);
-          }
-        }}
-      />
-
-      {/* Footer */}
-      <Footer />
+    <MainLayout
+      onOpenAuth={handleOpenAuth}
+      toastMessage={toastMessage}
+    >
+      <Routes>
+        <Route 
+          path="/" 
+          element={
+            <HomePage 
+              profiles={profiles}
+              activeCategory={activeCategory}
+              onCategoryChange={(cat) => setActiveCategory(cat)}
+              onSelectProfile={(p) => setSelectedProfile(p)}
+              onSendInterest={(p) => setInterestProfile(p)}
+              onToggleShortlist={handleToggleShortlist}
+              shortlistedIds={shortlistedIds}
+              onQuickSearch={handleQuickSearch}
+              onOpenAuth={handleOpenAuth}
+              onSelectPlan={(plan) => {
+                handleOpenAuth('register');
+                showToast(`Selected ${plan.name}. Complete registration to upgrade.`);
+              }}
+            />
+          } 
+        />
+        <Route 
+          path="/search" 
+          element={
+            <SearchPage 
+              onSelectProfile={(p) => setSelectedProfile(p)}
+              onSendInterest={(p) => setInterestProfile(p)}
+              onToggleShortlist={handleToggleShortlist}
+              shortlistedIds={shortlistedIds}
+            />
+          } 
+        />
+        <Route 
+          path="/matches" 
+          element={
+            <MatchesPage 
+              onSelectProfile={(p) => setSelectedProfile(p)}
+              onSendInterest={(p) => setInterestProfile(p)}
+              onToggleShortlist={handleToggleShortlist}
+              shortlistedIds={shortlistedIds}
+            />
+          } 
+        />
+        <Route 
+          path="/membership" 
+          element={
+            <MembershipPage 
+              onSelectPlan={(plan) => {
+                handleOpenAuth('register');
+                showToast(`Selected ${plan.name}. Complete registration to upgrade.`);
+              }}
+              onOpenAuth={handleOpenAuth}
+            />
+          } 
+        />
+        <Route 
+          path="/stories" 
+          element={<StoriesPage onOpenAuth={handleOpenAuth} />} 
+        />
+        <Route 
+          path="/how-it-works" 
+          element={<HowItWorksPage onOpenAuth={handleOpenAuth} />} 
+        />
+        <Route 
+          path="/contact" 
+          element={<ContactPage />} 
+        />
+      </Routes>
 
       {/* Profile Detail Modal */}
       {selectedProfile && (
@@ -234,18 +213,14 @@ export default function App() {
           onSuccess={handleAuthSuccess}
         />
       )}
+    </MainLayout>
+  );
+}
 
-      {/* Shortlisted Favorites Modal */}
-      {favoritesModalOpen && (
-        <FavoritesModal 
-          favorites={shortlistedProfiles}
-          onClose={() => setFavoritesModalOpen(false)}
-          onSelectProfile={(p) => setSelectedProfile(p)}
-          onSendInterest={(p) => setInterestProfile(p)}
-          onRemoveFavorite={(p) => handleToggleShortlist(p)}
-        />
-      )}
-
-    </div>
+export default function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 }
