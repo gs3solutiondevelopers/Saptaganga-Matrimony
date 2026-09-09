@@ -12,7 +12,7 @@ export default function Navbar({ onOpenAuth, onOpenFavorites, favoritesCount = 0
 
   return (
     <header>
-      {/* Main Navigation Bar (Clean & Sleek without topbar) */}
+      {/* Main Navigation Bar (Clean, Sleek & No Wrap) */}
       <nav className="navbar">
         <div className="container navbar-container">
           {/* Logo & Brand Identity */}
@@ -46,18 +46,7 @@ export default function Navbar({ onOpenAuth, onOpenFavorites, favoritesCount = 0
             {favoritesCount > 0 && (
               <button 
                 onClick={onOpenFavorites}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: '#FFF1F3',
-                  border: '1px solid #F7D4DA',
-                  padding: '8px 14px',
-                  borderRadius: '20px',
-                  fontSize: '0.84rem',
-                  fontWeight: 600,
-                  color: 'var(--primary-burgundy)'
-                }}
+                className="nav-shortlist-btn"
                 title="View Shortlisted Profiles"
               >
                 <Heart size={14} fill="#E11D48" color="#E11D48" />
@@ -94,21 +83,13 @@ export default function Navbar({ onOpenAuth, onOpenFavorites, favoritesCount = 0
 
         {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
-          <div style={{
-            background: '#FFF',
-            padding: '20px',
-            borderTop: '1px solid var(--romantic-rose)',
-            boxShadow: 'var(--shadow-md)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '14px'
-          }}>
-            <a href="#home" onClick={() => setMobileMenuOpen(false)} style={{ fontWeight: 600, color: 'var(--primary-burgundy)' }}>Home</a>
-            <a href="#search" onClick={() => setMobileMenuOpen(false)} style={{ fontWeight: 600 }}>Search</a>
-            <a href="#featured" onClick={() => setMobileMenuOpen(false)} style={{ fontWeight: 600 }}>Matches</a>
-            <a href="#membership" onClick={() => setMobileMenuOpen(false)} style={{ fontWeight: 600 }}>Membership</a>
-            <a href="#stories" onClick={() => setMobileMenuOpen(false)} style={{ fontWeight: 600 }}>Success Stories</a>
-            <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} style={{ fontWeight: 600 }}>How It Works</a>
+          <div className="mobile-nav-dropdown">
+            <a href="#home" onClick={() => setMobileMenuOpen(false)}>Home</a>
+            <a href="#search" onClick={() => setMobileMenuOpen(false)}>Search</a>
+            <a href="#featured" onClick={() => setMobileMenuOpen(false)}>Matches</a>
+            <a href="#membership" onClick={() => setMobileMenuOpen(false)}>Membership</a>
+            <a href="#stories" onClick={() => setMobileMenuOpen(false)}>Success Stories</a>
+            <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
               <button 
                 onClick={() => { setMobileMenuOpen(false); onOpenAuth('login'); }}
