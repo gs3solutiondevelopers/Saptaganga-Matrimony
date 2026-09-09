@@ -113,22 +113,22 @@ export default function HeroBanner({ onStartJourney }) {
         {/* Right Side Overlays (Rendered over the background couple & ghat) */}
         <div className="hero-right-box">
           
-          {/* Bottom Right: Maroon Brush Stroke Ribbon with Golden Lotus */}
-          <div className="hero-maroon-ribbon-badge">
-            <div className="ribbon-lotus-icon">
-              {/* Golden Lotus Flower SVG */}
-              <svg viewBox="0 0 40 30" width="36" height="26" fill="none" stroke="#ECCB85" strokeWidth="1.8">
-                <path d="M20 3 C17 10 17 18 20 26 C23 18 23 10 20 3 Z" fill="rgba(236, 203, 133, 0.2)" />
-                <path d="M19 12 C13 13 8 18 10 24 C14 24 17 21 19 18" />
-                <path d="M18 6 C12 8 6 15 5 22 C10 22 15 18 18 14" />
-                <path d="M21 12 C27 13 32 18 30 24 C26 24 23 21 21 18" />
-                <path d="M22 6 C28 8 34 15 35 22 C30 22 25 18 22 14" />
-                <path d="M12 26 Q 20 28 28 26" />
+          {/* Bottom Right: Luxury Royal Lotus Badge */}
+          <div className="hero-royal-lotus-badge">
+            <div className="royal-lotus-circle">
+              {/* Detailed Sacred Golden Lotus SVG */}
+              <svg viewBox="0 0 36 30" width="24" height="20" fill="none" stroke="#ECCB85" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 2 C15 9 15 17 18 24 C21 17 21 9 18 2 Z" fill="rgba(236, 203, 133, 0.3)" />
+                <path d="M17 10 C11 11 6 16 8 22 C12 22 15 19 17 16" />
+                <path d="M16 4 C10 6 4 13 3 20 C8 20 13 16 16 12" />
+                <path d="M19 10 C25 11 30 16 28 22 C24 22 21 19 19 16" />
+                <path d="M20 4 C26 6 32 13 33 20 C28 20 23 16 20 12" />
+                <path d="M10 24 Q 18 27 26 24" strokeWidth="1.5" />
               </svg>
             </div>
-            <div className="ribbon-text-content">
-              <div className="ribbon-title">More Than Matches</div>
-              <div className="ribbon-subtitle">We Create Happy Stories</div>
+            <div className="royal-lotus-text">
+              <span className="royal-lotus-title">More Than Matches</span>
+              <span className="royal-lotus-subtitle">We Create Happy Stories ♡</span>
             </div>
           </div>
 
