@@ -263,6 +263,23 @@
   overflow: visible;
 }
 
+.hero-title-top-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.hero-heart-ribbon {
+  height: 28px;
+  width: auto;
+  max-width: 140px;
+  display: inline-block;
+  vertical-align: middle;
+  filter: drop-shadow(0 2px 5px rgba(201, 150, 53, 0.25));
+  margin-top: -2px;
+}
+
 .hero-title-wedding-top,
 .hero-title-salita-top,
 .hero-title-vebiola,
@@ -274,7 +291,7 @@
   letter-spacing: 2.5px;
   line-height: 1.15;
   text-transform: uppercase;
-  display: block;
+  display: inline-block;
   padding: 0;
   margin-bottom: -2px;
   overflow: visible;
@@ -434,62 +451,97 @@
   pointer-events: none;
 }
 
+.hero-royal-rings-badge,
 .hero-royal-lotus-badge {
   position: absolute;
   bottom: 18px;
   right: -10px;
-  background: linear-gradient(135deg, rgba(88, 8, 32, 0.92) 0%, rgba(120, 15, 45, 0.94) 100%);
-  backdrop-filter: blur(12px);
-  padding: 10px 22px 10px 14px;
-  border-radius: var(--radius-full);
-  border: 1.5px solid rgba(236, 203, 133, 0.45);
+  background: linear-gradient(135deg, rgba(74, 8, 28, 0.94) 0%, rgba(98, 12, 38, 0.96) 100%);
+  backdrop-filter: blur(14px);
+  padding: 12px 24px 12px 16px;
+  border-radius: 24px 8px 24px 8px;
+  border: 1.5px solid #D4AF37;
   display: flex;
   align-items: center;
   gap: 14px;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.42), inset 0 0 16px rgba(212, 175, 55, 0.15);
   pointer-events: auto;
   transition: var(--transition-smooth);
 }
 
+.hero-royal-rings-badge:hover,
 .hero-royal-lotus-badge:hover {
   transform: translateY(-3px) scale(1.02);
-  border-color: rgba(236, 203, 133, 0.8);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), 0 0 20px rgba(236, 203, 133, 0.2);
+  border-color: #ECCB85;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.5), 0 0 24px rgba(236, 203, 133, 0.25);
 }
 
+.badge-corner-flourish {
+  position: absolute;
+  font-size: 0.65rem;
+  color: #ECCB85;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.badge-corner-flourish.top-left {
+  top: 4px;
+  left: 6px;
+}
+
+.badge-corner-flourish.top-right {
+  top: 4px;
+  right: 6px;
+}
+
+.badge-corner-flourish.bottom-left {
+  bottom: 4px;
+  left: 6px;
+}
+
+.badge-corner-flourish.bottom-right {
+  bottom: 4px;
+  right: 6px;
+}
+
+.royal-rings-circle,
 .royal-lotus-circle {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: rgba(236, 203, 133, 0.15);
-  border: 1.5px solid rgba(236, 203, 133, 0.6);
+  background: rgba(236, 203, 133, 0.12);
+  border: 1.5px solid #ECCB85;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 
+.royal-rings-text,
 .royal-lotus-text {
   display: flex;
   flex-direction: column;
 }
 
+.royal-rings-title,
 .royal-lotus-title {
-  font-family: var(--font-serif);
-  font-size: 0.96rem;
+  font-family: var(--font-sans);
+  font-size: 1.02rem;
   font-weight: 700;
-  color: #ECCB85;
-  letter-spacing: 0.8px;
+  color: #FFFFFF;
+  letter-spacing: 0.3px;
   line-height: 1.2;
 }
 
+.royal-rings-subtitle,
 .royal-lotus-subtitle {
-  font-size: 0.8rem;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 0.92rem;
   font-style: italic;
-  color: rgba(255, 255, 255, 0.95);
-  font-family: var(--font-sans);
+  color: #F7E7C8;
   letter-spacing: 0.2px;
+  margin-top: 2px;
 }
 
 /* --------------------------------------------------------------------------

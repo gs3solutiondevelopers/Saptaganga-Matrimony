@@ -38,9 +38,27 @@ export default function HeroBanner({ onStartJourney, onExploreMatches }) {
             <span>Traditional Values • Modern Connections</span>
           </div>
 
-          {/* Main Headline with Wedding Moment Ligature Typography */}
+          {/* Main Headline with Wedding Moment Ligature Typography & Heart Ribbon */}
           <h1 className="hero-main-title">
-            <span className="hero-title-wedding-top">Find Your</span>
+            <div className="hero-title-top-row">
+              <span className="hero-title-wedding-top">Find Your</span>
+              <svg className="hero-heart-ribbon" viewBox="0 0 160 38" width="130" height="30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path 
+                  d="M 6 25 Q 35 25 56 22 C 63 19 69 13 74 6 C 78 2 84 2 87 6 C 90 10 88 16 82 21 L 76 26 C 70 21 66 15 68 9 C 70 4 76 2 80 6 C 84 10 92 19 104 22 Q 130 25 154 25" 
+                  stroke="url(#heartRibbonGrad)" 
+                  strokeWidth="2.2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                />
+                <defs>
+                  <linearGradient id="heartRibbonGrad" x1="0" y1="0" x2="160" y2="0" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#8A1538" />
+                    <stop offset="45%" stopColor="#C99635" />
+                    <stop offset="100%" stopColor="#ECCB85" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
             <span className="hero-title-wedding-main">Perfect Partner</span>
           </h1>
 
@@ -113,22 +131,30 @@ export default function HeroBanner({ onStartJourney, onExploreMatches }) {
         {/* Right Side Overlays (Rendered over the background couple & ghat) */}
         <div className="hero-right-box">
           
-          {/* Bottom Right: Luxury Royal Lotus Badge */}
-          <div className="hero-royal-lotus-badge">
-            <div className="royal-lotus-circle">
-              {/* Detailed Sacred Golden Lotus SVG */}
-              <svg viewBox="0 0 36 30" width="24" height="20" fill="none" stroke="#ECCB85" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 2 C15 9 15 17 18 24 C21 17 21 9 18 2 Z" fill="rgba(236, 203, 133, 0.3)" />
-                <path d="M17 10 C11 11 6 16 8 22 C12 22 15 19 17 16" />
-                <path d="M16 4 C10 6 4 13 3 20 C8 20 13 16 16 12" />
-                <path d="M19 10 C25 11 30 16 28 22 C24 22 21 19 19 16" />
-                <path d="M20 4 C26 6 32 13 33 20 C28 20 23 16 20 12" />
-                <path d="M10 24 Q 18 27 26 24" strokeWidth="1.5" />
+          {/* Bottom Right: Luxury Royal Ornate Rings Badge */}
+          <div className="hero-royal-rings-badge">
+            <div className="badge-corner-flourish top-left">✦</div>
+            <div className="badge-corner-flourish top-right">✦</div>
+            <div className="badge-corner-flourish bottom-left">✦</div>
+            <div className="badge-corner-flourish bottom-right">✦</div>
+
+            <div className="royal-rings-circle">
+              <svg viewBox="0 0 48 48" width="32" height="32" fill="none" stroke="#ECCB85" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                {/* Left Ring */}
+                <circle cx="20" cy="27" r="10.5" />
+                {/* Right Ring */}
+                <circle cx="28" cy="27" r="10.5" />
+                {/* Solitaire Diamond on Top of Right Ring */}
+                <path d="M 25 15 L 28 9 L 31 15 Z" fill="#ECCB85" stroke="none" />
+                <path d="M 28 6 L 28 9" stroke="#ECCB85" strokeWidth="1.8" />
+                <circle cx="28" cy="9" r="1.2" fill="#FFF" />
+                <path d="M 22 27 C 22 24.5 26 24.5 26 27" stroke="#ECCB85" strokeWidth="2.2" />
               </svg>
             </div>
-            <div className="royal-lotus-text">
-              <span className="royal-lotus-title">More Than Matches</span>
-              <span className="royal-lotus-subtitle">We Create Happy Stories ♡</span>
+
+            <div className="royal-rings-text">
+              <span className="royal-rings-title">More Than Matches</span>
+              <span className="royal-rings-subtitle">We Create Happy Stories ♡</span>
             </div>
           </div>
 
