@@ -229,19 +229,9 @@
 }
 
 .hero-left-box {
-  max-width: 540px;
-  margin-top: -12px;
-}
-
-.hero-official-logo-box {
-  margin-bottom: 6px;
-}
-
-.hero-official-logo-img {
-  max-width: 170px;
-  height: auto;
-  display: block;
-  filter: drop-shadow(0 4px 10px rgba(115, 15, 45, 0.1));
+  max-width: 560px;
+  margin-top: 0;
+  padding: 10px 0;
 }
 
 .hero-subtagline {

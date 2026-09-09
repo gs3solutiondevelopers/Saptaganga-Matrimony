@@ -17,17 +17,8 @@ export default function HeroBanner({ onStartJourney }) {
 
       <div className="container hero-panoramic-container">
         
-        {/* Left Column: Official Logo, Heading, Stats & CTA */}
+        {/* Left Column: Heading, Stats & CTA */}
         <div className="hero-left-box">
-          
-          {/* Official Saptaganga Matrimony Logo */}
-          <div className="hero-official-logo-box">
-            <img 
-              src="/logo.png" 
-              alt="Saptaganga Matrimony - Seven Rivers. A Lifetime Together." 
-              className="hero-official-logo-img" 
-            />
-          </div>
 
           {/* Sub-tagline */}
           <div className="hero-subtagline">
