@@ -396,6 +396,14 @@
   max-width: 530px;
 }
 
+.hero-metrics-desktop {
+  display: flex;
+}
+
+.hero-metrics-mobile {
+  display: none;
+}
+
 .hero-metric-item {
   flex: 1;
   display: flex;
@@ -1359,12 +1367,13 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 32px;
-    padding-top: 20px;
-    padding-bottom: 32px;
+    gap: 24px;
+    padding-top: 16px;
+    padding-bottom: 28px;
   }
   .hero-left-box {
     max-width: 620px;
+    width: 100%;
   }
   .hero-subtagline {
     justify-content: center;
@@ -1378,10 +1387,27 @@
   }
   .hero-cta-pill-row {
     justify-content: center;
+    margin-bottom: 0;
   }
-  .hero-metrics-strip-divided {
-    margin-left: auto;
-    margin-right: auto;
+  .hero-metrics-desktop {
+    display: none !important;
+  }
+  .hero-metrics-mobile {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px 16px;
+    width: 100%;
+    max-width: 480px;
+    padding: 16px 14px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid #F4D5DD;
+    border-radius: 18px;
+    box-shadow: 0 4px 16px rgba(115, 15, 45, 0.05);
+    backdrop-filter: blur(8px);
+    margin: 4px auto 0 auto;
+  }
+  .hero-metric-divider {
+    display: none;
   }
   .hero-right-box {
     width: 100%;
@@ -1391,7 +1417,7 @@
   .hero-couple-showcase-frame {
     width: 100%;
     max-width: 440px;
-    height: 400px;
+    height: 380px;
   }
   .membership-grid,
   .plans-grid {
@@ -1451,27 +1477,27 @@
   }
   .saptaganga-hero-panoramic {
     min-height: auto;
-    padding: 20px 0 32px 0;
+    padding: 16px 0 28px 0;
   }
   .hero-panoramic-container {
     flex-direction: column;
-    align-items: stretch;
-    text-align: left;
-    gap: 24px;
+    align-items: center;
+    text-align: center;
+    gap: 18px;
     padding-top: 4px;
-    padding-bottom: 12px;
+    padding-bottom: 8px;
   }
   .hero-left-box {
     max-width: 100%;
     width: 100%;
   }
   .hero-subtagline {
-    justify-content: flex-start;
+    justify-content: center;
     font-size: 0.75rem;
     letter-spacing: 1.5px;
   }
   .hero-title-top-row {
-    justify-content: flex-start;
+    justify-content: center;
     gap: 10px;
   }
   .hero-heart-ribbon-img {
@@ -1487,42 +1513,45 @@
     line-height: 1.12;
   }
   .hero-subtext {
-    margin-left: 0;
-    margin-right: 0;
-    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
     font-size: 0.9rem;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
   }
   .hero-cta-pill-row {
-    justify-content: flex-start;
+    justify-content: center;
     display: flex;
     gap: 12px;
     width: 100%;
-    margin-bottom: 24px;
+    margin-bottom: 6px;
   }
   .hero-btn-pill-primary,
   .hero-btn-pill-outline {
     flex: 1;
+    max-width: 200px;
     min-width: 135px;
-    padding: 12px 16px;
-    font-size: 0.9rem;
+    padding: 11px 16px;
+    font-size: 0.88rem;
     justify-content: center;
     text-align: center;
   }
-  .hero-metrics-strip-divided {
-    display: grid;
+  .hero-metrics-desktop {
+    display: none !important;
+  }
+  .hero-metrics-mobile {
+    display: grid !important;
     grid-template-columns: repeat(2, 1fr);
-    gap: 14px 16px;
+    gap: 12px 14px;
     width: 100%;
-    max-width: 100%;
-    padding: 18px 14px;
+    max-width: 440px;
+    padding: 16px 14px;
     background: rgba(255, 255, 255, 0.85);
     border: 1px solid #F4D5DD;
     border-radius: 18px;
     box-shadow: 0 4px 16px rgba(115, 15, 45, 0.05);
     backdrop-filter: blur(8px);
-    margin-left: 0;
-    margin-right: 0;
+    margin: 4px auto 0 auto;
   }
   .hero-metric-divider {
     display: none;
@@ -1541,13 +1570,14 @@
     width: 100%;
     display: flex;
     justify-content: center;
-    margin-top: 8px;
+    margin-top: 4px;
   }
   .hero-couple-showcase-frame {
     width: 100%;
-    max-width: 100%;
-    height: 320px;
+    max-width: 380px;
+    height: 310px;
     border-radius: 24px 8px 24px 8px;
+    margin: 0 auto;
   }
   .hero-royal-rings-badge {
     position: absolute;
@@ -1607,12 +1637,16 @@
 /* Small Mobile (480px and below) */
 @media (max-width: 480px) {
   .hero-cta-pill-row {
-    flex-direction: column;
+    flex-direction: row;
+    gap: 8px;
+    max-width: 360px;
   }
   .hero-btn-pill-primary,
   .hero-btn-pill-outline {
-    width: 100%;
-    min-width: 100%;
+    flex: 1;
+    min-width: 0;
+    padding: 10px 10px;
+    font-size: 0.82rem;
   }
   .quick-search-form {
     grid-template-columns: 1fr;
@@ -1642,6 +1676,7 @@
     font-size: clamp(2.4rem, 11vw, 3.2rem);
   }
   .hero-couple-showcase-frame {
+    max-width: 320px;
     height: 260px;
   }
   .hero-royal-rings-badge {

@@ -68,8 +68,8 @@ export default function HeroBanner({ onStartJourney, onExploreMatches }) {
             </button>
           </div>
 
-          {/* 4 Circular Metrics Badges with Vertical Dividers (Bottom) */}
-          <div className="hero-metrics-strip-divided">
+          {/* 4 Circular Metrics Badges with Vertical Dividers (Desktop View) */}
+          <div className="hero-metrics-strip-divided hero-metrics-desktop">
             
             {/* Metric 1 */}
             <div className="hero-metric-item">
@@ -150,6 +150,53 @@ export default function HeroBanner({ onStartJourney, onExploreMatches }) {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* 4 Circular Metrics Badges (Mobile & Tablet View - directly below couple photo showcase) */}
+        <div className="hero-metrics-strip-divided hero-metrics-mobile">
+          
+          {/* Metric 1 */}
+          <div className="hero-metric-item">
+            <div className="hero-metric-icon-circle">
+              <Users size={18} />
+            </div>
+            <span className="hero-metric-val">2M+</span>
+            <span className="hero-metric-lbl">Trusted Members</span>
+          </div>
+
+          <div className="hero-metric-divider" />
+
+          {/* Metric 2 */}
+          <div className="hero-metric-item">
+            <div className="hero-metric-icon-circle">
+              <Heart size={18} />
+            </div>
+            <span className="hero-metric-val">500K+</span>
+            <span className="hero-metric-lbl">Successful Matches</span>
+          </div>
+
+          <div className="hero-metric-divider" />
+
+          {/* Metric 3 */}
+          <div className="hero-metric-item">
+            <div className="hero-metric-icon-circle">
+              <ShieldCheck size={18} />
+            </div>
+            <span className="hero-metric-val">100%</span>
+            <span className="hero-metric-lbl">Verified Profiles</span>
+          </div>
+
+          <div className="hero-metric-divider" />
+
+          {/* Metric 4 */}
+          <div className="hero-metric-item">
+            <div className="hero-metric-icon-circle">
+              <Headphones size={18} />
+            </div>
+            <span className="hero-metric-val">24/7</span>
+            <span className="hero-metric-lbl">Dedicated Support</span>
+          </div>
+
         </div>
 
       </div>
