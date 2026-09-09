@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { 
   Lock, 
@@ -9,9 +9,18 @@ import {
 
 export default function Navbar({ onOpenAuth }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 15);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <header>
+    <header className={`main-header-sticky ${scrolled ? 'header-scrolled' : ''}`}>
       {/* Main Navigation Bar (Common across all pages) */}
       <nav className="navbar">
         <div className="container navbar-container">
