@@ -24,7 +24,9 @@ export default function Navbar({ onOpenAuth }) {
             />
             <div className="brand-text-container">
               <span className="brand-name">SAPTAGANGA</span>
-              <span className="brand-tagline">MATRIMONY</span>
+              <span className="brand-tagline">
+                <span>M</span><span>A</span><span>T</span><span>R</span><span>I</span><span>M</span><span>O</span><span>N</span><span>Y</span>
+              </span>
             </div>
           </Link>
 
