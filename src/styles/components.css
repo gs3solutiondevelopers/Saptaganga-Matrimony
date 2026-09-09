@@ -1385,6 +1385,23 @@
 
 /* Mobile & Small Tablet (768px and below) */
 @media (max-width: 768px) {
+  .navbar-container {
+    height: 70px;
+    gap: 12px;
+  }
+  .navbar-brand-logo-img {
+    height: 46px;
+  }
+  .brand-name {
+    font-size: 1.2rem;
+  }
+  .brand-tagline {
+    font-size: 0.58rem;
+  }
+  .nav-actions .btn-burgundy {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
   .saptaganga-hero-panoramic {
     min-height: auto;
     padding: 24px 0 32px 0;
