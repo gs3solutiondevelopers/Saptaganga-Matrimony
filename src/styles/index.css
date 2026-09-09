@@ -46,13 +46,13 @@
   --status-heart: #E11D48;
 
   /* Typography */
-  --font-wedding-moment: 'Wedding Moment', 'Yeseva One', 'Prata', serif;
+  --font-wedding-moment: 'Wedding Moment', 'Yeseva One', 'Prata', cursive, serif;
   --font-serif: 'Playfair Display', 'Bodoni Moda', 'Marcellus', Georgia, serif;
-  --font-salita: 'Wedding Moment', 'Yeseva One', 'Rozha One', 'Abril Fatface', 'Prata', serif;
-  --font-vebiola: 'Wedding Moment', 'Prata', 'Italiana', 'Bodoni Moda', Georgia, serif;
-  --font-luxury-serif: 'Wedding Moment', 'Prata', 'Yeseva One', 'Italiana', 'Cinzel Decorative', serif;
-  --font-luxury-script: 'Pinyon Script', 'Alex Brush', 'Great Vibes', cursive;
-  --font-display: 'Wedding Moment', 'Yeseva One', 'Rozha One', 'Prata', 'Playfair Display', serif;
+  --font-salita: 'Yeseva One', 'Rozha One', 'Abril Fatface', 'Prata', serif;
+  --font-vebiola: 'Prata', 'Italiana', 'Bodoni Moda', 'Cormorant Garamond', Georgia, serif;
+  --font-luxury-serif: 'Cinzel Decorative', 'Prata', 'Italiana', 'Bodoni Moda', 'Playfair Display', serif;
+  --font-luxury-script: 'Wedding Moment', 'Pinyon Script', 'Alex Brush', 'Great Vibes', cursive;
+  --font-display: 'Prata', 'Yeseva One', 'Rozha One', 'Cormorant Garamond', 'Italiana', serif;
   --font-sans: 'Plus Jakarta Sans', 'Outfit', system-ui, -apple-system, sans-serif;
   --font-cursive: 'Pinyon Script', 'Alex Brush', 'Great Vibes', cursive;
   --font-indic: 'Yatra One', 'Rozha One', serif;

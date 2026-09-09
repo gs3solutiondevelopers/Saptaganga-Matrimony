@@ -255,11 +255,12 @@
 .hero-main-title {
   display: flex;
   flex-direction: column;
-  line-height: 1.35;
+  line-height: 1.4;
   gap: 12px;
-  margin-top: 10px;
-  margin-bottom: 20px;
-  padding-top: 4px;
+  margin-top: 12px;
+  margin-bottom: 22px;
+  padding: 10px 0 4px 0;
+  overflow: visible;
 }
 
 .hero-title-wedding-top,
@@ -271,9 +272,11 @@
   font-weight: 700;
   color: #4A081C;
   letter-spacing: 2px;
-  line-height: 1.2;
+  line-height: 1.25;
   text-transform: uppercase;
   display: block;
+  padding: 4px 0;
+  overflow: visible;
 }
 
 .hero-title-wedding-main,
@@ -285,8 +288,9 @@
   font-weight: normal;
   font-style: normal;
   color: #730F2D;
-  line-height: 1.25;
-  margin-top: 4px;
+  line-height: 1.35;
+  margin-top: 2px;
+  padding: 12px 6px 12px 2px;
   background: linear-gradient(135deg, #4A081C 0%, #851134 50%, #B8862B 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -294,6 +298,7 @@
   letter-spacing: 0.5px;
   text-transform: capitalize;
   display: block;
+  overflow: visible;
 }
 
 .hero-subtext {
