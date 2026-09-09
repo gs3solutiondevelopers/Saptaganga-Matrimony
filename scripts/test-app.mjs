@@ -66,6 +66,27 @@ async function runTests() {
   const interestRes = await api.sendInterest('SG-101', 'Namaste, our values align.');
   assert(interestRes.success === true, 'Express Interest successfully sent and acknowledged');
 
+  // 7. Admin Service & Dashboard Verification
+  console.log('\n7. Admin Service & Control Flow:');
+  const { adminService } = await import('../src/services/adminService.js');
+  
+  const adminLoginRes = adminService.login('admin@saptaganga.com', 'SaptagangaAdmin2026', '7777');
+  assert(adminLoginRes.success === true && adminLoginRes.session.adminId === 'ADMIN-001', 'Admin login authenticates with security master PIN');
+
+  const statsRes = await adminService.getDashboardStats();
+  assert(statsRes.success === true && statsRes.data.totalProfiles >= 6, 'Admin Dashboard fetches live KPI analytics');
+
+  const toggleRes = await adminService.toggleVerification('SG-101', false);
+  assert(toggleRes.success === true && toggleRes.verified === true, '1-Click Verification badge toggle works');
+
+  const newProfileRes = await adminService.createProfile({
+    name: 'Rupali Sen',
+    gender: 'female',
+    profession: 'UX Designer',
+    city: 'Kolkata'
+  });
+  assert(newProfileRes.success === true && newProfileRes.data.name === 'Rupali Sen', 'Admin creates candidate profile in system');
+
   console.log(`\n========================================`);
   console.log(`Test Results: ${passed} Passed, ${failed} Failed`);
   console.log(`========================================\n`);

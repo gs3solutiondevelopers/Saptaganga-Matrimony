@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
 
 // Pages
@@ -11,6 +11,15 @@ import StoriesPage from './pages/StoriesPage';
 import HowItWorksPage from './pages/HowItWorksPage';
 import ContactPage from './pages/ContactPage';
 
+// Admin Panel Pages & Components
+import AdminLayout from './components/admin/AdminLayout';
+import AdminProtectedRoute from './components/admin/AdminProtectedRoute';
+import AdminLoginPage from './pages/admin/AdminLoginPage';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import AdminProfilesPage from './pages/admin/AdminProfilesPage';
+import AdminStoriesPage from './pages/admin/AdminStoriesPage';
+import AdminInquiriesPage from './pages/admin/AdminInquiriesPage';
+
 // Modals
 import ProfileDetailModal from './components/modals/ProfileDetailModal';
 import AuthModal from './components/modals/AuthModal';
@@ -19,6 +28,7 @@ import SendInterestModal from './components/modals/SendInterestModal';
 import { api } from './services/api';
 import './styles/index.css';
 import './styles/components.css';
+import './styles/admin.css';
 
 function AppContent() {
   const navigate = useNavigate();
@@ -104,6 +114,31 @@ function AppContent() {
     setAuthModal({ open: true, mode: 'login' });
     showToast('Please sign in with a Gold/Diamond membership to view direct contact numbers.');
   };
+
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
+  // Handle Admin Login Portal
+  if (location.pathname === '/admin/login') {
+    return <AdminLoginPage />;
+  }
+
+  // Handle Admin Control Dashboard & Management Routes
+  if (isAdminRoute) {
+    return (
+      <AdminProtectedRoute>
+        <AdminLayout>
+          <Routes>
+            <Route path="/admin" element={<AdminDashboardPage />} />
+            <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+            <Route path="/admin/profiles" element={<AdminProfilesPage />} />
+            <Route path="/admin/stories" element={<AdminStoriesPage />} />
+            <Route path="/admin/inquiries" element={<AdminInquiriesPage />} />
+          </Routes>
+        </AdminLayout>
+      </AdminProtectedRoute>
+    );
+  }
 
   return (
     <MainLayout
