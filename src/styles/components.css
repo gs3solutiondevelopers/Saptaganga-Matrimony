@@ -207,40 +207,41 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding-top: 14px;
+  padding-top: 4px;
   padding-bottom: 24px;
 }
 
 .hero-left-box {
   max-width: 540px;
+  margin-top: -12px;
 }
 
 .hero-official-logo-box {
-  margin-bottom: 12px;
+  margin-bottom: 6px;
 }
 
 .hero-official-logo-img {
-  max-width: 195px;
+  max-width: 170px;
   height: auto;
   display: block;
   filter: drop-shadow(0 4px 10px rgba(115, 15, 45, 0.1));
 }
 
 .hero-subtagline {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 600;
   color: #4A3E3D;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
   letter-spacing: 0.2px;
 }
 
 .hero-main-title {
   font-family: var(--font-serif);
-  font-size: 2.85rem;
+  font-size: 2.7rem;
   font-weight: 800;
   color: #680825;
-  line-height: 1.1;
-  margin-bottom: 10px;
+  line-height: 1.08;
+  margin-bottom: 8px;
 }
 
 .hero-main-title span {
@@ -248,18 +249,18 @@
 }
 
 .hero-subtext {
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   color: #5C5254;
-  line-height: 1.5;
+  line-height: 1.45;
   max-width: 440px;
-  margin-bottom: 18px;
+  margin-bottom: 15px;
 }
 
 .hero-metrics-strip {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   align-items: center;
-  margin-bottom: 22px;
+  margin-bottom: 18px;
   flex-wrap: wrap;
 }
 
