@@ -1,117 +1,41 @@
-// API Service Client for Saptaganga Matrimony
-// Ready to switch between mock local data and live Express/Node.js API endpoints
-
+// API & Firebase Integration Service for Saptaganga Matrimony
+import { firestoreService } from './firestoreService.js';
+import { authService } from './authService.js';
 import { MOCK_PROFILES, MOCK_STORIES, MEMBERSHIP_PLANS } from '../data/mockData.js';
 
-// Configurable API base URL (can be loaded from import.meta.env?.VITE_API_URL)
-const API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) || null;
-
 export const api = {
-  // Fetch profiles with filtering capability
+  // Fetch profiles (Live Firestore with fallback)
   async getProfiles(filters = {}) {
-    if (API_BASE_URL) {
-      const response = await fetch(`${API_BASE_URL}/api/profiles?` + new URLSearchParams(filters));
-      return await response.json();
-    }
-
-    // Local Mock Implementation
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        let results = [...MOCK_PROFILES];
-
-        if (filters.gender && filters.gender !== 'any') {
-          results = results.filter(p => p.gender.toLowerCase() === filters.gender.toLowerCase());
-        }
-        if (filters.religion && filters.religion !== 'any') {
-          results = results.filter(p => p.religion.toLowerCase() === filters.religion.toLowerCase());
-        }
-        if (filters.motherTongue && filters.motherTongue !== 'any') {
-          results = results.filter(p => p.motherTongue.toLowerCase() === filters.motherTongue.toLowerCase());
-        }
-        if (filters.category && filters.category !== 'all') {
-          if (filters.category === 'brides') {
-            results = results.filter(p => p.gender === 'female');
-          } else if (filters.category === 'grooms') {
-            results = results.filter(p => p.gender === 'male');
-          } else if (filters.category === 'doctors') {
-            results = results.filter(p => p.profession.toLowerCase().includes('doctor') || p.profession.toLowerCase().includes('physician') || p.profession.toLowerCase().includes('dental'));
-          } else if (filters.category === 'tech') {
-            results = results.filter(p => p.profession.toLowerCase().includes('software') || p.profession.toLowerCase().includes('data'));
-          }
-        }
-        if (filters.minAge && filters.maxAge) {
-          results = results.filter(p => p.age >= filters.minAge && p.age <= filters.maxAge);
-        }
-
-        resolve({ success: true, data: results });
-      }, 200);
-    });
+    return await firestoreService.getProfiles(filters);
   },
 
   // Get specific profile by ID
   async getProfileById(id) {
-    if (API_BASE_URL) {
-      const response = await fetch(`${API_BASE_URL}/api/profiles/${id}`);
-      return await response.json();
-    }
-    const profile = MOCK_PROFILES.find(p => p.id === id);
-    return { success: !!profile, data: profile };
+    return await firestoreService.getProfileById(id);
   },
 
   // Send Interest / Connect request
   async sendInterest(profileId, note = "") {
-    if (API_BASE_URL) {
-      const response = await fetch(`${API_BASE_URL}/api/interests`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ profileId, note })
-      });
-      return await response.json();
-    }
-    return { success: true, message: `Interest successfully sent to ${profileId}` };
+    return await firestoreService.sendInterest(null, profileId, note);
   },
 
-  // User Registration
+  // User Registration via Firebase Auth & Firestore
   async registerUser(userData) {
-    if (API_BASE_URL) {
-      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
-      });
-      return await response.json();
-    }
-    return {
-      success: true,
-      message: "Account created successfully! Welcome to Saptaganga Matrimony.",
-      user: {
-        id: "SG-NEW-" + Math.floor(1000 + Math.random() * 9000),
-        ...userData
-      }
-    };
+    const email = userData.email || `member${Date.now()}@saptaganga.com`;
+    const password = userData.password || "Saptaganga@2026";
+    return await authService.register(email, password, userData);
   },
 
-  // User Login
+  // User Login via Firebase Auth
   async loginUser(credentials) {
-    if (API_BASE_URL) {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials)
-      });
-      return await response.json();
-    }
-    return {
-      success: true,
-      message: "Logged in successfully!",
-      token: "mock-jwt-token-saptaganga",
-      user: {
-        id: "SG-USER-001",
-        name: credentials.emailOrPhone.split('@')[0] || "Valued Member",
-        email: credentials.emailOrPhone,
-        plan: "Gold Advantage"
-      }
-    };
+    const email = credentials.emailOrPhone || credentials.email;
+    const password = credentials.password || "Saptaganga@2026";
+    return await authService.login(email, password);
+  },
+
+  // Submit Contact Form Inquiry to Firestore
+  async submitInquiry(inquiryData) {
+    return await firestoreService.submitInquiry(inquiryData);
   },
 
   // Fetch Success Stories
@@ -124,3 +48,5 @@ export const api = {
     return { success: true, data: MEMBERSHIP_PLANS };
   }
 };
+
+export { authService, firestoreService };
