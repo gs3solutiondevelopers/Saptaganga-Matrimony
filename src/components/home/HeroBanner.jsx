@@ -36,10 +36,10 @@ export default function HeroBanner({ onStartJourney }) {
             <span className="hero-subtagline-accent">✦</span>
           </div>
 
-          {/* Main Headline */}
+          {/* Main Headline with Luxury Serif + Royal Calligraphy */}
           <h1 className="hero-main-title">
-            Find Your<br />
-            <span className="hero-title-highlight">Perfect Partner</span>
+            <span className="hero-title-serif">Find Your</span>
+            <span className="hero-title-script">Perfect Partner</span>
           </h1>
 
           {/* Subtext Paragraph */}

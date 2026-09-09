@@ -38,9 +38,11 @@
 
   /* Typography */
   --font-serif: 'Playfair Display', 'Bodoni Moda', 'Marcellus', Georgia, serif;
+  --font-luxury-serif: 'Cinzel Decorative', 'Bodoni Moda', 'Playfair Display', serif;
+  --font-luxury-script: 'Pinyon Script', 'Alex Brush', 'Great Vibes', cursive;
   --font-display: 'Prata', 'Cormorant Garamond', 'Playfair Display', serif;
   --font-sans: 'Plus Jakarta Sans', 'Outfit', system-ui, -apple-system, sans-serif;
-  --font-cursive: 'Great Vibes', cursive;
+  --font-cursive: 'Pinyon Script', 'Alex Brush', 'Great Vibes', cursive;
   --font-indic: 'Yatra One', 'Rozha One', serif;
 
   /* Elevation & Shadows */

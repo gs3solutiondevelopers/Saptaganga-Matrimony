@@ -263,22 +263,34 @@
 }
 
 .hero-main-title {
-  font-family: 'Playfair Display', 'Bodoni Moda', Georgia, serif;
-  font-size: clamp(2.6rem, 4.4vw, 3.4rem);
-  font-weight: 800;
-  color: #550920;
-  line-height: 1.12;
-  letter-spacing: -0.015em;
-  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+  margin-bottom: 12px;
 }
 
-.hero-title-highlight {
-  font-family: 'Playfair Display', 'Bodoni Moda', Georgia, serif;
+.hero-title-serif {
+  font-family: var(--font-luxury-serif);
+  font-size: clamp(2.3rem, 3.8vw, 3.2rem);
   font-weight: 800;
-  font-style: italic;
-  color: #7B0E2E;
-  display: inline-block;
-  text-shadow: 0 2px 12px rgba(115, 15, 45, 0.08);
+  color: #550920;
+  letter-spacing: 1.5px;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.hero-title-script {
+  font-family: var(--font-luxury-script);
+  font-size: clamp(3.2rem, 5.2vw, 4.4rem);
+  font-weight: 500;
+  color: #C99635;
+  background: linear-gradient(135deg, #B57E24 0%, #ECCB85 45%, #9F721B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 0.96;
+  margin-top: -4px;
+  margin-left: 2px;
+  filter: drop-shadow(0 2px 10px rgba(201, 150, 53, 0.25));
 }
 
 .hero-subtext {
