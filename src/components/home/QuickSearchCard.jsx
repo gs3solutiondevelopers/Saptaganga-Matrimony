@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, ShieldCheck, ArrowRight, Sparkles, Filter } from 'lucide-react';
+import { HeartHandshake, ShieldCheck, ArrowRight, Filter } from 'lucide-react';
 
 export default function QuickSearchCard({ onSearch, onRegisterClick }) {
   const [lookingFor, setLookingFor] = useState('female');
@@ -26,7 +26,9 @@ export default function QuickSearchCard({ onSearch, onRegisterClick }) {
           
           <div className="quick-search-header">
             <div className="quick-search-title">
-              <Sparkles size={20} style={{ color: 'var(--accent-gold)' }} />
+              <div className="quick-search-icon-badge">
+                <HeartHandshake size={19} />
+              </div>
               <span>Find Your Match</span>
             </div>
             
