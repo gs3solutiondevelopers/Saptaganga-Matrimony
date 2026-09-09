@@ -38,9 +38,10 @@
 
   /* Typography */
   --font-serif: 'Playfair Display', 'Bodoni Moda', 'Marcellus', Georgia, serif;
-  --font-luxury-serif: 'Cinzel Decorative', 'Bodoni Moda', 'Playfair Display', serif;
+  --font-vebiola: 'Prata', 'Italiana', 'Bodoni Moda', 'Cormorant Garamond', Georgia, serif;
+  --font-luxury-serif: 'Prata', 'Italiana', 'Cinzel Decorative', 'Bodoni Moda', serif;
   --font-luxury-script: 'Pinyon Script', 'Alex Brush', 'Great Vibes', cursive;
-  --font-display: 'Prata', 'Cormorant Garamond', 'Playfair Display', serif;
+  --font-display: 'Prata', 'Cormorant Garamond', 'Italiana', 'Playfair Display', serif;
   --font-sans: 'Plus Jakarta Sans', 'Outfit', system-ui, -apple-system, sans-serif;
   --font-cursive: 'Pinyon Script', 'Alex Brush', 'Great Vibes', cursive;
   --font-indic: 'Yatra One', 'Rozha One', serif;

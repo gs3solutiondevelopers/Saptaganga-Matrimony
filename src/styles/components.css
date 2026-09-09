@@ -256,31 +256,35 @@
   display: flex;
   flex-direction: column;
   line-height: 1.05;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
+.hero-title-vebiola,
 .hero-title-serif {
-  font-family: var(--font-luxury-serif);
-  font-size: clamp(2.3rem, 3.8vw, 3.2rem);
-  font-weight: 800;
-  color: #550920;
-  letter-spacing: 1.5px;
-  line-height: 1.1;
-  text-transform: uppercase;
+  font-family: var(--font-vebiola);
+  font-size: clamp(2.4rem, 4.2vw, 3.4rem);
+  font-weight: 400;
+  color: #4A081C;
+  letter-spacing: 0.8px;
+  line-height: 1.12;
+  text-transform: capitalize;
 }
 
+.hero-title-vebiola-accent,
 .hero-title-script {
-  font-family: 'Playfair Display', 'Bodoni Moda', 'Prata', Georgia, serif;
-  font-size: clamp(2.7rem, 4.6vw, 3.8rem);
-  font-weight: 800;
-  font-style: italic;
-  color: #7B0E2E;
-  line-height: 1.08;
+  font-family: var(--font-vebiola);
+  font-size: clamp(2.9rem, 5.2vw, 4.2rem);
+  font-weight: 400;
+  font-style: normal;
+  color: #730F2D;
+  line-height: 1.05;
   margin-top: 2px;
-  background: linear-gradient(135deg, #730F2D 0%, #A31A43 55%, #A8761E 100%);
+  background: linear-gradient(135deg, #580B22 0%, #8A1538 45%, #B58428 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 8px rgba(115, 15, 45, 0.12));
+  filter: drop-shadow(0 2px 10px rgba(115, 15, 45, 0.12));
+  letter-spacing: 0.6px;
+  text-transform: capitalize;
 }
 
 .hero-subtext {
