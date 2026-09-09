@@ -38,26 +38,15 @@ export default function HeroBanner({ onStartJourney, onExploreMatches }) {
             <span>Traditional Values • Modern Connections</span>
           </div>
 
-          {/* Main Headline with Wedding Moment Ligature Typography & Heart Ribbon */}
+          {/* Main Headline with Wedding Moment Ligature Typography & Heart Ribbon Image */}
           <h1 className="hero-main-title">
             <div className="hero-title-top-row">
               <span className="hero-title-wedding-top">Find Your</span>
-              <svg className="hero-heart-ribbon" viewBox="0 0 160 38" width="130" height="30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path 
-                  d="M 6 25 Q 35 25 56 22 C 63 19 69 13 74 6 C 78 2 84 2 87 6 C 90 10 88 16 82 21 L 76 26 C 70 21 66 15 68 9 C 70 4 76 2 80 6 C 84 10 92 19 104 22 Q 130 25 154 25" 
-                  stroke="url(#heartRibbonGrad)" 
-                  strokeWidth="2.2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                />
-                <defs>
-                  <linearGradient id="heartRibbonGrad" x1="0" y1="0" x2="160" y2="0" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#8A1538" />
-                    <stop offset="45%" stopColor="#C99635" />
-                    <stop offset="100%" stopColor="#ECCB85" />
-                  </linearGradient>
-                </defs>
-              </svg>
+              <img 
+                src="/heart-ribbon.svg" 
+                alt="Heart Ribbon" 
+                className="hero-heart-ribbon-img" 
+              />
             </div>
             <span className="hero-title-wedding-main">Perfect Partner</span>
           </h1>

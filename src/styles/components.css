@@ -266,12 +266,13 @@
 .hero-title-top-row {
   display: inline-flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   flex-wrap: wrap;
 }
 
+.hero-heart-ribbon-img,
 .hero-heart-ribbon {
-  height: 28px;
+  height: 26px;
   width: auto;
   max-width: 140px;
   display: inline-block;
