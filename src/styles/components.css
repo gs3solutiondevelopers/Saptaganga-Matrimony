@@ -185,7 +185,7 @@
 .hero-panoramic-bg {
   position: absolute;
   inset: 0;
-  background-image: url('/hero_bg.jpg');
+  background-image: url('/hero.png');
   background-size: cover;
   background-position: right center;
   background-repeat: no-repeat;
@@ -198,10 +198,10 @@
   background: linear-gradient(
     90deg,
     rgba(254, 250, 245, 0.98) 0%,
-    rgba(254, 250, 245, 0.96) 36%,
-    rgba(254, 250, 245, 0.82) 48%,
-    rgba(254, 250, 245, 0.2) 62%,
-    rgba(254, 250, 245, 0) 72%
+    rgba(254, 250, 245, 0.95) 34%,
+    rgba(254, 250, 245, 0.75) 46%,
+    rgba(254, 250, 245, 0.1) 58%,
+    rgba(254, 250, 245, 0) 68%
   );
   z-index: 2;
   pointer-events: none;
