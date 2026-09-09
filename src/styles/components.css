@@ -36,11 +36,36 @@
 }
 
 .navbar-brand-logo-img {
-  height: 54px;
+  height: 48px;
   width: auto;
-  max-width: 220px;
   object-fit: contain;
   display: block;
+}
+
+.brand-text-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-name {
+  font-family: var(--font-serif);
+  font-size: 1.32rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--primary-burgundy-dark);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.brand-tagline {
+  font-size: 0.6rem;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--accent-gold-dark);
+  font-weight: 600;
+  margin-top: 2px;
+  font-family: var(--font-sans);
+  white-space: nowrap;
 }
 
 /* Nav Links */
@@ -142,7 +167,7 @@
 .saptaganga-hero-panoramic {
   position: relative;
   width: 100%;
-  min-height: 580px;
+  min-height: 620px;
   background-color: #FAF4EF;
   overflow: hidden;
   display: flex;
@@ -182,8 +207,8 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding-top: 36px;
-  padding-bottom: 46px;
+  padding-top: 14px;
+  padding-bottom: 24px;
 }
 
 .hero-left-box {
@@ -191,31 +216,31 @@
 }
 
 .hero-official-logo-box {
-  margin-bottom: 22px;
+  margin-bottom: 12px;
 }
 
 .hero-official-logo-img {
-  max-width: 250px;
+  max-width: 195px;
   height: auto;
   display: block;
-  filter: drop-shadow(0 4px 12px rgba(115, 15, 45, 0.12));
+  filter: drop-shadow(0 4px 10px rgba(115, 15, 45, 0.1));
 }
 
 .hero-subtagline {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #4A3E3D;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   letter-spacing: 0.2px;
 }
 
 .hero-main-title {
   font-family: var(--font-serif);
-  font-size: 3.4rem;
+  font-size: 2.85rem;
   font-weight: 800;
   color: #680825;
-  line-height: 1.12;
-  margin-bottom: 14px;
+  line-height: 1.1;
+  margin-bottom: 10px;
 }
 
 .hero-main-title span {
@@ -223,18 +248,18 @@
 }
 
 .hero-subtext {
-  font-size: 0.98rem;
+  font-size: 0.92rem;
   color: #5C5254;
-  line-height: 1.55;
+  line-height: 1.5;
   max-width: 440px;
-  margin-bottom: 26px;
+  margin-bottom: 18px;
 }
 
 .hero-metrics-strip {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   align-items: center;
-  margin-bottom: 28px;
+  margin-bottom: 22px;
   flex-wrap: wrap;
 }
 
@@ -243,12 +268,12 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .hero-metric-icon-circle {
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   border: 1.5px solid #F0C4CF;
   background: #FFF8FA;

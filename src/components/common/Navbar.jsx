@@ -15,13 +15,17 @@ export default function Navbar({ onOpenAuth }) {
       {/* Main Navigation Bar (Common across all pages) */}
       <nav className="navbar">
         <div className="container navbar-container">
-          {/* Official Brand Logo */}
+          {/* Official Brand Logo with Name */}
           <Link to="/" className="brand-logo">
             <img 
               src="/logo.png" 
               alt="Saptaganga Matrimony" 
               className="navbar-brand-logo-img" 
             />
+            <div className="brand-text-container">
+              <span className="brand-name">SAPTAGANGA</span>
+              <span className="brand-tagline">MATRIMONY • SEVEN RIVERS</span>
+            </div>
           </Link>
 
           {/* Desktop Navigation Links */}
