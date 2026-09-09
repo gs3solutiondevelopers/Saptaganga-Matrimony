@@ -1,75 +1,18 @@
 import React, { useState } from 'react';
 import { 
-  Phone, 
-  Globe, 
   Lock, 
   UserPlus, 
   Menu, 
   X, 
-  Heart, 
-  ShieldCheck, 
-  Sparkles,
-  Users
+  Heart 
 } from 'lucide-react';
 
 export default function Navbar({ onOpenAuth, onOpenFavorites, favoritesCount = 0 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [language, setLanguage] = useState('English');
-
-  const languages = ['English', 'বাংলা (Bengali)', 'हिंदी (Hindi)'];
 
   return (
     <header>
-      {/* Top Utility Bar */}
-      <div className="topbar">
-        <div className="container topbar-content">
-          <div className="topbar-left">
-            <span className="topbar-item">
-              <Phone size={13} className="text-gold" style={{ color: 'var(--accent-gold-light)' }} />
-              <span>24/7 Helpline: <strong>+91 1800 200 7777</strong></span>
-            </span>
-            <span className="topbar-item hide-mobile">
-              <ShieldCheck size={14} style={{ color: '#10B981' }} />
-              <span>100% Verified Hindu & South Asian Matrimony</span>
-            </span>
-          </div>
-
-          <div className="topbar-right">
-            <div className="topbar-item">
-              <Globe size={13} style={{ color: 'var(--accent-gold-light)' }} />
-              <select 
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                style={{ 
-                  background: 'transparent', 
-                  color: '#FFF', 
-                  border: 'none', 
-                  fontSize: '0.8rem',
-                  cursor: 'pointer',
-                  outline: 'none'
-                }}
-              >
-                {languages.map(lang => (
-                  <option key={lang} value={lang} style={{ color: '#333' }}>{lang}</option>
-                ))}
-              </select>
-            </div>
-            
-            {favoritesCount > 0 && (
-              <button 
-                onClick={onOpenFavorites}
-                className="topbar-item" 
-                style={{ background: 'rgba(255,255,255,0.15)', padding: '2px 10px', borderRadius: '20px', color: '#FFF' }}
-              >
-                <Heart size={13} fill="#E11D48" color="#E11D48" />
-                <span>Shortlisted (<strong>{favoritesCount}</strong>)</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Main Navigation Bar */}
+      {/* Main Navigation Bar (Clean & Sleek without topbar) */}
       <nav className="navbar">
         <div className="container navbar-container">
           {/* Logo & Brand Identity */}
@@ -91,15 +34,37 @@ export default function Navbar({ onOpenAuth, onOpenFavorites, favoritesCount = 0
           {/* Desktop Navigation Links */}
           <ul className="nav-links">
             <li><a href="#home" className="nav-link active">Home</a></li>
-            <li><a href="#search" className="nav-link">Search Matches</a></li>
-            <li><a href="#featured" className="nav-link">Featured Profiles</a></li>
-            <li><a href="#how-it-works" className="nav-link">How It Works</a></li>
+            <li><a href="#search" className="nav-link">Search</a></li>
+            <li><a href="#featured" className="nav-link">Matches</a></li>
             <li><a href="#membership" className="nav-link">Membership</a></li>
             <li><a href="#stories" className="nav-link">Success Stories</a></li>
+            <li><a href="#how-it-works" className="nav-link">How It Works</a></li>
           </ul>
 
           {/* User Action CTAs */}
           <div className="nav-actions">
+            {favoritesCount > 0 && (
+              <button 
+                onClick={onOpenFavorites}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: '#FFF1F3',
+                  border: '1px solid #F7D4DA',
+                  padding: '8px 14px',
+                  borderRadius: '20px',
+                  fontSize: '0.84rem',
+                  fontWeight: 600,
+                  color: 'var(--primary-burgundy)'
+                }}
+                title="View Shortlisted Profiles"
+              >
+                <Heart size={14} fill="#E11D48" color="#E11D48" />
+                <span>Shortlist ({favoritesCount})</span>
+              </button>
+            )}
+
             <button 
               onClick={() => onOpenAuth('login')}
               className="btn-outline-burgundy hide-mobile"
@@ -139,11 +104,11 @@ export default function Navbar({ onOpenAuth, onOpenFavorites, favoritesCount = 0
             gap: '14px'
           }}>
             <a href="#home" onClick={() => setMobileMenuOpen(false)} style={{ fontWeight: 600, color: 'var(--primary-burgundy)' }}>Home</a>
-            <a href="#search" onClick={() => setMobileMenuOpen(false)} style={{ fontWeight: 600 }}>Search Matches</a>
-            <a href="#featured" onClick={() => setMobileMenuOpen(false)} style={{ fontWeight: 600 }}>Featured Profiles</a>
-            <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} style={{ fontWeight: 600 }}>How It Works</a>
-            <a href="#membership" onClick={() => setMobileMenuOpen(false)} style={{ fontWeight: 600 }}>Membership Plans</a>
+            <a href="#search" onClick={() => setMobileMenuOpen(false)} style={{ fontWeight: 600 }}>Search</a>
+            <a href="#featured" onClick={() => setMobileMenuOpen(false)} style={{ fontWeight: 600 }}>Matches</a>
+            <a href="#membership" onClick={() => setMobileMenuOpen(false)} style={{ fontWeight: 600 }}>Membership</a>
             <a href="#stories" onClick={() => setMobileMenuOpen(false)} style={{ fontWeight: 600 }}>Success Stories</a>
+            <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} style={{ fontWeight: 600 }}>How It Works</a>
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
               <button 
                 onClick={() => { setMobileMenuOpen(false); onOpenAuth('login'); }}
