@@ -1,10 +1,10 @@
 // API Service Client for Saptaganga Matrimony
 // Ready to switch between mock local data and live Express/Node.js API endpoints
 
-import { MOCK_PROFILES, MOCK_STORIES, MEMBERSHIP_PLANS } from '../data/mockData';
+import { MOCK_PROFILES, MOCK_STORIES, MEMBERSHIP_PLANS } from '../data/mockData.js';
 
-// Configurable API base URL (can be loaded from import.meta.env.VITE_API_URL)
-const API_BASE_URL = import.meta.env.VITE_API_URL || null;
+// Configurable API base URL (can be loaded from import.meta.env?.VITE_API_URL)
+const API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) || null;
 
 export const api = {
   // Fetch profiles with filtering capability
