@@ -43,17 +43,6 @@ export default function Navbar({ onOpenAuth, onOpenFavorites, favoritesCount = 0
 
           {/* User Action CTAs */}
           <div className="nav-actions">
-            {favoritesCount > 0 && (
-              <button 
-                onClick={onOpenFavorites}
-                className="nav-shortlist-btn"
-                title="View Shortlisted Profiles"
-              >
-                <Heart size={14} fill="#E11D48" color="#E11D48" />
-                <span>Shortlist ({favoritesCount})</span>
-              </button>
-            )}
-
             <button 
               onClick={() => onOpenAuth('login')}
               className="btn-outline-burgundy hide-mobile"
