@@ -309,9 +309,9 @@
 
 .hero-metrics-strip {
   display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 18px;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 22px;
   flex-wrap: wrap;
 }
 
@@ -320,12 +320,13 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 4px;
+  gap: 6px;
+  min-width: 80px;
 }
 
 .hero-metric-icon-circle {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 1.5px solid #F0C4CF;
   background: #FFF8FA;
@@ -333,7 +334,8 @@
   align-items: center;
   justify-content: center;
   color: #730F2D;
-  box-shadow: 0 2px 8px rgba(115, 15, 45, 0.05);
+  box-shadow: 0 2px 8px rgba(115, 15, 45, 0.06);
+  transition: all 0.2s ease;
 }
 
 .hero-metric-info {
@@ -343,18 +345,22 @@
 }
 
 .hero-metric-val {
-  font-family: var(--font-serif);
-  font-size: 1.05rem;
+  font-family: var(--font-sans);
+  font-size: 1.15rem;
   font-weight: 800;
-  color: #680825;
-  line-height: 1.1;
+  color: #580B22;
+  line-height: 1.15;
+  letter-spacing: -0.3px;
 }
 
 .hero-metric-lbl {
-  font-size: 0.65rem;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
   font-weight: 600;
-  color: #6B6265;
-  line-height: 1.1;
+  color: #5C5256;
+  line-height: 1.25;
+  margin-top: 2px;
+  white-space: nowrap;
 }
 
 .hero-cta-row {
