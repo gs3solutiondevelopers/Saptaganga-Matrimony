@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { HeartHandshake, ShieldCheck, ArrowRight, Filter } from 'lucide-react';
+import { HeartHandshake, Search, ShieldCheck, ArrowRight, Filter } from 'lucide-react';
 
 export default function QuickSearchCard({ onSearch, onRegisterClick }) {
   const [lookingFor, setLookingFor] = useState('female');
