@@ -35,44 +35,12 @@
   flex-shrink: 0;
 }
 
-.brand-icon {
-  width: 42px;
-  height: 42px;
-  background: linear-gradient(135deg, var(--primary-burgundy) 0%, var(--primary-burgundy-dark) 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--accent-gold-light);
-  box-shadow: var(--shadow-burgundy);
-  border: 2px solid var(--accent-gold);
-  flex-shrink: 0;
-}
-
-.brand-text-container {
-  display: flex;
-  flex-direction: column;
-}
-
-.brand-name {
-  font-family: var(--font-serif);
-  font-size: 1.35rem;
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: var(--primary-burgundy-dark);
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.brand-tagline {
-  font-size: 0.62rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--accent-gold-dark);
-  font-weight: 600;
-  margin-top: 3px;
-  font-family: var(--font-sans);
-  white-space: nowrap;
+.navbar-brand-logo-img {
+  height: 54px;
+  width: auto;
+  max-width: 220px;
+  object-fit: contain;
+  display: block;
 }
 
 /* Nav Links */
@@ -222,57 +190,15 @@
   max-width: 540px;
 }
 
-.hero-brand-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 18px;
+.hero-official-logo-box {
+  margin-bottom: 22px;
 }
 
-.hero-brand-emblem {
-  width: 58px;
-  height: 58px;
-  flex-shrink: 0;
-}
-
-.hero-emblem-svg {
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 4px 10px rgba(115, 15, 45, 0.15));
-}
-
-.hero-brand-text {
-  display: flex;
-  flex-direction: column;
-}
-
-.hero-brand-title {
-  font-family: var(--font-serif);
-  font-size: 1.65rem;
-  font-weight: 900;
-  color: #730F2D;
-  letter-spacing: 1.5px;
-  line-height: 1;
-}
-
-.hero-brand-separator {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 3.5px;
-  color: #730F2D;
-  margin: 3px 0 1px 0;
-}
-
-.hero-brand-separator span {
-  color: #C99635;
-  margin: 0 4px;
-}
-
-.hero-brand-motto {
-  font-family: var(--font-cursive);
-  font-size: 1.25rem;
-  color: #A61C3C;
-  line-height: 1;
+.hero-official-logo-img {
+  max-width: 250px;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 4px 12px rgba(115, 15, 45, 0.12));
 }
 
 .hero-subtagline {

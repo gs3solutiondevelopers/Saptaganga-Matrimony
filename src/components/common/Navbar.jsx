@@ -3,32 +3,24 @@ import {
   Lock, 
   UserPlus, 
   Menu, 
-  X, 
-  Heart 
+  X 
 } from 'lucide-react';
 
-export default function Navbar({ onOpenAuth, onOpenFavorites, favoritesCount = 0 }) {
+export default function Navbar({ onOpenAuth }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header>
-      {/* Main Navigation Bar (Clean, Sleek & No Wrap) */}
+      {/* Main Navigation Bar */}
       <nav className="navbar">
         <div className="container navbar-container">
-          {/* Logo & Brand Identity */}
+          {/* Official Brand Logo */}
           <a href="#" className="brand-logo">
-            <div className="brand-icon">
-              {/* Sacred Lotus / Couple Emblem */}
-              <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 3c1.5 3 4 5.5 7 6-2 3-5 5-7 12-2-7-5-9-7-12 3-.5 5.5-3 7-6z" fill="rgba(201, 150, 53, 0.4)" />
-                <path d="M12 21c3-4 7-6 9-8-1-2-3-3-5-3-2 3-3 7-4 11z" />
-                <path d="M12 21c-3-4-7-6-9-8 1-2 3-3 5-3 2 3 3 7 4 11z" />
-              </svg>
-            </div>
-            <div className="brand-text-container">
-              <span className="brand-name">SAPTAGANGA</span>
-              <span className="brand-tagline">MATRIMONY • SEVEN RIVERS</span>
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="Saptaganga Matrimony" 
+              className="navbar-brand-logo-img" 
+            />
           </a>
 
           {/* Desktop Navigation Links */}

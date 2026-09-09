@@ -17,41 +17,16 @@ export default function HeroBanner({ onStartJourney }) {
 
       <div className="container hero-panoramic-container">
         
-        {/* Left Column: Saptaganga Brand Identity, Heading, Stats & CTA */}
+        {/* Left Column: Official Logo, Heading, Stats & CTA */}
         <div className="hero-left-box">
           
-          {/* Logo with Bride & Groom Heritage Emblem */}
-          <div className="hero-brand-header">
-            <div className="hero-brand-emblem">
-              {/* Couple silhouette in traditional wedding crown/dupatta */}
-              <svg viewBox="0 0 100 100" className="hero-emblem-svg">
-                <circle cx="50" cy="50" r="46" fill="none" stroke="#D4AF37" strokeWidth="2.5" strokeDasharray="4 2" />
-                <circle cx="50" cy="50" r="41" fill="#FFF" stroke="#7A0C2E" strokeWidth="1.5" />
-                
-                {/* Groom Turban & Silhouette */}
-                <path d="M35 48 C35 32 45 26 52 26 C60 26 62 33 60 40 C58 46 54 52 48 56 Z" fill="#7A0C2E" />
-                <path d="M48 24 C50 18 52 14 54 12 C56 16 55 20 52 24 Z" fill="#D4AF37" />
-                <circle cx="51" cy="24" r="2.5" fill="#D4AF37" />
-
-                {/* Bride Veil (Ghoonghat) & Silhouette */}
-                <path d="M42 42 C48 40 56 42 62 48 C68 54 70 66 68 76 C58 78 45 74 38 68 C34 60 36 48 42 42 Z" fill="#961538" opacity="0.9" />
-                <path d="M52 40 C58 38 65 44 65 52 C65 58 60 62 55 64 Z" fill="#FFF" />
-                
-                {/* Traditional Mukut / Ornaments */}
-                <path d="M38 42 Q 46 36 56 40" stroke="#D4AF37" strokeWidth="2" fill="none" />
-                <path d="M42 66 Q 50 72 62 70" stroke="#D4AF37" strokeWidth="2" fill="none" />
-              </svg>
-            </div>
-
-            <div className="hero-brand-text">
-              <h2 className="hero-brand-title">SAPTAGANGA</h2>
-              <div className="hero-brand-separator">
-                <span>—</span> MATRIMONY <span>—</span>
-              </div>
-              <div className="hero-brand-motto">
-                Seven Rivers. A Lifetime Together.
-              </div>
-            </div>
+          {/* Official Saptaganga Matrimony Logo */}
+          <div className="hero-official-logo-box">
+            <img 
+              src="/logo.png" 
+              alt="Saptaganga Matrimony - Seven Rivers. A Lifetime Together." 
+              className="hero-official-logo-img" 
+            />
           </div>
 
           {/* Sub-tagline */}

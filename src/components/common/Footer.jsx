@@ -16,28 +16,19 @@ export default function Footer() {
           
           {/* Col 1: Brand & Bio */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{
-                width: '38px',
-                height: '38px',
-                background: 'linear-gradient(135deg, var(--primary-burgundy) 0%, var(--primary-burgundy-dark) 100%)',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--accent-gold-light)',
-                border: '1.5px solid var(--accent-gold)'
-              }}>
-                💍
-              </div>
-              <div>
-                <div style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', fontWeight: 800, color: 'var(--accent-gold-light)' }}>
-                  SAPTAGANGA
-                </div>
-                <div style={{ fontSize: '0.62rem', letterSpacing: '1.8px', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase' }}>
-                  Seven Rivers • A Lifetime Together
-                </div>
-              </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+              <img 
+                src="/logo.png" 
+                alt="Saptaganga Matrimony" 
+                style={{ 
+                  height: '60px', 
+                  width: 'auto', 
+                  background: '#FFF', 
+                  padding: '6px 12px', 
+                  borderRadius: '10px',
+                  boxShadow: '0 4px 14px rgba(0,0,0,0.3)'
+                }} 
+              />
             </div>
 
             <p className="footer-brand-desc">
