@@ -11,13 +11,13 @@ export default function HeroBanner({ onStartJourney }) {
   return (
     <section className="saptaganga-hero-panoramic" id="home">
       
-      {/* Background Image Container with Gradient Fade */}
+      {/* Background Image Container with Right-Aligned Couple */}
       <div className="hero-panoramic-bg" />
       <div className="hero-panoramic-overlay" />
 
       <div className="container hero-panoramic-container">
         
-        {/* Left Column: Saptaganga Exact Brand Identity & Actions */}
+        {/* Left Column: Saptaganga Brand Identity, Heading, Stats & CTA */}
         <div className="hero-left-box">
           
           {/* Logo with Bride & Groom Heritage Emblem */}
@@ -25,7 +25,7 @@ export default function HeroBanner({ onStartJourney }) {
             <div className="hero-brand-emblem">
               {/* Couple silhouette in traditional wedding crown/dupatta */}
               <svg viewBox="0 0 100 100" className="hero-emblem-svg">
-                <circle cx="50" cy="50" r="46" fill="none" stroke="#D4AF37" strokeWidth="2.5" strokeDasharray="3 2" />
+                <circle cx="50" cy="50" r="46" fill="none" stroke="#D4AF37" strokeWidth="2.5" strokeDasharray="4 2" />
                 <circle cx="50" cy="50" r="41" fill="#FFF" stroke="#7A0C2E" strokeWidth="1.5" />
                 
                 {/* Groom Turban & Silhouette */}
@@ -123,7 +123,7 @@ export default function HeroBanner({ onStartJourney }) {
           <div className="hero-cta-row">
             <button onClick={onStartJourney} className="hero-start-journey-btn">
               <span>Start Your Journey</span>
-              <ArrowRight size={18} />
+              <ArrowRight size={17} />
             </button>
 
             <div className="hero-handwritten-calligraphy">
@@ -135,31 +135,19 @@ export default function HeroBanner({ onStartJourney }) {
 
         </div>
 
-        {/* Right Side Overlays (Rendered gracefully over the background couple & ghat) */}
+        {/* Right Side Overlays (Rendered over the background couple & ghat) */}
         <div className="hero-right-box">
           
-          {/* Top Right: Hindi Heritage Quote */}
-          <div className="hero-hindi-quote-overlay">
-            <p>सात नदियाँ</p>
-            <p>एक बंधन</p>
-            <p>सदा के लिए</p>
-            <div className="hindi-heart">♡</div>
-          </div>
-
           {/* Bottom Right: Maroon Brush Stroke Ribbon with Golden Lotus */}
           <div className="hero-maroon-ribbon-badge">
             <div className="ribbon-lotus-icon">
               {/* Golden Lotus Flower SVG */}
-              <svg viewBox="0 0 40 30" width="38" height="28" fill="none" stroke="#ECCB85" strokeWidth="1.8">
-                {/* Center Petal */}
+              <svg viewBox="0 0 40 30" width="36" height="26" fill="none" stroke="#ECCB85" strokeWidth="1.8">
                 <path d="M20 3 C17 10 17 18 20 26 C23 18 23 10 20 3 Z" fill="rgba(236, 203, 133, 0.2)" />
-                {/* Left Petals */}
                 <path d="M19 12 C13 13 8 18 10 24 C14 24 17 21 19 18" />
                 <path d="M18 6 C12 8 6 15 5 22 C10 22 15 18 18 14" />
-                {/* Right Petals */}
                 <path d="M21 12 C27 13 32 18 30 24 C26 24 23 21 21 18" />
                 <path d="M22 6 C28 8 34 15 35 22 C30 22 25 18 22 14" />
-                {/* Base */}
                 <path d="M12 26 Q 20 28 28 26" />
               </svg>
             </div>
