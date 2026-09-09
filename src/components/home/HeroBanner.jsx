@@ -22,9 +22,7 @@ export default function HeroBanner({ onStartJourney }) {
 
           {/* Sub-tagline */}
           <div className="hero-subtagline">
-            <span className="hero-subtagline-accent">✦</span>
             <span>Traditional Values • Modern Connections</span>
-            <span className="hero-subtagline-accent">✦</span>
           </div>
 
           {/* Main Headline with Wedding Moment Ligature Typography */}
