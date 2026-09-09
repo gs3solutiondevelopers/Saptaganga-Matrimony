@@ -447,34 +447,61 @@
 
 .hero-right-box {
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  z-index: 4;
+}
+
+.hero-couple-showcase-frame {
+  position: relative;
+  width: 440px;
   height: 480px;
-  width: 380px;
-  pointer-events: none;
+  border-radius: 36px 12px 36px 12px;
+  border: 2px solid rgba(212, 175, 55, 0.55);
+  box-shadow: 0 18px 45px rgba(115, 15, 45, 0.16), 0 0 24px rgba(212, 175, 55, 0.12);
+  overflow: hidden;
+  background: #FFFDFD;
+}
+
+.hero-couple-main-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 15%;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.hero-couple-showcase-frame:hover .hero-couple-main-img {
+  transform: scale(1.03);
 }
 
 .hero-royal-rings-badge,
 .hero-royal-lotus-badge {
   position: absolute;
-  bottom: 18px;
-  right: -10px;
-  background: linear-gradient(135deg, rgba(74, 8, 28, 0.94) 0%, rgba(98, 12, 38, 0.96) 100%);
+  bottom: 14px;
+  left: 14px;
+  right: 14px;
+  background: linear-gradient(135deg, rgba(74, 8, 28, 0.95) 0%, rgba(98, 12, 38, 0.97) 100%);
   backdrop-filter: blur(14px);
-  padding: 12px 24px 12px 16px;
-  border-radius: 24px 8px 24px 8px;
+  padding: 10px 16px;
+  border-radius: 20px 6px 20px 6px;
   border: 1.5px solid #D4AF37;
   display: flex;
   align-items: center;
-  gap: 14px;
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.42), inset 0 0 16px rgba(212, 175, 55, 0.15);
+  gap: 12px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45), inset 0 0 14px rgba(212, 175, 55, 0.15);
   pointer-events: auto;
   transition: var(--transition-smooth);
 }
 
 .hero-royal-rings-badge:hover,
 .hero-royal-lotus-badge:hover {
-  transform: translateY(-3px) scale(1.02);
+  transform: translateY(-2px);
   border-color: #ECCB85;
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.5), 0 0 24px rgba(236, 203, 133, 0.25);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.52), 0 0 20px rgba(236, 203, 133, 0.25);
 }
 
 .badge-corner-flourish {
@@ -1329,21 +1356,42 @@
     display: block;
   }
   .hero-panoramic-container {
-    padding-top: 16px;
-    padding-bottom: 28px;
-    gap: 20px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 32px;
+    padding-top: 20px;
+    padding-bottom: 32px;
   }
   .hero-left-box {
-    max-width: 500px;
+    max-width: 620px;
+  }
+  .hero-subtagline {
+    justify-content: center;
+  }
+  .hero-title-top-row {
+    justify-content: center;
+  }
+  .hero-subtext {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero-cta-pill-row {
+    justify-content: center;
+  }
+  .hero-metrics-strip-divided {
+    margin-left: auto;
+    margin-right: auto;
   }
   .hero-right-box {
-    width: 320px;
-    height: 420px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
   }
-  .hero-royal-rings-badge {
-    right: 0;
-    bottom: 12px;
-    padding: 10px 18px;
+  .hero-couple-showcase-frame {
+    width: 100%;
+    max-width: 440px;
+    height: 400px;
   }
   .membership-grid,
   .plans-grid {
@@ -1374,11 +1422,10 @@
   }
   .hero-panoramic-overlay {
     background: linear-gradient(
-      90deg,
+      180deg,
       rgba(254, 250, 245, 0.98) 0%,
-      rgba(254, 250, 245, 0.96) 55%,
-      rgba(254, 250, 245, 0.75) 75%,
-      rgba(254, 250, 245, 0.3) 100%
+      rgba(254, 250, 245, 0.96) 60%,
+      rgba(254, 250, 245, 0.92) 100%
     );
   }
 }
@@ -1404,21 +1451,14 @@
   }
   .saptaganga-hero-panoramic {
     min-height: auto;
-    padding: 24px 0 32px 0;
-  }
-  .hero-panoramic-overlay {
-    background: linear-gradient(
-      180deg,
-      rgba(254, 250, 245, 0.98) 0%,
-      rgba(254, 250, 245, 0.95) 70%,
-      rgba(254, 250, 245, 0.88) 100%
-    );
+    padding: 20px 0 32px 0;
   }
   .hero-panoramic-container {
     flex-direction: column;
     align-items: stretch;
+    text-align: left;
     gap: 24px;
-    padding-top: 8px;
+    padding-top: 4px;
     padding-bottom: 12px;
   }
   .hero-left-box {
@@ -1426,10 +1466,12 @@
     width: 100%;
   }
   .hero-subtagline {
+    justify-content: flex-start;
     font-size: 0.75rem;
     letter-spacing: 1.5px;
   }
   .hero-title-top-row {
+    justify-content: flex-start;
     gap: 10px;
   }
   .hero-heart-ribbon-img {
@@ -1445,10 +1487,14 @@
     line-height: 1.12;
   }
   .hero-subtext {
+    margin-left: 0;
+    margin-right: 0;
+    text-align: left;
     font-size: 0.9rem;
     margin-bottom: 20px;
   }
   .hero-cta-pill-row {
+    justify-content: flex-start;
     display: flex;
     gap: 12px;
     width: 100%;
@@ -1470,11 +1516,13 @@
     width: 100%;
     max-width: 100%;
     padding: 18px 14px;
-    background: rgba(255, 255, 255, 0.82);
+    background: rgba(255, 255, 255, 0.85);
     border: 1px solid #F4D5DD;
     border-radius: 18px;
     box-shadow: 0 4px 16px rgba(115, 15, 45, 0.05);
     backdrop-filter: blur(8px);
+    margin-left: 0;
+    margin-right: 0;
   }
   .hero-metric-divider {
     display: none;
@@ -1491,18 +1539,31 @@
   }
   .hero-right-box {
     width: 100%;
-    height: auto;
-    position: static;
     display: flex;
     justify-content: center;
-    margin-top: 4px;
+    margin-top: 8px;
+  }
+  .hero-couple-showcase-frame {
+    width: 100%;
+    max-width: 100%;
+    height: 320px;
+    border-radius: 24px 8px 24px 8px;
   }
   .hero-royal-rings-badge {
-    position: static;
-    width: 100%;
-    max-width: 380px;
-    justify-content: center;
-    padding: 12px 18px;
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    padding: 8px 12px;
+    gap: 10px;
+    border-radius: 16px 6px 16px 6px;
+  }
+  .royal-rings-title {
+    font-size: 0.92rem;
+  }
+  .royal-rings-subtitle {
+    font-size: 0.8rem;
   }
   .category-tabs {
     overflow-x: auto;
@@ -1580,14 +1641,29 @@
   .hero-title-wedding-main {
     font-size: clamp(2.4rem, 11vw, 3.2rem);
   }
+  .hero-couple-showcase-frame {
+    height: 260px;
+  }
+  .hero-royal-rings-badge {
+    padding: 6px 10px;
+    gap: 8px;
+  }
+  .royal-rings-circle {
+    width: 36px;
+    height: 36px;
+  }
+  .royal-rings-circle svg {
+    width: 22px;
+    height: 22px;
+  }
+  .royal-rings-title {
+    font-size: 0.86rem;
+  }
+  .royal-rings-subtitle {
+    font-size: 0.74rem;
+  }
   .membership-grid,
   .plans-grid {
     grid-template-columns: 1fr;
-  }
-  .royal-rings-title {
-    font-size: 0.95rem;
-  }
-  .royal-rings-subtitle {
-    font-size: 0.82rem;
   }
 }

@@ -117,36 +117,39 @@ export default function HeroBanner({ onStartJourney, onExploreMatches }) {
 
         </div>
 
-        {/* Right Side Overlays (Rendered over the background couple & ghat) */}
+        {/* Right Side Visual Showcase: Couple Photo & Royal Ornate Rings Badge */}
         <div className="hero-right-box">
-          
-          {/* Bottom Right: Luxury Royal Ornate Rings Badge */}
-          <div className="hero-royal-rings-badge">
-            <div className="badge-corner-flourish top-left">✦</div>
-            <div className="badge-corner-flourish top-right">✦</div>
-            <div className="badge-corner-flourish bottom-left">✦</div>
-            <div className="badge-corner-flourish bottom-right">✦</div>
+          <div className="hero-couple-showcase-frame">
+            <img 
+              src="/hero.png" 
+              alt="Saptaganga Happy Wedding Couple" 
+              className="hero-couple-main-img" 
+            />
 
-            <div className="royal-rings-circle">
-              <svg viewBox="0 0 48 48" width="32" height="32" fill="none" stroke="#ECCB85" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                {/* Left Ring */}
-                <circle cx="20" cy="27" r="10.5" />
-                {/* Right Ring */}
-                <circle cx="28" cy="27" r="10.5" />
-                {/* Solitaire Diamond on Top of Right Ring */}
-                <path d="M 25 15 L 28 9 L 31 15 Z" fill="#ECCB85" stroke="none" />
-                <path d="M 28 6 L 28 9" stroke="#ECCB85" strokeWidth="1.8" />
-                <circle cx="28" cy="9" r="1.2" fill="#FFF" />
-                <path d="M 22 27 C 22 24.5 26 24.5 26 27" stroke="#ECCB85" strokeWidth="2.2" />
-              </svg>
-            </div>
+            {/* Floating Luxury Royal Ornate Rings Badge */}
+            <div className="hero-royal-rings-badge">
+              <div className="badge-corner-flourish top-left">✦</div>
+              <div className="badge-corner-flourish top-right">✦</div>
+              <div className="badge-corner-flourish bottom-left">✦</div>
+              <div className="badge-corner-flourish bottom-right">✦</div>
 
-            <div className="royal-rings-text">
-              <span className="royal-rings-title">More Than Matches</span>
-              <span className="royal-rings-subtitle">We Create Happy Stories ♡</span>
+              <div className="royal-rings-circle">
+                <svg viewBox="0 0 48 48" width="30" height="30" fill="none" stroke="#ECCB85" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="20" cy="27" r="10.5" />
+                  <circle cx="28" cy="27" r="10.5" />
+                  <path d="M 25 15 L 28 9 L 31 15 Z" fill="#ECCB85" stroke="none" />
+                  <path d="M 28 6 L 28 9" stroke="#ECCB85" strokeWidth="1.8" />
+                  <circle cx="28" cy="9" r="1.2" fill="#FFF" />
+                  <path d="M 22 27 C 22 24.5 26 24.5 26 27" stroke="#ECCB85" strokeWidth="2.2" />
+                </svg>
+              </div>
+
+              <div className="royal-rings-text">
+                <span className="royal-rings-title">More Than Matches</span>
+                <span className="royal-rings-subtitle">We Create Happy Stories ♡</span>
+              </div>
             </div>
           </div>
-
         </div>
 
       </div>

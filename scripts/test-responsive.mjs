@@ -34,7 +34,7 @@ console.log('\n2. Hero Section Responsive Adaptations:');
 assert(componentsCss.includes('.hero-panoramic-container') && componentsCss.includes('flex-direction: column'), 'Hero container stacks vertically on mobile viewports');
 assert(componentsCss.includes('.hero-metrics-strip-divided') && componentsCss.includes('grid-template-columns: repeat(2, 1fr)'), 'Metrics strip transitions to a clean 2x2 grid on mobile');
 assert(componentsCss.includes('.hero-metric-divider') && componentsCss.includes('display: none'), 'Metric dividers hide on mobile grid layout to avoid clutter');
-assert(componentsCss.includes('.hero-royal-rings-badge') && componentsCss.includes('position: static'), 'Royal rings badge becomes static & centered on mobile');
+assert(componentsCss.includes('.hero-couple-showcase-frame') && componentsCss.includes('.hero-royal-rings-badge'), 'Royal rings badge floats over couple showcase frame on mobile');
 assert(componentsCss.includes('.hero-heart-ribbon-img'), 'Heart ribbon image has responsive sizing rules');
 
 console.log('\n3. Touch & Interactive Components on Mobile:');
