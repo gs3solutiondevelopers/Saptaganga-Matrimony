@@ -27,7 +27,7 @@ export default function Navbar({ onOpenAuth }) {
           {/* Official Brand Logo with Name */}
           <Link to="/" className="brand-logo">
             <img 
-              src="/logo.png" 
+              src="/logo-emblem.png" 
               alt="Saptaganga Matrimony" 
               className="navbar-brand-logo-img" 
             />
