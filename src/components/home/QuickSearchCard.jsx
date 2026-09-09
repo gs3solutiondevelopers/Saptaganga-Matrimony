@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { HeartHandshake, Search, ShieldCheck, ArrowRight, Filter } from 'lucide-react';
+import { HeartHandshake, Search, ArrowRight, Filter } from 'lucide-react';
 
 export default function QuickSearchCard({ onSearch, onRegisterClick }) {
   const [lookingFor, setLookingFor] = useState('female');
@@ -129,20 +129,6 @@ export default function QuickSearchCard({ onSearch, onRegisterClick }) {
             </div>
 
           </form>
-
-          {/* Bottom Security Note */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            marginTop: '18px',
-            fontSize: '0.82rem',
-            color: 'var(--text-muted)'
-          }}>
-            <ShieldCheck size={16} style={{ color: '#10B981' }} />
-            <span>100% Verified Profiles • Safe & Secure Matchmaking</span>
-          </div>
 
         </div>
       </div>
