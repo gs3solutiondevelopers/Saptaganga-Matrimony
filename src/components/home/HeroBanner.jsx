@@ -31,13 +31,15 @@ export default function HeroBanner({ onStartJourney }) {
 
           {/* Sub-tagline */}
           <div className="hero-subtagline">
-            Traditional Values. Modern Connections.
+            <span className="hero-subtagline-accent">✦</span>
+            <span>Traditional Values • Modern Connections</span>
+            <span className="hero-subtagline-accent">✦</span>
           </div>
 
           {/* Main Headline */}
           <h1 className="hero-main-title">
             Find Your<br />
-            <span>Perfect Partner</span>
+            <span className="hero-title-highlight">Perfect Partner</span>
           </h1>
 
           {/* Subtext Paragraph */}

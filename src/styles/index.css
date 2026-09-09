@@ -37,9 +37,9 @@
   --status-heart: #E11D48;
 
   /* Typography */
-  --font-serif: 'Playfair Display', Georgia, serif;
-  --font-display: 'Cormorant Garamond', serif;
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Playfair Display', 'Bodoni Moda', 'Marcellus', Georgia, serif;
+  --font-display: 'Prata', 'Cormorant Garamond', 'Playfair Display', serif;
+  --font-sans: 'Plus Jakarta Sans', 'Outfit', system-ui, -apple-system, sans-serif;
   --font-cursive: 'Great Vibes', cursive;
   --font-indic: 'Yatra One', 'Rozha One', serif;
 
