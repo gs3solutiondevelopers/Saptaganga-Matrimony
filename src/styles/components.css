@@ -1459,33 +1459,36 @@
 /* Mobile & Small Tablet (768px and below) */
 @media (max-width: 768px) {
   .navbar-container {
-    height: 70px;
+    height: 66px;
     gap: 12px;
   }
   .navbar-brand-logo-img {
-    height: 46px;
+    height: 44px;
   }
   .brand-name {
-    font-size: 1.2rem;
+    font-size: 1.18rem;
   }
   .brand-tagline {
-    font-size: 0.58rem;
+    font-size: 0.56rem;
   }
   .nav-actions .btn-burgundy {
-    padding: 8px 16px;
-    font-size: 0.85rem;
+    padding: 7px 14px;
+    font-size: 0.82rem;
   }
   .saptaganga-hero-panoramic {
     min-height: auto;
-    padding: 16px 0 28px 0;
+    padding: 10px 0 24px 0;
+  }
+  .hero-panoramic-bg {
+    opacity: 0;
   }
   .hero-panoramic-container {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 18px;
-    padding-top: 4px;
-    padding-bottom: 8px;
+    gap: 14px;
+    padding-top: 0;
+    padding-bottom: 4px;
   }
   .hero-left-box {
     max-width: 100%;
@@ -1493,46 +1496,47 @@
   }
   .hero-subtagline {
     justify-content: center;
-    font-size: 0.75rem;
-    letter-spacing: 1.5px;
+    font-size: 0.72rem;
+    letter-spacing: 1.4px;
+    margin-bottom: 4px;
   }
   .hero-title-top-row {
     justify-content: center;
     gap: 10px;
   }
   .hero-heart-ribbon-img {
-    height: 22px;
-    max-width: 100px;
+    height: 20px;
+    max-width: 95px;
   }
   .hero-title-wedding-top {
-    font-size: clamp(1.6rem, 5.5vw, 2.2rem);
-    letter-spacing: 1.8px;
+    font-size: clamp(1.5rem, 5.2vw, 2.0rem);
+    letter-spacing: 1.6px;
   }
   .hero-title-wedding-main {
-    font-size: clamp(2.8rem, 9.5vw, 4.2rem);
-    line-height: 1.12;
+    font-size: clamp(2.6rem, 9vw, 3.8rem);
+    line-height: 1.1;
   }
   .hero-subtext {
     margin-left: auto;
     margin-right: auto;
     text-align: center;
-    font-size: 0.9rem;
-    margin-bottom: 16px;
+    font-size: 0.86rem;
+    margin-bottom: 12px;
   }
   .hero-cta-pill-row {
     justify-content: center;
     display: flex;
-    gap: 12px;
+    gap: 10px;
     width: 100%;
-    margin-bottom: 6px;
+    margin-bottom: 2px;
   }
   .hero-btn-pill-primary,
   .hero-btn-pill-outline {
     flex: 1;
-    max-width: 200px;
-    min-width: 135px;
-    padding: 11px 16px;
-    font-size: 0.88rem;
+    max-width: 180px;
+    min-width: 130px;
+    padding: 10px 14px;
+    font-size: 0.85rem;
     justify-content: center;
     text-align: center;
   }
@@ -1542,13 +1546,13 @@
   .hero-metrics-mobile {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px 14px;
+    gap: 10px 12px;
     width: 100%;
-    max-width: 440px;
-    padding: 16px 14px;
-    background: rgba(255, 255, 255, 0.85);
+    max-width: 380px;
+    padding: 14px 12px;
+    background: rgba(255, 255, 255, 0.88);
     border: 1px solid #F4D5DD;
-    border-radius: 18px;
+    border-radius: 16px;
     box-shadow: 0 4px 16px rgba(115, 15, 45, 0.05);
     backdrop-filter: blur(8px);
     margin: 4px auto 0 auto;
@@ -1561,39 +1565,55 @@
     align-items: center;
   }
   .hero-metric-item .hero-metric-val {
-    font-size: 1.22rem;
+    font-size: 1.18rem;
   }
   .hero-metric-item .hero-metric-lbl {
-    font-size: 0.72rem;
+    font-size: 0.70rem;
   }
   .hero-right-box {
     width: 100%;
     display: flex;
     justify-content: center;
-    margin-top: 4px;
+    margin-top: 2px;
   }
   .hero-couple-showcase-frame {
     width: 100%;
-    max-width: 380px;
-    height: 310px;
-    border-radius: 24px 8px 24px 8px;
+    max-width: 330px;
+    height: 250px;
+    border-radius: 20px 6px 20px 6px;
     margin: 0 auto;
+    border: 1.5px solid rgba(212, 175, 55, 0.6);
+  }
+  .hero-couple-main-img {
+    object-position: center 20%;
   }
   .hero-royal-rings-badge {
     position: absolute;
-    bottom: 10px;
-    left: 10px;
-    right: 10px;
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
     width: auto;
-    padding: 8px 12px;
-    gap: 10px;
-    border-radius: 16px 6px 16px 6px;
+    padding: 6px 10px;
+    gap: 8px;
+    border-radius: 14px 4px 14px 4px;
+  }
+  .hero-royal-rings-badge .badge-corner-flourish {
+    display: none;
+  }
+  .royal-rings-circle {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+  .royal-rings-circle svg {
+    width: 20px;
+    height: 20px;
   }
   .royal-rings-title {
-    font-size: 0.92rem;
+    font-size: 0.84rem;
   }
   .royal-rings-subtitle {
-    font-size: 0.8rem;
+    font-size: 0.72rem;
   }
   .category-tabs {
     overflow-x: auto;
@@ -1639,14 +1659,14 @@
   .hero-cta-pill-row {
     flex-direction: row;
     gap: 8px;
-    max-width: 360px;
+    max-width: 330px;
   }
   .hero-btn-pill-primary,
   .hero-btn-pill-outline {
     flex: 1;
     min-width: 0;
-    padding: 10px 10px;
-    font-size: 0.82rem;
+    padding: 9px 8px;
+    font-size: 0.80rem;
   }
   .quick-search-form {
     grid-template-columns: 1fr;
@@ -1662,40 +1682,43 @@
   .hero-title-top-row {
     flex-direction: row;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
   }
   .hero-heart-ribbon-img {
-    height: 18px;
-    max-width: 80px;
+    height: 16px;
+    max-width: 75px;
   }
   .hero-title-wedding-top {
-    font-size: 1.45rem;
-    letter-spacing: 1.2px;
+    font-size: 1.35rem;
+    letter-spacing: 1.0px;
   }
   .hero-title-wedding-main {
-    font-size: clamp(2.4rem, 11vw, 3.2rem);
+    font-size: clamp(2.3rem, 10.5vw, 3.0rem);
   }
   .hero-couple-showcase-frame {
-    max-width: 320px;
-    height: 260px;
+    max-width: 300px;
+    height: 230px;
   }
   .hero-royal-rings-badge {
-    padding: 6px 10px;
-    gap: 8px;
+    bottom: 6px;
+    left: 6px;
+    right: 6px;
+    padding: 5px 8px;
+    gap: 6px;
   }
   .royal-rings-circle {
-    width: 36px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
   }
   .royal-rings-circle svg {
-    width: 22px;
-    height: 22px;
+    width: 18px;
+    height: 18px;
   }
   .royal-rings-title {
-    font-size: 0.86rem;
+    font-size: 0.80rem;
   }
   .royal-rings-subtitle {
-    font-size: 0.74rem;
+    font-size: 0.68rem;
   }
   .membership-grid,
   .plans-grid {
