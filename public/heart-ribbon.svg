@@ -1,36 +1,37 @@
-<svg viewBox="0 0 170 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 160 36" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="heartRibbonGoldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+    <linearGradient id="heartRibbonGrad" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" stop-color="#9B1A40" />
-      <stop offset="35%" stop-color="#B8762D" />
-      <stop offset="60%" stop-color="#D4AF37" />
+      <stop offset="30%" stop-color="#B8762D" />
+      <stop offset="50%" stop-color="#D4AF37" />
+      <stop offset="75%" stop-color="#D4AF37" />
       <stop offset="100%" stop-color="#ECCB85" />
     </linearGradient>
   </defs>
-  
-  <!-- Left Flourish Ribbon -->
+
+  <!-- Left Flowing Ribbon Strand -->
   <path 
-    d="M 4 23 C 24 24 44 21 62 23 C 70 23.8 77 24 85 24" 
-    stroke="url(#heartRibbonGoldGrad)" 
-    stroke-width="1.8" 
+    d="M 4 23 C 24 25.5 48 24 66 23.5 C 72 23.3 76 23.6 80 24" 
+    stroke="url(#heartRibbonGrad)" 
+    stroke-width="1.9" 
     stroke-linecap="round"
   />
 
-  <!-- Upright Romantic Heart -->
+  <!-- Perfectly Formed Romantic Heart Loop -->
   <path 
-    d="M 85 24 C 70 17 62 8 68 3 C 73 -1 80 0 85 6 C 90 0 97 -1 102 3 C 108 8 100 17 85 24 Z" 
+    d="M 80 24 C 67 17 61 7 71 3 C 77 0.5 80 6 80 10 C 80 6 83 0.5 89 3 C 99 7 93 17 80 24 Z" 
     stroke="#C99635" 
-    stroke-width="1.8" 
+    stroke-width="1.9" 
     stroke-linejoin="round"
     stroke-linecap="round"
-    fill="rgba(236, 203, 133, 0.08)"
+    fill="rgba(212, 175, 55, 0.06)"
   />
 
-  <!-- Right Flourish Ribbon -->
+  <!-- Right Flowing Ribbon Strand -->
   <path 
-    d="M 85 24 C 95 24 105 23.5 118 22 C 134 20 150 23 166 22" 
-    stroke="url(#heartRibbonGoldGrad)" 
-    stroke-width="1.8" 
+    d="M 80 24 C 84 23.6 88 23.3 94 23.5 C 112 24 136 25.5 156 23" 
+    stroke="url(#heartRibbonGrad)" 
+    stroke-width="1.9" 
     stroke-linecap="round"
   />
 </svg>
