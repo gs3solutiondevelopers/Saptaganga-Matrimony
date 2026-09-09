@@ -3,6 +3,15 @@
    Theme: Royal Maroon, Warm Gold, Soft Rose & Clean Modern Luxury
    ========================================================================== */
 
+/* Custom Wedding Moment Ligature Serif Font */
+@font-face {
+  font-family: 'Wedding Moment';
+  src: url('/Wedding Moment.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* Brand Colors */
   --primary-burgundy: #730F2D;
@@ -37,12 +46,13 @@
   --status-heart: #E11D48;
 
   /* Typography */
+  --font-wedding-moment: 'Wedding Moment', 'Yeseva One', 'Prata', serif;
   --font-serif: 'Playfair Display', 'Bodoni Moda', 'Marcellus', Georgia, serif;
-  --font-salita: 'Yeseva One', 'Rozha One', 'Abril Fatface', 'Prata', 'Bodoni Moda', serif;
-  --font-vebiola: 'Prata', 'Italiana', 'Bodoni Moda', 'Cormorant Garamond', Georgia, serif;
-  --font-luxury-serif: 'Prata', 'Yeseva One', 'Italiana', 'Cinzel Decorative', 'Bodoni Moda', serif;
+  --font-salita: 'Wedding Moment', 'Yeseva One', 'Rozha One', 'Abril Fatface', 'Prata', serif;
+  --font-vebiola: 'Wedding Moment', 'Prata', 'Italiana', 'Bodoni Moda', Georgia, serif;
+  --font-luxury-serif: 'Wedding Moment', 'Prata', 'Yeseva One', 'Italiana', 'Cinzel Decorative', serif;
   --font-luxury-script: 'Pinyon Script', 'Alex Brush', 'Great Vibes', cursive;
-  --font-display: 'Yeseva One', 'Rozha One', 'Prata', 'Cormorant Garamond', 'Italiana', 'Playfair Display', serif;
+  --font-display: 'Wedding Moment', 'Yeseva One', 'Rozha One', 'Prata', 'Playfair Display', serif;
   --font-sans: 'Plus Jakarta Sans', 'Outfit', system-ui, -apple-system, sans-serif;
   --font-cursive: 'Pinyon Script', 'Alex Brush', 'Great Vibes', cursive;
   --font-indic: 'Yatra One', 'Rozha One', serif;

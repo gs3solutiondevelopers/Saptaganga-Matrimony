@@ -27,10 +27,10 @@ export default function HeroBanner({ onStartJourney }) {
             <span className="hero-subtagline-accent">✦</span>
           </div>
 
-          {/* Main Headline with Salita Ligature Serif Typography */}
+          {/* Main Headline with Wedding Moment Ligature Typography */}
           <h1 className="hero-main-title">
-            <span className="hero-title-salita-top">Find Your</span>
-            <span className="hero-title-salita-main">Perfect Partner</span>
+            <span className="hero-title-wedding-top">Find Your</span>
+            <span className="hero-title-wedding-main">Perfect Partner</span>
           </h1>
 
           {/* Subtext Paragraph */}
