@@ -7,7 +7,20 @@ import {
   ArrowRight 
 } from 'lucide-react';
 
-export default function HeroBanner({ onStartJourney }) {
+export default function HeroBanner({ onStartJourney, onExploreMatches }) {
+  const handleExploreMatches = () => {
+    if (onExploreMatches) {
+      onExploreMatches();
+    } else {
+      const el = document.getElementById('search-finder') || 
+                 document.querySelector('.quick-search-section') || 
+                 document.querySelector('.featured-profiles-section');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
   return (
     <section className="saptaganga-hero-panoramic" id="home">
       
@@ -36,67 +49,63 @@ export default function HeroBanner({ onStartJourney }) {
             Join Saptaganga Matrimony and take the first step towards a happier tomorrow.
           </p>
 
-          {/* 4 Circular Metrics Badges in Horizontal Row */}
-          <div className="hero-metrics-strip">
-            
-            {/* Metric 1 */}
-            <div className="hero-metric-badge">
-              <div className="hero-metric-icon-circle">
-                <Users size={17} />
-              </div>
-              <div className="hero-metric-info">
-                <span className="hero-metric-val">2M+</span>
-                <span className="hero-metric-lbl">Trusted Members</span>
-              </div>
-            </div>
-
-            {/* Metric 2 */}
-            <div className="hero-metric-badge">
-              <div className="hero-metric-icon-circle">
-                <Heart size={17} />
-              </div>
-              <div className="hero-metric-info">
-                <span className="hero-metric-val">500K+</span>
-                <span className="hero-metric-lbl">Successful Matches</span>
-              </div>
-            </div>
-
-            {/* Metric 3 */}
-            <div className="hero-metric-badge">
-              <div className="hero-metric-icon-circle">
-                <ShieldCheck size={17} />
-              </div>
-              <div className="hero-metric-info">
-                <span className="hero-metric-val">100%</span>
-                <span className="hero-metric-lbl">Verified Profiles</span>
-              </div>
-            </div>
-
-            {/* Metric 4 */}
-            <div className="hero-metric-badge">
-              <div className="hero-metric-icon-circle">
-                <Headphones size={17} />
-              </div>
-              <div className="hero-metric-info">
-                <span className="hero-metric-val">24/7</span>
-                <span className="hero-metric-lbl">Dedicated Support</span>
-              </div>
-            </div>
-
-          </div>
-
-          {/* CTA Button and Gold Calligraphy Note */}
-          <div className="hero-cta-row">
-            <button onClick={onStartJourney} className="hero-start-journey-btn">
+          {/* Pill CTA Buttons (Top) */}
+          <div className="hero-cta-pill-row">
+            <button onClick={onStartJourney} className="hero-btn-pill-primary">
               <span>Start Your Journey</span>
               <ArrowRight size={17} />
             </button>
 
-            <div className="hero-handwritten-calligraphy">
-              <span className="handwritten-line1">Same Roots</span>
-              <span className="handwritten-line2">Brighter Tomorrows</span>
-              <span className="handwritten-heart">♡</span>
+            <button onClick={handleExploreMatches} className="hero-btn-pill-outline">
+              <span>Explore Matches</span>
+            </button>
+          </div>
+
+          {/* 4 Circular Metrics Badges with Vertical Dividers (Bottom) */}
+          <div className="hero-metrics-strip-divided">
+            
+            {/* Metric 1 */}
+            <div className="hero-metric-item">
+              <div className="hero-metric-icon-circle">
+                <Users size={18} />
+              </div>
+              <span className="hero-metric-val">2M+</span>
+              <span className="hero-metric-lbl">Trusted Members</span>
             </div>
+
+            <div className="hero-metric-divider" />
+
+            {/* Metric 2 */}
+            <div className="hero-metric-item">
+              <div className="hero-metric-icon-circle">
+                <Heart size={18} />
+              </div>
+              <span className="hero-metric-val">500K+</span>
+              <span className="hero-metric-lbl">Successful Matches</span>
+            </div>
+
+            <div className="hero-metric-divider" />
+
+            {/* Metric 3 */}
+            <div className="hero-metric-item">
+              <div className="hero-metric-icon-circle">
+                <ShieldCheck size={18} />
+              </div>
+              <span className="hero-metric-val">100%</span>
+              <span className="hero-metric-lbl">Verified Profiles</span>
+            </div>
+
+            <div className="hero-metric-divider" />
+
+            {/* Metric 4 */}
+            <div className="hero-metric-item">
+              <div className="hero-metric-icon-circle">
+                <Headphones size={18} />
+              </div>
+              <span className="hero-metric-val">24/7</span>
+              <span className="hero-metric-lbl">Dedicated Support</span>
+            </div>
+
           </div>
 
         </div>

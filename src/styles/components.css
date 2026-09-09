@@ -310,113 +310,121 @@
   letter-spacing: 0.1px;
 }
 
-.hero-metrics-strip {
+/* CTA Pill Buttons Row (Top) */
+.hero-cta-pill-row {
   display: flex;
+  align-items: center;
   gap: 16px;
-  align-items: flex-start;
-  margin-bottom: 22px;
+  margin-bottom: 32px;
   flex-wrap: wrap;
 }
 
-.hero-metric-badge {
+.hero-btn-pill-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px 30px;
+  background: linear-gradient(135deg, #780E2F 0%, #52081E 100%);
+  color: #FFFFFF;
+  border-radius: 9999px;
+  border: none;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(115, 15, 45, 0.28);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: 0.2px;
+}
+
+.hero-btn-pill-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 26px rgba(115, 15, 45, 0.38);
+  background: linear-gradient(135deg, #8B1238 0%, #600B24 100%);
+}
+
+.hero-btn-pill-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  background: rgba(255, 255, 255, 0.7);
+  color: #730F2D;
+  border-radius: 9999px;
+  border: 1.5px solid #8B1D3D;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(8px);
+}
+
+.hero-btn-pill-outline:hover {
+  background: #FFF0F3;
+  border-color: #730F2D;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(115, 15, 45, 0.12);
+}
+
+/* 4 Metrics Strip with Vertical Dividers (Bottom) */
+.hero-metrics-strip-divided {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-top: 0;
+  margin-bottom: 10px;
+  max-width: 530px;
+}
+
+.hero-metric-item {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 6px;
-  min-width: 80px;
+  padding: 0 12px;
 }
 
-.hero-metric-icon-circle {
-  width: 40px;
-  height: 40px;
+.hero-metric-divider {
+  width: 1px;
+  height: 48px;
+  background: rgba(115, 15, 45, 0.16);
+  flex-shrink: 0;
+}
+
+.hero-metric-item .hero-metric-icon-circle {
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  border: 1.5px solid #F0C4CF;
-  background: #FFF8FA;
+  background: #FDF1F4;
+  border: 1px solid #F5D3DC;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #730F2D;
-  box-shadow: 0 2px 8px rgba(115, 15, 45, 0.06);
-  transition: all 0.2s ease;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 6px rgba(115, 15, 45, 0.04);
 }
 
-.hero-metric-info {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.hero-metric-val {
+.hero-metric-item .hero-metric-val {
   font-family: var(--font-sans);
-  font-size: 1.15rem;
+  font-size: 1.28rem;
   font-weight: 800;
-  color: #580B22;
+  color: #50081E;
   line-height: 1.15;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.4px;
 }
 
-.hero-metric-lbl {
+.hero-metric-item .hero-metric-lbl {
   font-family: var(--font-sans);
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 550;
   color: #5C5256;
   line-height: 1.25;
-  margin-top: 2px;
+  margin-top: 3px;
   white-space: nowrap;
-}
-
-.hero-cta-row {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-
-.hero-start-journey-btn {
-  background: linear-gradient(135deg, #8B0D32 0%, #680825 100%);
-  color: #FFF;
-  padding: 13px 30px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 0.98rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  box-shadow: 0 8px 24px rgba(104, 8, 37, 0.35);
-  transition: var(--transition-smooth);
-}
-
-.hero-start-journey-btn:hover {
-  background: linear-gradient(135deg, #A81440 0%, #7B0E2E 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(104, 8, 37, 0.45);
-}
-
-.hero-handwritten-calligraphy {
-  font-family: var(--font-cursive);
-  display: flex;
-  flex-direction: column;
-  line-height: 0.95;
-  color: #B58428;
-  position: relative;
-}
-
-.handwritten-line1 {
-  font-size: 1.65rem;
-}
-
-.handwritten-line2 {
-  font-size: 1.45rem;
-  margin-top: 2px;
-}
-
-.handwritten-heart {
-  position: absolute;
-  right: -24px;
-  bottom: 2px;
-  font-size: 1.6rem;
-  color: #B58428;
 }
 
 .hero-right-box {

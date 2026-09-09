@@ -21,7 +21,15 @@ export default function HomePage({
   return (
     <div className="home-page">
       {/* Saptaganga Panoramic Hero Banner */}
-      <HeroBanner onStartJourney={() => onOpenAuth('register')} />
+      <HeroBanner 
+        onStartJourney={() => onOpenAuth('register')} 
+        onExploreMatches={() => {
+          const el = document.getElementById('search-finder') || 
+                     document.querySelector('.quick-search-section') || 
+                     document.querySelector('.featured-profiles-section');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }}
+      />
 
       {/* Quick Match Finder */}
       <QuickSearchCard 
