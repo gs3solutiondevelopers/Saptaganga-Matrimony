@@ -68,12 +68,12 @@ export default function Footer() {
           <div>
             <h4 className="footer-col-title">Regional Matrimony</h4>
             <ul className="footer-links-list">
-              <li><a href="#">Bengali Matrimony (বাংলা)</a></li>
-              <li><a href="#">Hindi Matrimony (हिंदी)</a></li>
-              <li><a href="#">Tamil Matrimony (தமிழ்)</a></li>
-              <li><a href="#">Gujarati Matrimony (ગુજરાતી)</a></li>
-              <li><a href="#">Marathi Matrimony (मराठी)</a></li>
-              <li><a href="#">Punjabi Matrimony (ਪੰਜਾਬੀ)</a></li>
+              <li><a href="#">Bengali Matrimony</a></li>
+              <li><a href="#">Hindi Matrimony</a></li>
+              <li><a href="#">Tamil Matrimony</a></li>
+              <li><a href="#">Gujarati Matrimony</a></li>
+              <li><a href="#">Marathi Matrimony</a></li>
+              <li><a href="#">Punjabi Matrimony</a></li>
             </ul>
           </div>
 

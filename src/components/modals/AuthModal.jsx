@@ -1,430 +1,555 @@
-import React, { useState } from 'react';
-import { X, Lock, Mail, Phone, User, Sparkles, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Phone, ShieldCheck, ArrowRight, ArrowLeft, RotateCw } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { api } from '../../services/api';
 
-export default function AuthModal({ initialMode = 'register', onClose, onSuccess }) {
-  const [mode, setMode] = useState(initialMode); // 'login' or 'register'
-  const [step, setStep] = useState(1);
+export default function AuthModal({ onClose, onSuccess, isGated = false }) {
+  // Steps: 'phone' -> 'otp'
+  const [step, setStep] = useState('phone');
+  const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [generatedOtp, setGeneratedOtp] = useState('');
+  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [timer, setTimer] = useState(30);
+  const [canResend, setCanResend] = useState(false);
 
-  // Form State
-  const [formData, setFormData] = useState({
-    profileFor: 'Self',
-    fullName: '',
-    gender: 'female',
-    dob: '1998-05-15',
-    religion: 'Hindu',
-    motherTongue: 'Bengali',
-    education: 'B.Tech / MCA / Graduate',
-    profession: 'Software Engineer',
-    annualIncome: '₹15 - 20 LPA',
-    city: 'Kolkata',
-    emailOrPhone: '',
-    email: '',
-    phone: '',
-    password: ''
-  });
+  const otpInputRefs = useRef([]);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError('');
-  };
+  // Timer countdown for OTP resend
+  useEffect(() => {
+    let interval = null;
+    if (step === 'otp' && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    } else if (timer === 0) {
+      setCanResend(true);
+    }
+    return () => clearInterval(interval);
+  }, [step, timer]);
 
-  const handleLoginSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.emailOrPhone || !formData.password) {
-      setError('Please enter your email/phone and password.');
+  // Handle phone submission -> Request OTP
+  const handleSendOtp = async (e) => {
+    if (e) e.preventDefault();
+    const cleanPhone = phone.replace(/\D/g, '').slice(-10);
+    if (!cleanPhone || cleanPhone.length !== 10) {
+      setError('Please enter a valid 10-digit mobile number.');
       return;
     }
+
     setLoading(true);
+    setError('');
+
     try {
-      const res = await api.loginUser({
-        emailOrPhone: formData.emailOrPhone,
-        password: formData.password
-      });
+      const res = await api.sendPhoneOtp(cleanPhone);
       if (res.success) {
-        onSuccess(res.user);
-        onClose();
+        setGeneratedOtp(res.otp);
+        setStep('otp');
+        setTimer(30);
+        setCanResend(false);
+        setOtp(['', '', '', '', '', '']);
+      } else {
+        setError(res.error || 'Failed to send OTP. Please try again.');
       }
-    } catch (err) {
-      setError('Login failed. Please try again.');
+    } catch {
+      setError('Error sending OTP. Please check your network.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRegisterSubmit = async (e) => {
-    e.preventDefault();
-    if (step < 3) {
-      setStep(step + 1);
-      return;
+  // Handle Resend OTP
+  const handleResendOtp = async () => {
+    if (!canResend) return;
+    setLoading(true);
+    setError('');
+    try {
+      const res = await api.sendPhoneOtp(phone);
+      if (res.success) {
+        setGeneratedOtp(res.otp);
+        setTimer(30);
+        setCanResend(false);
+      } else {
+        setError(res.error || 'Failed to resend OTP.');
+      }
+    } catch {
+      setError('Error resending OTP.');
+    } finally {
+      setLoading(false);
     }
+  };
 
-    if (!formData.email || !formData.password || !formData.fullName) {
-      setError('Please fill in all required fields.');
+  // Handle OTP input change
+  const handleOtpChange = (index, value) => {
+    const val = value.replace(/\D/g, '').slice(-1);
+    const newOtp = [...otp];
+    newOtp[index] = val;
+    setOtp(newOtp);
+    setError('');
+
+    // Auto-focus next input box
+    if (val && index < 5 && otpInputRefs.current[index + 1]) {
+      otpInputRefs.current[index + 1].focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      otpInputRefs.current[index - 1].focus();
+    }
+  };
+
+  // Handle OTP Verification
+  const handleVerifyOtp = async (e) => {
+    if (e) e.preventDefault();
+    const enteredOtp = otp.join('');
+    if (enteredOtp.length !== 6 && enteredOtp !== '123456') {
+      setError('Please enter the full 6-digit OTP code.');
       return;
     }
 
     setLoading(true);
+    setError('');
+
     try {
-      const res = await api.registerUser(formData);
+      const res = await api.verifyPhoneOtp(phone, enteredOtp, {
+        name: name || undefined
+      });
+
       if (res.success) {
         confetti({
-          particleCount: 80,
+          particleCount: 90,
           spread: 70,
           origin: { y: 0.6 }
         });
-        onSuccess(res.user);
-        onClose();
+        if (onSuccess) onSuccess(res.user);
+        if (onClose) onClose();
+      } else {
+        setError(res.error || 'Invalid OTP code.');
       }
-    } catch (err) {
-      setError('Registration failed. Please try again.');
+    } catch {
+      setError('Verification failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  // Fill Demo OTP
+  const handleQuickFillDemoOtp = () => {
+    const targetOtp = (generatedOtp || '123456').padEnd(6, '0').slice(0, 6);
+    setOtp(targetOtp.split(''));
+  };
+
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={isGated ? undefined : onClose}>
       <div 
-        className="modal-content" 
-        style={{ maxWidth: '520px' }} 
+        className="modal-content auth-otp-modal-box" 
+        style={{ maxWidth: '440px', padding: '0', overflow: 'hidden', borderRadius: '24px' }} 
         onClick={(e) => e.stopPropagation()}
       >
-        
-        {/* Modal Header */}
-        <div className="modal-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ width: '28px', height: '28px', background: 'var(--romantic-rose)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary-burgundy)' }}>
-              💍
+        {/* Top Header with Saptaganga Logo & Name */}
+        <div style={{
+          background: '#FFF0F3',
+          borderBottom: '1px solid rgba(120, 14, 47, 0.12)',
+          padding: '24px 24px 20px 24px',
+          color: '#780E2F',
+          position: 'relative',
+          textAlign: 'center'
+        }}>
+          {!isGated && (
+            <button 
+              className="modal-close-btn" 
+              onClick={onClose} 
+              aria-label="Close modal"
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                color: '#780E2F',
+                background: 'rgba(120, 14, 47, 0.08)',
+                border: 'none',
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer'
+              }}
+            >
+              <X size={16} />
+            </button>
+          )}
+
+          {/* Saptaganga Official Brand Logo Emblem */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '12px',
+            marginBottom: '10px'
+          }}>
+            <img 
+              src="/logo-emblem.png" 
+              alt="Saptaganga Matrimony" 
+              style={{
+                height: '48px',
+                width: 'auto',
+                filter: 'drop-shadow(0 2px 4px rgba(120, 14, 47, 0.12))'
+              }}
+            />
+            <div style={{ textAlign: 'left' }}>
+              <div style={{
+                fontFamily: 'var(--font-serif)',
+                fontSize: '1.25rem',
+                fontWeight: 800,
+                color: '#780E2F',
+                letterSpacing: '1px',
+                lineHeight: 1.1
+              }}>
+                SAPTAGANGA
+              </div>
+              <div style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: '0.65rem',
+                fontWeight: 700,
+                color: '#9B1B3C',
+                letterSpacing: '2.5px',
+                textTransform: 'uppercase'
+              }}>
+                MATRIMONY
+              </div>
             </div>
-            <span style={{ fontFamily: 'var(--font-serif)', fontSize: '1.2rem', fontWeight: 700, color: 'var(--primary-burgundy-dark)' }}>
-              {mode === 'login' ? 'Member Login' : 'Create Free Matrimony Profile'}
-            </span>
           </div>
 
-          <button className="modal-close-btn" onClick={onClose} aria-label="Close modal">
-            <X size={18} />
-          </button>
-        </div>
-
-        {/* Tab Toggle between Login and Register */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
-          <button
-            onClick={() => { setMode('login'); setError(''); }}
-            style={{
-              padding: '12px',
-              fontSize: '0.9rem',
-              fontWeight: 700,
-              color: mode === 'login' ? 'var(--primary-burgundy)' : 'var(--text-muted)',
-              borderBottom: mode === 'login' ? '2.5px solid var(--primary-burgundy)' : '2.5px solid transparent',
-              background: mode === 'login' ? '#FFF' : 'transparent'
-            }}
-          >
-            Login
-          </button>
-
-          <button
-            onClick={() => { setMode('register'); setError(''); }}
-            style={{
-              padding: '12px',
-              fontSize: '0.9rem',
-              fontWeight: 700,
-              color: mode === 'register' ? 'var(--primary-burgundy)' : 'var(--text-muted)',
-              borderBottom: mode === 'register' ? '2.5px solid var(--primary-burgundy)' : '2.5px solid transparent',
-              background: mode === 'register' ? '#FFF' : 'transparent'
-            }}
-          >
-            Register Free
-          </button>
+          <p style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: '0.84rem',
+            color: '#6B5A60',
+            margin: '0',
+            lineHeight: 1.4
+          }}>
+            {step === 'phone' 
+              ? 'Enter your mobile number to access the website' 
+              : `Enter the 6-digit code sent to +91 ${phone}`}
+          </p>
         </div>
 
         {/* Modal Body */}
-        <div className="modal-body">
+        <div style={{ padding: '24px 28px' }}>
+          
           {error && (
-            <div style={{ background: '#FEE2E2', color: '#991B1B', padding: '10px 14px', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', marginBottom: '16px' }}>
-              {error}
+            <div style={{
+              background: '#FEE2E2',
+              color: '#991B1B',
+              padding: '10px 14px',
+              borderRadius: '10px',
+              fontSize: '0.84rem',
+              marginBottom: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              border: '1px solid #FCA5A5'
+            }}>
+              <span>⚠️</span>
+              <span>{error}</span>
             </div>
           )}
 
-          {/* ---------------- LOGIN FORM ---------------- */}
-          {mode === 'login' ? (
-            <form onSubmit={handleLoginSubmit}>
-              <div style={{ marginBottom: '16px' }}>
-                <label className="search-field-label">Email Address or Mobile Number</label>
-                <div style={{ position: 'relative', marginTop: '6px' }}>
+          {/* STEP 1: PHONE NUMBER INPUT */}
+          {step === 'phone' && (
+            <form onSubmit={handleSendOtp}>
+              <div style={{ marginBottom: '18px' }}>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.84rem',
+                  fontWeight: 700,
+                  color: 'var(--text-main)',
+                  marginBottom: '8px',
+                  fontFamily: 'var(--font-sans)'
+                }}>
+                  Mobile Number
+                </label>
+
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  background: '#FDF7F8',
+                  border: '1.5px solid var(--romantic-rose-border)',
+                  borderRadius: '12px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    padding: '12px 14px',
+                    background: '#F5E6EA',
+                    fontWeight: 700,
+                    fontSize: '0.92rem',
+                    color: 'var(--primary-burgundy-dark)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    borderRight: '1px solid var(--romantic-rose-border)'
+                  }}>
+                    <span>IN +91</span>
+                  </div>
+
                   <input 
-                    type="text" 
-                    name="emailOrPhone"
-                    className="search-input"
-                    placeholder="e.g. user@gmail.com or 9876543210"
-                    value={formData.emailOrPhone}
-                    onChange={handleChange}
-                    required
+                    type="tel" 
+                    placeholder="Enter 10-digit number"
+                    value={phone}
+                    maxLength={10}
+                    onChange={(e) => {
+                      setPhone(e.target.value.replace(/\D/g, ''));
+                      setError('');
+                    }}
+                    autoFocus
+                    style={{
+                      flex: 1,
+                      border: 'none',
+                      background: 'transparent',
+                      padding: '12px 16px',
+                      fontSize: '1.05rem',
+                      fontWeight: 600,
+                      color: 'var(--text-main)',
+                      outline: 'none',
+                      letterSpacing: '1px'
+                    }}
                   />
                 </div>
               </div>
 
-              <div style={{ marginBottom: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <label className="search-field-label">Password</label>
-                  <a href="#" style={{ fontSize: '0.78rem', color: 'var(--primary-burgundy)' }}>Forgot Password?</a>
-                </div>
-                <div style={{ position: 'relative', marginTop: '6px' }}>
-                  <input 
-                    type="password" 
-                    name="password"
-                    className="search-input"
-                    placeholder="Enter your password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
+              {/* Optional Name field */}
+              <div style={{ marginBottom: '22px' }}>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  color: '#6B7280',
+                  marginBottom: '6px'
+                }}>
+                  Your Name (Optional)
+                </label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Subhajit Mukherjee"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 14px',
+                    borderRadius: '10px',
+                    border: '1px solid #E5E7EB',
+                    fontSize: '0.9rem',
+                    outline: 'none',
+                    background: '#FAFAFA'
+                  }}
+                />
               </div>
 
-              <button 
-                type="submit" 
-                className="btn-burgundy" 
-                style={{ width: '100%', height: '48px', borderRadius: 'var(--radius-md)' }}
-                disabled={loading}
+              <button
+                type="submit"
+                disabled={loading || phone.length < 10}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  background: phone.length === 10 
+                    ? 'linear-gradient(135deg, #780E2F 0%, #52081E 100%)' 
+                    : '#D1D5DB',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '12px',
+                  fontSize: '0.98rem',
+                  fontWeight: 700,
+                  cursor: phone.length === 10 ? 'pointer' : 'not-allowed',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: phone.length === 10 ? '0 4px 14px rgba(115, 15, 45, 0.28)' : 'none',
+                  transition: 'all 0.2s ease'
+                }}
               >
-                {loading ? 'Logging in...' : 'Sign In to Saptaganga'}
+                {loading ? (
+                  <span>Sending OTP...</span>
+                ) : (
+                  <>
+                    <span>Get OTP Code</span>
+                    <ArrowRight size={17} />
+                  </>
+                )}
               </button>
 
-              <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                New to Saptaganga Matrimony?{' '}
-                <button 
-                  type="button" 
-                  onClick={() => setMode('register')}
-                  style={{ color: 'var(--primary-burgundy)', fontWeight: 700 }}
-                >
-                  Register Free
-                </button>
+              <div style={{
+                marginTop: '16px',
+                textAlign: 'center',
+                fontSize: '0.78rem',
+                color: '#6B7280'
+              }}>
+                🔒 Your mobile number is 100% secure with Saptaganga Matrimony.
               </div>
             </form>
-          ) : (
-            /* ---------------- MULTI-STEP REGISTRATION FORM ---------------- */
-            <form onSubmit={handleRegisterSubmit}>
+          )}
+
+          {/* STEP 2: OTP VERIFICATION */}
+          {step === 'otp' && (
+            <form onSubmit={handleVerifyOtp}>
               
-              {/* Step Progress Bar */}
-              <div style={{ marginBottom: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: 600, color: 'var(--primary-burgundy)', marginBottom: '6px' }}>
-                  <span>Step {step} of 3</span>
-                  <span>{step === 1 ? 'Personal Info' : step === 2 ? 'Education & Career' : 'Account Setup'}</span>
+              {/* Demo / Live OTP helper banner for seamless testing */}
+              <div style={{
+                background: '#FEF3C7',
+                border: '1px solid #FDE68A',
+                borderRadius: '10px',
+                padding: '10px 14px',
+                marginBottom: '18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <div style={{ fontSize: '0.82rem', color: '#92400E' }}>
+                  💡 Test Code: <strong>{generatedOtp || '123456'}</strong>
                 </div>
-                <div style={{ width: '100%', height: '6px', background: '#E5E7EB', borderRadius: '3px', overflow: 'hidden' }}>
-                  <div 
-                    style={{ 
-                      width: `${(step / 3) * 100}%`, 
-                      height: '100%', 
-                      background: 'linear-gradient(90deg, var(--primary-burgundy) 0%, var(--accent-gold) 100%)',
-                      transition: 'width 0.3s ease'
-                    }} 
-                  />
-                </div>
-              </div>
-
-              {/* Step 1: Basic Info */}
-              {step === 1 && (
-                <div>
-                  <div style={{ marginBottom: '14px' }}>
-                    <label className="search-field-label">Creating Profile For</label>
-                    <select 
-                      name="profileFor" 
-                      value={formData.profileFor} 
-                      onChange={handleChange} 
-                      className="search-select"
-                    >
-                      <option value="Self">Self (নিজে)</option>
-                      <option value="Son">Son (ছেলে)</option>
-                      <option value="Daughter">Daughter (মেয়ে)</option>
-                      <option value="Brother">Brother (ভাই)</option>
-                      <option value="Sister">Sister (বোন)</option>
-                    </select>
-                  </div>
-
-                  <div style={{ marginBottom: '14px' }}>
-                    <label className="search-field-label">Full Name</label>
-                    <input 
-                      type="text" 
-                      name="fullName"
-                      placeholder="Candidate's Full Name"
-                      value={formData.fullName}
-                      onChange={handleChange}
-                      className="search-input"
-                      required
-                    />
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
-                    <div>
-                      <label className="search-field-label">Gender</label>
-                      <select name="gender" value={formData.gender} onChange={handleChange} className="search-select">
-                        <option value="female">Bride (Female)</option>
-                        <option value="male">Groom (Male)</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="search-field-label">Mother Tongue</label>
-                      <select name="motherTongue" value={formData.motherTongue} onChange={handleChange} className="search-select">
-                        <option value="Bengali">Bengali (বাংলা)</option>
-                        <option value="Hindi">Hindi (हिंदी)</option>
-                        <option value="Tamil">Tamil (தமிழ்)</option>
-                        <option value="Gujarati">Gujarati</option>
-                        <option value="Marathi">Marathi</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div style={{ marginBottom: '14px' }}>
-                    <label className="search-field-label">Religion</label>
-                    <select name="religion" value={formData.religion} onChange={handleChange} className="search-select">
-                      <option value="Hindu">Hindu (হিন্দু)</option>
-                      <option value="Jain">Jain (জৈন)</option>
-                      <option value="Sikh">Sikh (শিখ)</option>
-                      <option value="Buddhist">Buddhist</option>
-                    </select>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 2: Education & Career */}
-              {step === 2 && (
-                <div>
-                  <div style={{ marginBottom: '14px' }}>
-                    <label className="search-field-label">Highest Qualification</label>
-                    <input 
-                      type="text" 
-                      name="education"
-                      placeholder="e.g. B.Tech / MBA / MBBS / CA"
-                      value={formData.education}
-                      onChange={handleChange}
-                      className="search-input"
-                      required
-                    />
-                  </div>
-
-                  <div style={{ marginBottom: '14px' }}>
-                    <label className="search-field-label">Profession / Job Title</label>
-                    <input 
-                      type="text" 
-                      name="profession"
-                      placeholder="e.g. Software Engineer / Doctor / Business"
-                      value={formData.profession}
-                      onChange={handleChange}
-                      className="search-input"
-                      required
-                    />
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
-                    <div>
-                      <label className="search-field-label">Annual Income</label>
-                      <select name="annualIncome" value={formData.annualIncome} onChange={handleChange} className="search-select">
-                        <option value="₹5 - 10 LPA">₹5 - 10 LPA</option>
-                        <option value="₹10 - 15 LPA">₹10 - 15 LPA</option>
-                        <option value="₹15 - 25 LPA">₹15 - 25 LPA</option>
-                        <option value="₹25 - 50 LPA">₹25 - 50 LPA</option>
-                        <option value="₹50+ LPA">₹50+ LPA</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="search-field-label">Current City</label>
-                      <input 
-                        type="text" 
-                        name="city"
-                        placeholder="e.g. Kolkata / Delhi"
-                        value={formData.city}
-                        onChange={handleChange}
-                        className="search-input"
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 3: Account & Password */}
-              {step === 3 && (
-                <div>
-                  <div style={{ marginBottom: '14px' }}>
-                    <label className="search-field-label">Email Address</label>
-                    <input 
-                      type="email" 
-                      name="email"
-                      placeholder="name@example.com"
-                      value={formData.email}
-                      onChange={handleChange}
-                      className="search-input"
-                      required
-                    />
-                  </div>
-
-                  <div style={{ marginBottom: '14px' }}>
-                    <label className="search-field-label">Mobile Number (For OTP Verification)</label>
-                    <input 
-                      type="tel" 
-                      name="phone"
-                      placeholder="10-digit mobile number"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className="search-input"
-                      required
-                    />
-                  </div>
-
-                  <div style={{ marginBottom: '18px' }}>
-                    <label className="search-field-label">Create Secure Password</label>
-                    <input 
-                      type="password" 
-                      name="password"
-                      placeholder="Minimum 6 characters"
-                      value={formData.password}
-                      onChange={handleChange}
-                      className="search-input"
-                      required
-                    />
-                  </div>
-
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
-                    By clicking Complete Registration, you agree to Saptaganga Matrimony's Terms of Use & Privacy Policy.
-                  </div>
-                </div>
-              )}
-
-              {/* Navigation Buttons */}
-              <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                {step > 1 && (
-                  <button 
-                    type="button" 
-                    onClick={() => setStep(step - 1)}
-                    className="btn-outline-burgundy"
-                    style={{ flex: 1, justifyContent: 'center' }}
-                  >
-                    <ArrowLeft size={16} />
-                    <span>Back</span>
-                  </button>
-                )}
-
-                <button 
-                  type="submit" 
-                  className="btn-burgundy"
-                  style={{ flex: 2, height: '48px', borderRadius: 'var(--radius-md)' }}
-                  disabled={loading}
+                <button
+                  type="button"
+                  onClick={handleQuickFillDemoOtp}
+                  style={{
+                    background: '#F59E0B',
+                    color: '#FFF',
+                    border: 'none',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
                 >
-                  {loading ? 'Submitting...' : step < 3 ? 'Continue to Next Step' : 'Complete Registration 🎉'}
-                  {step < 3 && <ArrowRight size={16} />}
+                  Auto-Fill
                 </button>
               </div>
 
+              {/* 6-box OTP inputs */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                gap: '8px',
+                marginBottom: '20px'
+              }}>
+                {otp.map((digit, idx) => (
+                  <input
+                    key={idx}
+                    ref={(el) => (otpInputRefs.current[idx] = el)}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleOtpChange(idx, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                    style={{
+                      width: '46px',
+                      height: '52px',
+                      textAlign: 'center',
+                      fontSize: '1.3rem',
+                      fontWeight: 800,
+                      color: 'var(--primary-burgundy-dark)',
+                      background: '#FDF7F8',
+                      border: digit ? '2px solid var(--primary-burgundy)' : '1.5px solid var(--romantic-rose-border)',
+                      borderRadius: '10px',
+                      outline: 'none',
+                      transition: 'all 0.2s ease'
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* Resend & Edit Phone Row */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                fontSize: '0.82rem',
+                marginBottom: '22px'
+              }}>
+                <button
+                  type="button"
+                  onClick={() => setStep('phone')}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--primary-burgundy)',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <ArrowLeft size={14} />
+                  <span>Change Number</span>
+                </button>
+
+                {canResend ? (
+                  <button
+                    type="button"
+                    onClick={handleResendOtp}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--accent-gold-dark)',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <RotateCw size={13} />
+                    <span>Resend OTP</span>
+                  </button>
+                ) : (
+                  <span style={{ color: '#9CA3AF' }}>
+                    Resend in <strong>{timer}s</strong>
+                  </span>
+                )}
+              </div>
+
+              {/* Verify Button */}
+              <button
+                type="submit"
+                disabled={loading || otp.join('').length < 6}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  background: otp.join('').length === 6 
+                    ? 'linear-gradient(135deg, #780E2F 0%, #52081E 100%)' 
+                    : '#D1D5DB',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '12px',
+                  fontSize: '0.98rem',
+                  fontWeight: 700,
+                  cursor: otp.join('').length === 6 ? 'pointer' : 'not-allowed',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: otp.join('').length === 6 ? '0 4px 14px rgba(115, 15, 45, 0.28)' : 'none',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                {loading ? (
+                  <span>Verifying OTP...</span>
+                ) : (
+                  <>
+                    <ShieldCheck size={18} />
+                    <span>Verify & Access Website</span>
+                  </>
+                )}
+              </button>
             </form>
           )}
 
         </div>
-
       </div>
     </div>
   );

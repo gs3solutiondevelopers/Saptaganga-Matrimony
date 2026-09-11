@@ -1,19 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, RefreshCw, CheckCircle2, Heart, Send, Sparkles } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { Search, Filter, RefreshCw, CheckCircle2, Heart, Send, Sparkles, Lock, UserPlus, ArrowRight } from 'lucide-react';
 import { api } from '../services/api';
 
 export default function SearchPage({
   onSelectProfile,
   onSendInterest,
   onToggleShortlist,
-  shortlistedIds
+  shortlistedIds,
+  currentUser,
+  onOpenCreateProfile
 }) {
+  const location = useLocation();
+  const initialFilters = location.state?.searchFilters || {};
+
   const [filters, setFilters] = useState({
-    gender: 'any',
-    minAge: 20,
-    maxAge: 40,
-    religion: 'any',
-    motherTongue: 'any',
+    gender: initialFilters.gender || 'any',
+    minAge: initialFilters.minAge || 20,
+    maxAge: initialFilters.maxAge || 40,
+    religion: initialFilters.religion || 'any',
+    motherTongue: initialFilters.motherTongue || 'any',
     education: 'any',
     income: 'any'
   });
@@ -23,6 +29,12 @@ export default function SearchPage({
   const [sortBy, setSortBy] = useState('relevance');
 
   const executeSearch = async () => {
+    if (!currentUser?.profileCompleted) {
+      if (onOpenCreateProfile) {
+        onOpenCreateProfile();
+      }
+      return;
+    }
     setLoading(true);
     try {
       const res = await api.getProfiles(filters);
@@ -43,8 +55,10 @@ export default function SearchPage({
   };
 
   useEffect(() => {
-    executeSearch();
-  }, [filters, sortBy]);
+    if (currentUser?.profileCompleted) {
+      executeSearch();
+    }
+  }, [filters, sortBy, currentUser?.profileCompleted]);
 
   const handleReset = () => {
     setFilters({
@@ -140,10 +154,12 @@ export default function SearchPage({
                 onChange={(e) => setFilters({ ...filters, religion: e.target.value })}
               >
                 <option value="any">All Religions</option>
-                <option value="Hindu">Hindu (হিন্দু)</option>
-                <option value="Jain">Jain (জৈন)</option>
-                <option value="Sikh">Sikh (শিখ)</option>
+                <option value="Hindu">Hindu</option>
+                <option value="Jain">Jain</option>
+                <option value="Sikh">Sikh</option>
                 <option value="Buddhist">Buddhist</option>
+                <option value="Christian">Christian</option>
+                <option value="Muslim">Muslim</option>
               </select>
             </div>
 
@@ -157,9 +173,10 @@ export default function SearchPage({
                 onChange={(e) => setFilters({ ...filters, motherTongue: e.target.value })}
               >
                 <option value="any">All Languages</option>
-                <option value="Bengali">Bengali (বাংলা)</option>
-                <option value="Hindi">Hindi (हिंदी)</option>
-                <option value="Tamil">Tamil (தமிழ்)</option>
+                <option value="Bengali">Bengali</option>
+                <option value="Hindi">Hindi</option>
+                <option value="English">English</option>
+                <option value="Tamil">Tamil</option>
                 <option value="Gujarati">Gujarati</option>
                 <option value="Marathi">Marathi</option>
                 <option value="Malayalam">Malayalam</option>
@@ -167,7 +184,6 @@ export default function SearchPage({
             </div>
 
             <button onClick={executeSearch} className="btn-burgundy" style={{ width: '100%', marginTop: '10px' }}>
-              <Search size={16} />
               <span>Apply Filters</span>
             </button>
 
@@ -205,8 +221,48 @@ export default function SearchPage({
               </div>
             </div>
 
-            {/* Profiles Grid */}
-            {loading ? (
+            {/* Profiles Grid or Locked Gate */}
+            {!currentUser?.profileCompleted ? (
+              <div style={{
+                background: '#FFF',
+                border: '1.5px solid var(--romantic-rose-border)',
+                borderRadius: 'var(--radius-xl)',
+                padding: '60px 30px',
+                textAlign: 'center',
+                boxShadow: 'var(--shadow-sm)'
+              }}>
+                <div style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  background: '#FFF0F3',
+                  border: '2px solid var(--romantic-rose-border)',
+                  color: 'var(--primary-burgundy)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 18px auto'
+                }}>
+                  <Lock size={28} />
+                </div>
+                
+                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.45rem', color: 'var(--primary-burgundy-dark)', marginBottom: '10px' }}>
+                  Profile Creation Required to View Matches
+                </h3>
+                
+                <p style={{ maxWidth: '480px', margin: '0 auto 24px auto', fontSize: '0.90rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
+                  Please complete your 5-step profile first. Once your profile details are saved, verified bride & groom profiles will automatically unlock.
+                </p>
+
+                <button 
+                  onClick={onOpenCreateProfile} 
+                  className="btn-burgundy"
+                  style={{ padding: '13px 32px', fontSize: '0.95rem' }}
+                >
+                  <span>Create Your Profile Now</span>
+                </button>
+              </div>
+            ) : loading ? (
               <div style={{ textAlign: 'center', padding: '60px 0' }}>Loading matches...</div>
             ) : profiles.length === 0 ? (
               <div style={{ textAlign: 'center', background: '#FFF', padding: '60px 20px', borderRadius: 'var(--radius-lg)' }}>
@@ -223,34 +279,29 @@ export default function SearchPage({
                     <div className="profile-card" key={profile.id}>
                       <div className="profile-img-container">
                         <img src={profile.image} alt={profile.name} className="profile-img" />
-                        {profile.online && (
-                          <div className="profile-badge-top-left">
-                            <span className="badge-online">Online</span>
-                          </div>
-                        )}
-                        <button 
-                          className={`profile-shortlist-btn ${isFavorited ? 'favorited' : ''}`}
-                          onClick={() => onToggleShortlist(profile)}
-                        >
-                          <Heart size={18} fill={isFavorited ? "#E11D48" : "none"} color={isFavorited ? "#E11D48" : "currentColor"} />
-                        </button>
                       </div>
 
-                      <div className="profile-info">
-                        <div className="profile-name-row">
-                          <h3 className="profile-name">{profile.name}</h3>
-                          {profile.verified && <CheckCircle2 size={16} fill="#10B981" color="#FFF" />}
-                        </div>
-                        <div className="profile-meta">{profile.age} yrs • {profile.city} • {profile.motherTongue}</div>
-                        <div className="profile-profession">{profile.profession}</div>
-
-                        <div className="profile-actions">
-                          <button onClick={() => onSelectProfile(profile)} className="profile-btn-view">View Profile</button>
-                          <button onClick={() => onSendInterest(profile)} className="profile-btn-connect">
-                            <Send size={13} />
-                            <span>Connect</span>
-                          </button>
-                        </div>
+                      {/* Profile Action */}
+                      <div className="profile-info" style={{ padding: '14px 16px 16px 16px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <button 
+                          onClick={() => onSelectProfile(profile)} 
+                          className="profile-btn-view"
+                          style={{ 
+                            width: '100%', 
+                            maxWidth: '180px',
+                            padding: '9px 16px',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            margin: '0 auto',
+                            fontSize: '0.86rem',
+                            fontWeight: 600,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          View Profile
+                        </button>
                       </div>
                     </div>
                   );

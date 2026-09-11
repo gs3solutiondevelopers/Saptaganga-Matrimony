@@ -60,7 +60,6 @@ export default function HeroBanner({ onStartJourney, onExploreMatches }) {
           <div className="hero-cta-pill-row">
             <button onClick={onStartJourney} className="hero-btn-pill-primary">
               <span>Start Your Journey</span>
-              <ArrowRight size={17} />
             </button>
 
             <button onClick={handleExploreMatches} className="hero-btn-pill-outline">
@@ -128,10 +127,6 @@ export default function HeroBanner({ onStartJourney, onExploreMatches }) {
 
             {/* Floating Luxury Royal Ornate Rings Badge */}
             <div className="hero-royal-rings-badge">
-              <div className="badge-corner-flourish top-left">✦</div>
-              <div className="badge-corner-flourish top-right">✦</div>
-              <div className="badge-corner-flourish bottom-left">✦</div>
-              <div className="badge-corner-flourish bottom-right">✦</div>
 
               <div className="royal-rings-circle">
                 <svg viewBox="0 0 48 48" width="30" height="30" fill="none" stroke="#ECCB85" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">

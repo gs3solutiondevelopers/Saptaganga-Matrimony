@@ -5,7 +5,12 @@ import Footer from '../common/Footer';
 export default function MainLayout({ 
   children, 
   onOpenAuth, 
-  toastMessage 
+  onOpenCreateProfile,
+  toastMessage,
+  currentUser,
+  onLogout,
+  onViewNotificationProfile,
+  notifications = []
 }) {
   return (
     <div className="app-layout">
@@ -21,7 +26,7 @@ export default function MainLayout({
           borderRadius: 'var(--radius-md)',
           boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
           borderLeft: '4px solid var(--accent-gold)',
-          zIndex: 3000,
+          zIndex: 15000,
           fontSize: '0.92rem',
           display: 'flex',
           alignItems: 'center',
@@ -33,7 +38,14 @@ export default function MainLayout({
       )}
 
       {/* Common Navbar Header across all pages */}
-      <Navbar onOpenAuth={onOpenAuth} />
+      <Navbar 
+        onOpenAuth={onOpenAuth} 
+        onOpenCreateProfile={onOpenCreateProfile}
+        currentUser={currentUser} 
+        onLogout={onLogout} 
+        onViewNotificationProfile={onViewNotificationProfile}
+        notifications={notifications}
+      />
 
       {/* Dynamic Page Content */}
       <main className="main-page-content">

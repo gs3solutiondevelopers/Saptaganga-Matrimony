@@ -19,6 +19,16 @@ export const api = {
     return await firestoreService.sendInterest(null, profileId, note);
   },
 
+  // Send Phone OTP
+  async sendPhoneOtp(phone) {
+    return await authService.sendPhoneOtp(phone);
+  },
+
+  // Verify Phone OTP
+  async verifyPhoneOtp(phone, otp, profileDetails = {}) {
+    return await authService.verifyPhoneOtp(phone, otp, profileDetails);
+  },
+
   // User Registration via Firebase Auth & Firestore
   async registerUser(userData) {
     const email = userData.email || `member${Date.now()}@saptaganga.com`;

@@ -16,9 +16,35 @@ import { adminService } from '../../services/adminService';
 
 export default function AdminLayout({ children }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
   const adminSession = adminService.getSession();
+
+  React.useEffect(() => {
+    const updateCount = () => {
+      adminService.getProfiles().then(res => {
+        if (res.success) {
+          const count = res.data.filter(p => !p.approved || p.status === 'pending_approval' || !p.verified).length;
+          setPendingCount(count);
+        }
+      });
+    };
+    updateCount();
+    window.addEventListener('storage', updateCount);
+    window.addEventListener('focus', updateCount);
+    window.addEventListener('saptaganga_profile_created', updateCount);
+    window.addEventListener('saptaganga_profile_approved', updateCount);
+    const interval = setInterval(updateCount, 2500);
+
+    return () => {
+      window.removeEventListener('storage', updateCount);
+      window.removeEventListener('focus', updateCount);
+      window.removeEventListener('saptaganga_profile_created', updateCount);
+      window.removeEventListener('saptaganga_profile_approved', updateCount);
+      clearInterval(interval);
+    };
+  }, []);
 
   const handleLogout = () => {
     adminService.logout();
@@ -67,9 +93,25 @@ export default function AdminLayout({ children }) {
               to="/admin/profiles" 
               className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
               onClick={() => setMobileMenuOpen(false)}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
             >
-              <Users size={18} />
-              <span>Profiles & Approvals</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <Users size={18} />
+                <span>Profiles & Approvals</span>
+              </div>
+              {pendingCount > 0 && (
+                <span style={{
+                  background: '#F43F5E',
+                  color: '#FFFFFF',
+                  fontSize: '0.68rem',
+                  fontWeight: 800,
+                  padding: '2px 7px',
+                  borderRadius: '10px',
+                  boxShadow: '0 2px 6px rgba(244, 63, 94, 0.4)'
+                }}>
+                  {pendingCount}
+                </span>
+              )}
             </NavLink>
           </li>
 

@@ -51,7 +51,6 @@ export default function MembershipPlans({ onSelectPlan }) {
                 style={{ width: '100%' }}
               >
                 <span>{plan.cta}</span>
-                <ArrowRight size={16} />
               </button>
             </div>
           ))}

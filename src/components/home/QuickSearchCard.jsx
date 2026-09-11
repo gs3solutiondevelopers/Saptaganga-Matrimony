@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { HeartHandshake, Search, ArrowRight, Filter } from 'lucide-react';
 
-export default function QuickSearchCard({ onSearch, onRegisterClick }) {
+export default function QuickSearchCard({ onSearch, onRegisterClick, onOpenCreateProfile, currentUser }) {
   const [lookingFor, setLookingFor] = useState('female');
   const [ageRange, setAgeRange] = useState('22-32');
   const [religion, setReligion] = useState('any');
@@ -9,6 +9,15 @@ export default function QuickSearchCard({ onSearch, onRegisterClick }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!currentUser?.profileCompleted) {
+      if (onOpenCreateProfile) {
+        onOpenCreateProfile();
+      } else if (onRegisterClick) {
+        onRegisterClick();
+      }
+      return;
+    }
+
     const [minAge, maxAge] = ageRange.split('-').map(Number);
     onSearch({
       gender: lookingFor,
@@ -38,14 +47,14 @@ export default function QuickSearchCard({ onSearch, onRegisterClick }) {
                 className={`search-tab-btn ${lookingFor === 'female' ? 'active' : ''}`}
                 onClick={() => setLookingFor('female')}
               >
-                Bride (পাত্রী)
+                Bride
               </button>
               <button 
                 type="button"
                 className={`search-tab-btn ${lookingFor === 'male' ? 'active' : ''}`}
                 onClick={() => setLookingFor('male')}
               >
-                Groom (পাত্র)
+                Groom
               </button>
             </div>
           </div>
@@ -90,10 +99,10 @@ export default function QuickSearchCard({ onSearch, onRegisterClick }) {
                 onChange={(e) => setReligion(e.target.value)}
               >
                 <option value="any">Any Religion</option>
-                <option value="Hindu">Hindu (হিন্দু)</option>
-                <option value="Jain">Jain (জৈন)</option>
-                <option value="Sikh">Sikh (শিখ)</option>
-                <option value="Buddhist">Buddhist (বৌদ্ধ)</option>
+                <option value="Hindu">Hindu</option>
+                <option value="Jain">Jain</option>
+                <option value="Sikh">Sikh</option>
+                <option value="Buddhist">Buddhist</option>
                 <option value="Christian">Christian</option>
                 <option value="Muslim">Muslim</option>
               </select>
@@ -108,14 +117,15 @@ export default function QuickSearchCard({ onSearch, onRegisterClick }) {
                 onChange={(e) => setMotherTongue(e.target.value)}
               >
                 <option value="any">Any Language</option>
-                <option value="Bengali">Bengali (বাংলা)</option>
-                <option value="Hindi">Hindi (हिंदी)</option>
-                <option value="Tamil">Tamil (தமிழ்)</option>
-                <option value="Gujarati">Gujarati (ગુજરાતી)</option>
-                <option value="Marathi">Marathi (मराठी)</option>
-                <option value="Malayalam">Malayalam (മലയാളം)</option>
-                <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option>
-                <option value="Telugu">Telugu (తెలుగు)</option>
+                <option value="Bengali">Bengali</option>
+                <option value="Hindi">Hindi</option>
+                <option value="English">English</option>
+                <option value="Tamil">Tamil</option>
+                <option value="Gujarati">Gujarati</option>
+                <option value="Marathi">Marathi</option>
+                <option value="Malayalam">Malayalam</option>
+                <option value="Punjabi">Punjabi</option>
+                <option value="Telugu">Telugu</option>
               </select>
             </div>
 
@@ -123,7 +133,6 @@ export default function QuickSearchCard({ onSearch, onRegisterClick }) {
             <div className="search-field-group">
               <label className="search-field-label" style={{ opacity: 0 }}>Action</label>
               <button type="submit" className="search-submit-btn">
-                <Search size={18} />
                 <span>Search Matches</span>
               </button>
             </div>

@@ -16,13 +16,21 @@ export default function HomePage({
   shortlistedIds,
   onQuickSearch,
   onOpenAuth,
+  onOpenCreateProfile,
+  currentUser,
   onSelectPlan
 }) {
   return (
     <div className="home-page">
       {/* Saptaganga Panoramic Hero Banner */}
       <HeroBanner 
-        onStartJourney={() => onOpenAuth('register')} 
+        onStartJourney={() => {
+          if (currentUser && onOpenCreateProfile) {
+            onOpenCreateProfile();
+          } else {
+            onOpenAuth('login');
+          }
+        }} 
         onExploreMatches={() => {
           const el = document.getElementById('search-finder') || 
                      document.querySelector('.quick-search-section') || 
@@ -34,11 +42,29 @@ export default function HomePage({
       {/* Quick Match Finder */}
       <QuickSearchCard 
         onSearch={onQuickSearch}
-        onRegisterClick={() => onOpenAuth('register')}
+        onOpenCreateProfile={onOpenCreateProfile}
+        currentUser={currentUser}
+        onRegisterClick={() => {
+          if (onOpenCreateProfile) {
+            onOpenCreateProfile();
+          } else {
+            onOpenAuth('login');
+          }
+        }}
       />
 
       {/* How It Works - 3 Steps */}
-      <HowItWorks onGetStarted={() => onOpenAuth('register')} />
+      <HowItWorks 
+        onGetStarted={() => {
+          if (onOpenCreateProfile) {
+            onOpenCreateProfile();
+          } else {
+            onOpenAuth('login');
+          }
+        }}
+        onOpenCreateProfile={onOpenCreateProfile}
+        currentUser={currentUser}
+      />
 
       {/* Featured Profiles Section */}
       <FeaturedProfiles 

@@ -19,30 +19,117 @@ import { MOCK_PROFILES, MOCK_STORIES, MEMBERSHIP_PLANS } from '../data/mockData.
 export const firestoreService = {
   // Fetch profiles with optional filters
   async getProfiles(filters = {}) {
-    if (!isFirebaseConfigured()) {
-      return this._filterLocalProfiles(MOCK_PROFILES, filters);
+    let baseList = [];
+
+    if (isFirebaseConfigured()) {
+      try {
+        const snapshot = await getDocs(collection(db, 'profiles'));
+        if (!snapshot.empty) {
+          baseList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        }
+      } catch (error) {
+        console.warn("Firestore query fallback to local mock data:", error.message);
+      }
     }
 
+    if (baseList.length === 0) {
+      baseList = MOCK_PROFILES;
+    }
+
+    // Read approved candidates & registered profile cache from localStorage
+    let adminProfiles = [];
+    let registeredProfiles = [];
     try {
-      const profilesRef = collection(db, 'profiles');
-      let q = query(profilesRef);
-
-      if (filters.gender && filters.gender !== 'any') {
-        q = query(profilesRef, where('gender', '==', filters.gender.toLowerCase()));
+      if (typeof localStorage !== 'undefined') {
+        const saved = localStorage.getItem('saptaganga_admin_profiles');
+        if (saved) adminProfiles = JSON.parse(saved);
+        const reg = localStorage.getItem('saptaganga_all_registered_profiles');
+        if (reg) registeredProfiles = JSON.parse(reg);
       }
+    } catch {}
 
-      const snapshot = await getDocs(q);
-      if (snapshot.empty) {
-        // If Firestore collection is empty, return initial mock data
-        return this._filterLocalProfiles(MOCK_PROFILES, filters);
+    let userProfile = null;
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const u = localStorage.getItem('saptaganga_user');
+        if (u) userProfile = JSON.parse(u);
       }
+    } catch {}
 
-      let profiles = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      return this._filterLocalProfiles(profiles, filters);
-    } catch (error) {
-      console.warn("Firestore query fallback to local mock data:", error.message);
-      return this._filterLocalProfiles(MOCK_PROFILES, filters);
+    const map = new Map();
+
+    // Default photo fallbacks
+    const defaultFemale = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=600';
+    const defaultMale = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600';
+
+    // 1. Add registered profile cache
+    const combinedCandidates = [...adminProfiles, ...registeredProfiles];
+    combinedCandidates.forEach(p => {
+      if (p && (p.id || p.memberId) && (p.approved || p.status === 'approved' || p.verified)) {
+        const id = p.id || p.memberId;
+        const genderKey = (p.gender?.toLowerCase() === 'female' || p.gender?.toLowerCase() === 'bride') ? 'Female' : 'Male';
+        const photo = p.image || p.profileImage || p.profilePhoto;
+        const existing = map.get(id) || {};
+        map.set(id, {
+          ...existing,
+          ...p,
+          id,
+          name: p.name || p.fullName || existing.name || 'Member',
+          fullName: p.name || p.fullName || existing.name || 'Member',
+          gender: genderKey,
+          age: Number(p.age) || existing.age || 26,
+          image: photo || existing.image || (genderKey === 'Female' ? defaultFemale : defaultMale),
+          profileImage: photo || existing.profileImage || (genderKey === 'Female' ? defaultFemale : defaultMale),
+          category: genderKey === 'Female' ? 'brides' : 'grooms',
+          approved: true,
+          status: 'approved',
+          verified: true
+        });
+      }
+    });
+
+    // 2. Add current user if approved
+    if (userProfile && (userProfile.id || userProfile.memberId) && (userProfile.approved || userProfile.status === 'approved' || userProfile.verified)) {
+      const id = userProfile.id || userProfile.memberId;
+      const genderKey = (userProfile.gender?.toLowerCase() === 'female' || userProfile.gender?.toLowerCase() === 'bride') ? 'Female' : 'Male';
+      const photo = userProfile.image || userProfile.profileImage || userProfile.profilePhoto;
+      const existing = map.get(id) || {};
+      map.set(id, {
+        ...existing,
+        ...userProfile,
+        id,
+        name: userProfile.name || userProfile.fullName || existing.name || 'Member',
+        fullName: userProfile.name || userProfile.fullName || existing.name || 'Member',
+        gender: genderKey,
+        age: Number(userProfile.age) || existing.age || 26,
+        image: photo || existing.image || (genderKey === 'Female' ? defaultFemale : defaultMale),
+        profileImage: photo || existing.profileImage || (genderKey === 'Female' ? defaultFemale : defaultMale),
+        category: genderKey === 'Female' ? 'brides' : 'grooms',
+        approved: true,
+        status: 'approved',
+        verified: true
+      });
     }
+
+    // 3. Add base / mock profiles
+    baseList.forEach(p => {
+      if (p && (p.id || p.memberId)) {
+        const id = p.id || p.memberId;
+        if (!map.has(id)) {
+          map.set(id, p);
+        } else {
+          // If map has this id from registered profiles with custom image, preserve that image!
+          const existing = map.get(id);
+          if (!existing.image || existing.image.includes('photo-1539571696357')) {
+            existing.image = p.image;
+            existing.profileImage = p.profileImage;
+          }
+        }
+      }
+    });
+
+    const allLiveProfiles = Array.from(map.values());
+    return this._filterLocalProfiles(allLiveProfiles, filters);
   },
 
   // Helper filter logic
@@ -50,7 +137,11 @@ export const firestoreService = {
     let results = [...profiles];
 
     if (filters.gender && filters.gender !== 'any') {
-      results = results.filter(p => p.gender?.toLowerCase() === filters.gender.toLowerCase());
+      const g = filters.gender.toLowerCase();
+      results = results.filter(p => {
+        const pg = p.gender?.toLowerCase() || '';
+        return pg === g || (g === 'female' && pg === 'bride') || (g === 'male' && pg === 'groom');
+      });
     }
     if (filters.religion && filters.religion !== 'any') {
       results = results.filter(p => p.religion?.toLowerCase() === filters.religion.toLowerCase());
@@ -60,9 +151,9 @@ export const firestoreService = {
     }
     if (filters.category && filters.category !== 'all') {
       if (filters.category === 'brides') {
-        results = results.filter(p => p.gender === 'female');
+        results = results.filter(p => p.gender?.toLowerCase() === 'female' || p.gender?.toLowerCase() === 'bride');
       } else if (filters.category === 'grooms') {
-        results = results.filter(p => p.gender === 'male');
+        results = results.filter(p => p.gender?.toLowerCase() === 'male' || p.gender?.toLowerCase() === 'groom');
       } else if (filters.category === 'doctors') {
         results = results.filter(p => p.profession?.toLowerCase().includes('doctor') || p.profession?.toLowerCase().includes('physician') || p.profession?.toLowerCase().includes('dental'));
       } else if (filters.category === 'tech') {

@@ -20,10 +20,8 @@ export default function FeaturedProfiles({
 }) {
   const categories = [
     { id: 'all', label: 'All Matches' },
-    { id: 'brides', label: 'Brides (পাত্রী)' },
-    { id: 'grooms', label: 'Grooms (পাত্র)' },
-    { id: 'doctors', label: 'Doctors & Medical' },
-    { id: 'tech', label: 'Engineers & Tech' }
+    { id: 'brides', label: 'Brides' },
+    { id: 'grooms', label: 'Grooms' }
   ];
 
   return (
@@ -60,79 +58,41 @@ export default function FeaturedProfiles({
             return (
               <div className="profile-card" key={profile.id}>
                 
-                {/* Photo & Top Badges */}
-                <div className="profile-img-container">
+                {/* Photo */}
+                <div 
+                  className="profile-img-container" 
+                  onClick={() => onSelectProfile(profile)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <img 
                     src={profile.image} 
                     alt={profile.name} 
                     className="profile-img"
                     loading="lazy"
                   />
-                  
-                  {/* Online Badge */}
-                  {profile.online && (
-                    <div className="profile-badge-top-left">
-                      <span className="badge-online">Online</span>
-                    </div>
-                  )}
-
-                  {/* Shortlist Heart Button */}
-                  <button 
-                    className={`profile-shortlist-btn ${isFavorited ? 'favorited' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onToggleShortlist(profile);
-                    }}
-                    title={isFavorited ? "Remove from Shortlist" : "Add to Shortlist"}
-                    aria-label="Shortlist profile"
-                  >
-                    <Heart 
-                      size={18} 
-                      fill={isFavorited ? "#E11D48" : "none"} 
-                      color={isFavorited ? "#E11D48" : "currentColor"} 
-                    />
-                  </button>
                 </div>
 
-                {/* Profile Information */}
-                <div className="profile-info">
-                  <div className="profile-name-row">
-                    <h3 className="profile-name">{profile.name}</h3>
-                    {profile.verified && (
-                      <CheckCircle2 
-                        size={16} 
-                        className="profile-verified-check" 
-                        fill="#10B981" 
-                        color="#FFF" 
-                      />
-                    )}
-                  </div>
-
-                  <div className="profile-meta">
-                    {profile.age} yrs, {profile.city} • {profile.motherTongue}
-                  </div>
-
-                  <div className="profile-profession" title={profile.profession}>
-                    {profile.profession}
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="profile-actions">
-                    <button 
-                      onClick={() => onSelectProfile(profile)} 
-                      className="profile-btn-view"
-                    >
-                      View Profile
-                    </button>
-                    <button 
-                      onClick={() => onSendInterest(profile)} 
-                      className="profile-btn-connect"
-                    >
-                      <Send size={13} />
-                      <span>Connect</span>
-                    </button>
-                  </div>
-
+                {/* Profile Information & Action */}
+                <div className="profile-info" style={{ padding: '14px 16px 16px 16px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <button 
+                    onClick={() => onSelectProfile(profile)} 
+                    className="profile-btn-view"
+                    style={{ 
+                      width: '100%', 
+                      maxWidth: '180px',
+                      padding: '9px 16px',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      margin: '0 auto',
+                      fontSize: '0.86rem',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    View Profile
+                  </button>
                 </div>
 
               </div>
@@ -145,10 +105,9 @@ export default function FeaturedProfiles({
           <button 
             onClick={() => onCategoryChange('all')}
             className="btn-outline-burgundy" 
-            style={{ padding: '12px 32px' }}
+            style={{ padding: '12px 34px' }}
           >
             <span>View All Verified Profiles</span>
-            <ArrowRight size={16} />
           </button>
         </div>
 

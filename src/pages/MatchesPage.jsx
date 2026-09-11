@@ -1,43 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, CheckCircle2, Heart, Send, Users } from 'lucide-react';
+import { Sparkles, CheckCircle2, Heart, Send, Users, Lock, UserPlus, ArrowRight } from 'lucide-react';
 import { api } from '../services/api';
 
 export default function MatchesPage({
   onSelectProfile,
   onSendInterest,
   onToggleShortlist,
-  shortlistedIds
+  shortlistedIds,
+  currentUser,
+  onOpenCreateProfile
 }) {
-  const [activeTab, setActiveTab] = useState('daily');
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const tabs = [
-    { id: 'daily', label: '🌟 Daily Recommendations' },
-    { id: 'mutual', label: '🤝 Mutual Matches (95%+ Compatibility)' },
-    { id: 'doctors', label: '🩺 Doctors & Medical' },
-    { id: 'tech', label: '💻 Engineers & Tech' },
-    { id: 'brides', label: '👰 Verified Brides' },
-    { id: 'grooms', label: '🤵 Verified Grooms' }
-  ];
-
   useEffect(() => {
     async function loadMatches() {
+      if (!currentUser?.profileCompleted) return;
       setLoading(true);
-      let filterParam = {};
-      if (activeTab === 'doctors') filterParam = { category: 'doctors' };
-      else if (activeTab === 'tech') filterParam = { category: 'tech' };
-      else if (activeTab === 'brides') filterParam = { category: 'brides' };
-      else if (activeTab === 'grooms') filterParam = { category: 'grooms' };
 
-      const res = await api.getProfiles(filterParam);
+      const res = await api.getProfiles();
       if (res.success) {
-        setProfiles(res.data);
+        let list = res.data;
+        // Automatic opposite gender matchmaking filtering
+        if (currentUser?.gender) {
+          const oppositeGender = currentUser.gender.toLowerCase() === 'male' ? 'female' : 'male';
+          const genderMatched = list.filter(p => p.gender?.toLowerCase() === oppositeGender);
+          if (genderMatched.length > 0) {
+            list = genderMatched;
+          }
+        }
+        setProfiles(list);
       }
       setLoading(false);
     }
     loadMatches();
-  }, [activeTab]);
+  }, [currentUser?.profileCompleted, currentUser?.gender]);
 
   return (
     <div style={{ background: '#FFF8FA', minHeight: '80vh', padding: '40px 0 80px 0' }}>
@@ -50,78 +47,81 @@ export default function MatchesPage({
           <p className="section-desc">Handpicked profiles curated to match your cultural values, education, and Kundali compatibility.</p>
         </div>
 
-        {/* Tab Pills */}
-        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '40px' }}>
-          {tabs.map(t => (
-            <button
-              key={t.id}
-              onClick={() => setActiveTab(t.id)}
-              className={`profile-filter-tab ${activeTab === t.id ? 'active' : ''}`}
-              style={{ fontSize: '0.9rem', padding: '10px 20px' }}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        {/* Grid or Profile Creation Gate */}
+        {!currentUser?.profileCompleted ? (
+          <div style={{
+            background: '#FFF',
+            border: '1.5px solid var(--romantic-rose-border)',
+            borderRadius: 'var(--radius-xl)',
+            padding: '60px 30px',
+            textAlign: 'center',
+            maxWidth: '650px',
+            margin: '0 auto',
+            boxShadow: 'var(--shadow-sm)'
+          }}>
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: '#FFF0F3',
+              border: '2px solid var(--romantic-rose-border)',
+              color: 'var(--primary-burgundy)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 18px auto'
+            }}>
+              <Lock size={28} />
+            </div>
+            
+            <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.45rem', color: 'var(--primary-burgundy-dark)', marginBottom: '10px' }}>
+              Create Your Profile to View Matches
+            </h3>
+            
+            <p style={{ margin: '0 auto 24px auto', fontSize: '0.90rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
+              Personalized and Kundali-matched profiles are curated based on your preferences. Complete your profile to view 100% verified matches.
+            </p>
 
-        {/* Grid */}
-        {loading ? (
+            <button 
+              onClick={onOpenCreateProfile} 
+              className="btn-burgundy"
+              style={{ padding: '13px 32px', fontSize: '0.95rem' }}
+            >
+              <span>Create Your Profile Now</span>
+            </button>
+          </div>
+        ) : loading ? (
           <div style={{ textAlign: 'center', padding: '60px 0' }}>Loading your matches...</div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '24px' }}>
-            {profiles.map((profile, idx) => {
-              const isFavorited = shortlistedIds.has(profile.id);
-              const matchPercent = 98 - idx * 3;
-
+            {profiles.map((profile) => {
               return (
                 <div className="profile-card" key={profile.id}>
                   <div className="profile-img-container">
-                    <img src={profile.image} alt={profile.name} className="profile-img" />
-                    
-                    {/* Match Score Badge */}
-                    <div style={{
-                      position: 'absolute',
-                      top: '12px',
-                      left: '12px',
-                      background: 'rgba(115, 15, 45, 0.9)',
-                      backdropFilter: 'blur(6px)',
-                      color: '#ECCB85',
-                      padding: '4px 10px',
-                      borderRadius: 'var(--radius-full)',
-                      fontSize: '0.74rem',
-                      fontWeight: 700,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}>
-                      <Sparkles size={12} />
-                      <span>{matchPercent}% Match</span>
-                    </div>
-
-                    <button 
-                      className={`profile-shortlist-btn ${isFavorited ? 'favorited' : ''}`}
-                      onClick={() => onToggleShortlist(profile)}
-                    >
-                      <Heart size={18} fill={isFavorited ? "#E11D48" : "none"} color={isFavorited ? "#E11D48" : "currentColor"} />
-                    </button>
+                    <img src={profile.image} alt={profile.name} className="profile-img" loading="lazy" />
                   </div>
 
-                  <div className="profile-info">
-                    <div className="profile-name-row">
-                      <h3 className="profile-name">{profile.name}</h3>
-                      {profile.verified && <CheckCircle2 size={16} fill="#10B981" color="#FFF" />}
-                    </div>
-
-                    <div className="profile-meta">{profile.age} yrs • {profile.city} • {profile.religion} ({profile.caste})</div>
-                    <div className="profile-profession">{profile.profession}</div>
-
-                    <div className="profile-actions">
-                      <button onClick={() => onSelectProfile(profile)} className="profile-btn-view">View Details</button>
-                      <button onClick={() => onSendInterest(profile)} className="profile-btn-connect">
-                        <Send size={13} />
-                        <span>Connect</span>
-                      </button>
-                    </div>
+                  {/* Profile Action */}
+                  <div className="profile-info" style={{ padding: '14px 16px 16px 16px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <button 
+                      onClick={() => onSelectProfile(profile)} 
+                      className="profile-btn-view"
+                      style={{ 
+                        width: '100%', 
+                        maxWidth: '180px',
+                        padding: '9px 16px',
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        margin: '0 auto',
+                        fontSize: '0.86rem',
+                        fontWeight: 600,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      View Profile
+                    </button>
                   </div>
                 </div>
               );

@@ -50,6 +50,24 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     loadDashboardData();
+
+    const handleSync = () => {
+      loadDashboardData();
+    };
+
+    window.addEventListener('storage', handleSync);
+    window.addEventListener('focus', handleSync);
+    window.addEventListener('saptaganga_profile_created', handleSync);
+    window.addEventListener('saptaganga_profile_approved', handleSync);
+    const interval = setInterval(handleSync, 3000);
+
+    return () => {
+      window.removeEventListener('storage', handleSync);
+      window.removeEventListener('focus', handleSync);
+      window.removeEventListener('saptaganga_profile_created', handleSync);
+      window.removeEventListener('saptaganga_profile_approved', handleSync);
+      clearInterval(interval);
+    };
   }, []);
 
   const handleToggleVerify = async (profileId, currentStatus) => {

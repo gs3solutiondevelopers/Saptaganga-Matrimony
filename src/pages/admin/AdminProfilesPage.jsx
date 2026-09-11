@@ -65,12 +65,40 @@ export default function AdminProfilesPage() {
 
   useEffect(() => {
     loadProfiles();
+
+    // Auto-refresh when tab gains focus, storage changes or profile created
+    const handleSync = () => {
+      adminService.getProfiles().then(res => {
+        if (res.success) setProfiles(res.data);
+      });
+    };
+
+    window.addEventListener('storage', handleSync);
+    window.addEventListener('focus', handleSync);
+    window.addEventListener('saptaganga_profile_created', handleSync);
+
+    const interval = setInterval(handleSync, 2500);
+
+    return () => {
+      window.removeEventListener('storage', handleSync);
+      window.removeEventListener('focus', handleSync);
+      window.removeEventListener('saptaganga_profile_created', handleSync);
+      clearInterval(interval);
+    };
   }, []);
 
   const handleToggleVerify = async (profileId, currentStatus) => {
     const res = await adminService.toggleVerification(profileId, currentStatus);
     if (res.success) {
       setProfiles(prev => prev.map(p => p.id === profileId ? { ...p, verified: res.verified } : p));
+    }
+  };
+
+  const handleApproveProfile = async (profileId) => {
+    const res = await adminService.approveProfile(profileId);
+    if (res.success) {
+      setProfiles(prev => prev.map(p => p.id === profileId ? { ...p, verified: true, approved: true, status: 'approved' } : p));
+      alert(`🎉 Profile ${profileId} has been successfully approved and published live! An approval notification has been delivered to the user.`);
     }
   };
 
@@ -124,12 +152,13 @@ export default function AdminProfilesPage() {
 
     if (!matchesSearch) return false;
 
-    if (activeFilter === 'brides') return p.gender === 'female';
-    if (activeFilter === 'grooms') return p.gender === 'male';
-    if (activeFilter === 'pending') return !p.verified;
-    if (activeFilter === 'verified') return p.verified;
+    const genderLower = p.gender?.toLowerCase() || '';
+    if (activeFilter === 'brides') return genderLower === 'female' || genderLower === 'bride';
+    if (activeFilter === 'grooms') return genderLower === 'male' || genderLower === 'groom';
+    if (activeFilter === 'pending') return !p.verified || p.status === 'pending_approval' || !p.approved;
+    if (activeFilter === 'verified') return p.verified && p.approved !== false;
     if (activeFilter === 'doctors') return p.profession?.toLowerCase().includes('doctor') || p.profession?.toLowerCase().includes('physician') || p.profession?.toLowerCase().includes('dental');
-    if (activeFilter === 'tech') return p.profession?.toLowerCase().includes('software') || p.profession?.toLowerCase().includes('data');
+    if (activeFilter === 'tech') return p.profession?.toLowerCase().includes('software') || p.profession?.toLowerCase().includes('data') || p.profession?.toLowerCase().includes('engineer');
 
     return true;
   });
@@ -177,13 +206,13 @@ export default function AdminProfilesPage() {
               className={`admin-filter-pill ${activeFilter === 'brides' ? 'active' : ''}`}
               onClick={() => setActiveFilter('brides')}
             >
-              Brides (পাত্রী)
+              Brides
             </button>
             <button 
               className={`admin-filter-pill ${activeFilter === 'grooms' ? 'active' : ''}`}
               onClick={() => setActiveFilter('grooms')}
             >
-              Grooms (পাত্র)
+              Grooms
             </button>
             <button 
               className={`admin-filter-pill ${activeFilter === 'verified' ? 'active' : ''}`}
@@ -194,8 +223,21 @@ export default function AdminProfilesPage() {
             <button 
               className={`admin-filter-pill ${activeFilter === 'pending' ? 'active' : ''}`}
               onClick={() => setActiveFilter('pending')}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              Pending Approval
+              <span>Pending Approval</span>
+              {profiles.filter(p => !p.approved || p.status === 'pending_approval' || !p.verified).length > 0 && (
+                <span style={{
+                  background: activeFilter === 'pending' ? '#FFFFFF' : '#F43F5E',
+                  color: activeFilter === 'pending' ? '#780E2F' : '#FFFFFF',
+                  fontSize: '0.70rem',
+                  fontWeight: 800,
+                  padding: '1px 6px',
+                  borderRadius: '10px'
+                }}>
+                  {profiles.filter(p => !p.approved || p.status === 'pending_approval' || !p.verified).length}
+                </span>
+              )}
             </button>
             <button 
               className={`admin-filter-pill ${activeFilter === 'doctors' ? 'active' : ''}`}
@@ -211,6 +253,42 @@ export default function AdminProfilesPage() {
             </button>
           </div>
         </div>
+
+        {/* Pending Requests Alert Banner */}
+        {profiles.filter(p => !p.approved || p.status === 'pending_approval' || !p.verified).length > 0 && activeFilter !== 'pending' && (
+          <div style={{
+            background: '#FFF7ED',
+            border: '1px solid #FED7AA',
+            borderRadius: '10px',
+            padding: '12px 18px',
+            margin: '0 20px 16px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#9A3412', fontSize: '0.88rem', fontWeight: 600 }}>
+              <Clock size={18} color="#EA580C" />
+              <span>🔔 You have <strong>{profiles.filter(p => !p.approved || p.status === 'pending_approval' || !p.verified).length}</strong> candidate profile registration request(s) awaiting admin review and verification.</span>
+            </div>
+            <button 
+              onClick={() => setActiveFilter('pending')}
+              style={{
+                background: '#EA580C',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '6px 14px',
+                borderRadius: '6px',
+                fontSize: '0.80rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                flexShrink: 0
+              }}
+            >
+              View Pending Requests
+            </button>
+          </div>
+        )}
 
         {/* Candidate Table */}
         <div className="admin-table-responsive">
@@ -239,7 +317,7 @@ export default function AdminProfilesPage() {
                         <img src={p.image} alt={p.name} className="admin-cell-avatar" />
                         <div>
                           <div className="admin-cell-name">{p.name}</div>
-                          <div className="admin-cell-sub">{p.id} • {p.gender === 'female' ? 'Bride (পাত্রী)' : 'Groom (পাত্র)'}</div>
+                          <div className="admin-cell-sub">{p.id} • {p.gender?.toLowerCase() === 'female' ? 'Bride' : 'Groom'}</div>
                         </div>
                       </div>
                     </td>
@@ -273,8 +351,33 @@ export default function AdminProfilesPage() {
                     </td>
 
                     <td>
-                      <div className="admin-actions-cell" style={{ justifyContent: 'flex-end' }}>
+                      <div className="admin-actions-cell" style={{ justifyContent: 'flex-end', gap: '8px' }}>
                         
+                        {/* 1-Click Approve Button for Pending Profiles */}
+                        {(!p.approved || p.status === 'pending_approval') && (
+                          <button
+                            onClick={() => handleApproveProfile(p.id)}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              background: '#10B981',
+                              color: '#FFFFFF',
+                              border: 'none',
+                              padding: '5px 12px',
+                              borderRadius: '6px',
+                              fontSize: '0.78rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              boxShadow: '0 2px 6px rgba(16, 185, 129, 0.25)'
+                            }}
+                            title="Approve & Publish Live"
+                          >
+                            <Check size={13} strokeWidth={3} />
+                            <span>Approve</span>
+                          </button>
+                        )}
+
                         {/* 1-Click Verification Toggle */}
                         <button 
                           onClick={() => handleToggleVerify(p.id, p.verified)}
@@ -374,8 +477,8 @@ export default function AdminProfilesPage() {
                     value={formData.gender}
                     onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                   >
-                    <option value="female">Bride (পাত্রী)</option>
-                    <option value="male">Groom (পাত্র)</option>
+                    <option value="female">Bride</option>
+                    <option value="male">Groom</option>
                   </select>
                 </div>
               </div>
