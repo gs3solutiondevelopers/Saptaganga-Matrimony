@@ -1,13 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   Heart, 
   ShieldCheck, 
-  Headphones, 
-  ArrowRight 
+  Headphones 
 } from 'lucide-react';
 
+const HERO_SLIDES = [
+  {
+    id: 1,
+    image: '/imsge 2.webp',
+    alt: 'Saptaganga Matrimony - Traditional Values, Modern Connections',
+  },
+  {
+    id: 2,
+    image: '/hero-slide2.webp',
+    alt: 'Saptaganga Happy Wedding Couple by the Ghats',
+  }
+];
+
 export default function HeroBanner({ onStartJourney, onExploreMatches }) {
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 7000);
+    return () => clearInterval(timer);
+  }, []);
+
   const handleExploreMatches = () => {
     if (onExploreMatches) {
       onExploreMatches();
@@ -24,8 +45,17 @@ export default function HeroBanner({ onStartJourney, onExploreMatches }) {
   return (
     <section className="saptaganga-hero-panoramic" id="home">
       
-      {/* Background Image Container with Right-Aligned Couple */}
-      <div className="hero-panoramic-bg" />
+      {/* Dynamic Panoramic Background Carousel with 7s auto-transition */}
+      <div className="hero-panoramic-bg-wrapper">
+        {HERO_SLIDES.map((slide, idx) => (
+          <div
+            key={slide.id}
+            className={`hero-panoramic-bg ${idx === activeSlide ? 'active' : ''}`}
+            style={{ backgroundImage: `url("${slide.image}")` }}
+            aria-hidden={idx !== activeSlide}
+          />
+        ))}
+      </div>
       <div className="hero-panoramic-overlay" />
 
       <div className="container hero-panoramic-container">
@@ -195,6 +225,20 @@ export default function HeroBanner({ onStartJourney, onExploreMatches }) {
         </div>
 
       </div>
+
+      {/* Slide Indicator Navigation Dots */}
+      <div className="hero-slide-indicators">
+        {HERO_SLIDES.map((slide, idx) => (
+          <button
+            key={slide.id}
+            onClick={() => setActiveSlide(idx)}
+            className={`hero-slide-dot ${idx === activeSlide ? 'active' : ''}`}
+            aria-label={`Go to slide ${idx + 1}`}
+            title={`Slide ${idx + 1}`}
+          />
+        ))}
+      </div>
+
     </section>
   );
 }
