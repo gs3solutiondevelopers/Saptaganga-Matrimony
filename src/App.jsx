@@ -121,12 +121,17 @@ function AppContent() {
         if (u) {
           const parsed = JSON.parse(u);
           const adminProfiles = JSON.parse(localStorage.getItem('saptaganga_admin_profiles') || '[]');
-          const match = adminProfiles.find(p => p.id === parsed.memberId || p.memberId === parsed.memberId || p.id === parsed.id || (p.phone && parsed.phone && p.phone === parsed.phone));
-          if (match && (match.approved || match.verified || match.status === 'approved')) {
-            parsed.approved = true;
-            parsed.verified = true;
-            parsed.status = 'approved';
-            parsed.badge = '100% Verified';
+          const match = adminProfiles.find(p => p.id === parsed.memberId || p.memberId === parsed.memberId || p.id === parsed.id || (p.phone && parsed.phone && p.phone === parsed.phone) || (p.name && parsed.name && p.name.toLowerCase() === parsed.name.toLowerCase()));
+          if (match) {
+            parsed.approved = match.approved ?? true;
+            parsed.verified = match.verified ?? true;
+            parsed.status = match.status || 'approved';
+            parsed.badge = match.badge || (match.verified ? '100% Verified' : 'Verification Pending');
+            const updatedPhoto = match.image || match.profileImage || match.profilePhoto;
+            if (updatedPhoto) {
+              parsed.image = updatedPhoto;
+              parsed.profileImage = updatedPhoto;
+            }
           }
           setCurrentUser(parsed);
         }
@@ -138,18 +143,39 @@ function AppContent() {
     window.addEventListener('storage', handleLiveSync);
     window.addEventListener('focus', handleLiveSync);
     window.addEventListener('saptaganga_profile_created', handleLiveSync);
+    window.addEventListener('saptaganga_profile_updated', handleLiveSync);
     window.addEventListener('saptaganga_profile_approved', handleLiveSync);
 
-    const interval = setInterval(handleLiveSync, 3000);
+    const interval = setInterval(handleLiveSync, 2000);
 
     return () => {
       window.removeEventListener('storage', handleLiveSync);
       window.removeEventListener('focus', handleLiveSync);
       window.removeEventListener('saptaganga_profile_created', handleLiveSync);
+      window.removeEventListener('saptaganga_profile_updated', handleLiveSync);
       window.removeEventListener('saptaganga_profile_approved', handleLiveSync);
       clearInterval(interval);
     };
   }, [activeCategory]);
+
+  // Keep selectedProfile open modal in sync with live updated profiles
+  useEffect(() => {
+    if (selectedProfile && profiles.length > 0) {
+      const match = profiles.find(p => p.id === selectedProfile.id || p.memberId === selectedProfile.id);
+      if (match && (
+        match.name !== selectedProfile.name ||
+        match.age !== selectedProfile.age ||
+        match.city !== selectedProfile.city ||
+        match.education !== selectedProfile.education ||
+        match.profession !== selectedProfile.profession ||
+        match.image !== selectedProfile.image ||
+        match.profileImage !== selectedProfile.profileImage ||
+        match.about !== selectedProfile.about
+      )) {
+        setSelectedProfile(match);
+      }
+    }
+  }, [profiles]);
 
   // Handle Quick Search from Home -> navigate to search (Gated on Profile Completion)
   const handleQuickSearch = async (searchParams) => {

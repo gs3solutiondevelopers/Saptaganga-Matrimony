@@ -122,7 +122,8 @@ export const firestoreService = {
     adminProfiles.forEach(p => {
       if (p && (p.id || p.memberId)) {
         const id = p.id || p.memberId;
-        const isApproved = Boolean(p.approved === true || p.status === 'approved');
+        const existing = map.get(id) || {};
+        const isApproved = p.approved !== undefined ? Boolean(p.approved) : (existing.approved !== undefined ? Boolean(existing.approved) : (p.status === 'approved' || existing.status === 'approved' || true));
 
         // If this profile is an unapproved pending registration, do NOT publish live on website until admin approves!
         if (!isApproved && !map.has(id)) {
@@ -130,8 +131,7 @@ export const firestoreService = {
         }
 
         const genderKey = (p.gender?.toLowerCase() === 'female' || p.gender?.toLowerCase() === 'bride') ? 'Female' : 'Male';
-        const photo = p.image || p.profileImage || p.profilePhoto;
-        const existing = map.get(id) || {};
+        const photo = p.image || p.profileImage || p.profilePhoto || existing.image || existing.profileImage;
         map.set(id, {
           ...existing,
           ...p,
@@ -140,18 +140,26 @@ export const firestoreService = {
           fullName: p.name || p.fullName || existing.name || 'Member',
           gender: genderKey,
           age: Number(p.age) || existing.age || 26,
-          image: photo || existing.image || (genderKey === 'Female' ? defaultFemale : defaultMale),
-          profileImage: photo || existing.profileImage || (genderKey === 'Female' ? defaultFemale : defaultMale),
+          image: photo || (genderKey === 'Female' ? defaultFemale : defaultMale),
+          profileImage: photo || (genderKey === 'Female' ? defaultFemale : defaultMale),
           category: genderKey === 'Female' ? 'brides' : 'grooms',
           approved: isApproved,
           status: isApproved ? 'approved' : 'pending_approval',
-          verified: Boolean(p.verified)
+          verified: p.verified !== undefined ? Boolean(p.verified) : (existing.verified !== undefined ? Boolean(existing.verified) : true)
         });
       }
     });
 
-    // Only approved profiles are shown live on the public website
+    // 5. Build final list: Prioritize admin/registered profiles with real custom photos over mock stock images
     const allLiveProfiles = Array.from(map.values()).filter(p => p.approved === true || p.status === 'approved');
+
+    // Sort so admin updated / registered profiles with custom uploaded images come first
+    allLiveProfiles.sort((a, b) => {
+      const aIsCustom = a.image && !a.image.includes('unsplash.com') ? 1 : 0;
+      const bIsCustom = b.image && !b.image.includes('unsplash.com') ? 1 : 0;
+      return bIsCustom - aIsCustom;
+    });
+
     return this._filterLocalProfiles(allLiveProfiles, filters);
   },
 
@@ -192,8 +200,17 @@ export const firestoreService = {
 
   // Get profile by ID
   async getProfileById(id) {
+    // 1. Check live/merged profiles list first (includes admin updates)
+    try {
+      const allRes = await this.getProfiles();
+      if (allRes.success && allRes.data) {
+        const match = allRes.data.find(p => p.id === id || p.memberId === id);
+        if (match) return { success: true, data: match };
+      }
+    } catch {}
+
     if (!isFirebaseConfigured()) {
-      const profile = MOCK_PROFILES.find(p => p.id === id);
+      const profile = MOCK_PROFILES.find(p => p.id === id || p.memberId === id);
       return { success: !!profile, data: profile };
     }
 
@@ -203,10 +220,10 @@ export const firestoreService = {
       if (docSnap.exists()) {
         return { success: true, data: { id: docSnap.id, ...docSnap.data() } };
       }
-      const local = MOCK_PROFILES.find(p => p.id === id);
+      const local = MOCK_PROFILES.find(p => p.id === id || p.memberId === id);
       return { success: !!local, data: local };
     } catch {
-      const local = MOCK_PROFILES.find(p => p.id === id);
+      const local = MOCK_PROFILES.find(p => p.id === id || p.memberId === id);
       return { success: !!local, data: local };
     }
   },

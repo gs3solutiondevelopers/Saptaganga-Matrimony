@@ -34,6 +34,22 @@ export default function MatchesPage({
       setLoading(false);
     }
     loadMatches();
+
+    const handleSync = () => {
+      loadMatches();
+    };
+
+    window.addEventListener('storage', handleSync);
+    window.addEventListener('saptaganga_profile_created', handleSync);
+    window.addEventListener('saptaganga_profile_updated', handleSync);
+    window.addEventListener('saptaganga_profile_approved', handleSync);
+
+    return () => {
+      window.removeEventListener('storage', handleSync);
+      window.removeEventListener('saptaganga_profile_created', handleSync);
+      window.removeEventListener('saptaganga_profile_updated', handleSync);
+      window.removeEventListener('saptaganga_profile_approved', handleSync);
+    };
   }, [currentUser?.profileCompleted, currentUser?.gender]);
 
   return (

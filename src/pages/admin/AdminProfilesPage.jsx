@@ -130,7 +130,14 @@ export default function AdminProfilesPage() {
   const handleSaveEdit = async (e) => {
     e.preventDefault();
     if (!editingProfile || !editFormData) return;
-    const res = await adminService.updateProfile(editingProfile.id, editFormData);
+    const fullPayload = {
+      ...editingProfile,
+      ...editFormData,
+      approved: editingProfile.approved ?? true,
+      verified: editingProfile.verified ?? true,
+      status: editingProfile.status || 'approved'
+    };
+    const res = await adminService.updateProfile(editingProfile.id, fullPayload);
     if (res.success) {
       setProfiles(prev => prev.map(p => (p.id === editingProfile.id || p.memberId === editingProfile.id) ? res.data : p));
       setEditingProfile(null);

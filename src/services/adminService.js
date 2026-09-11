@@ -451,6 +451,9 @@ export const adminService = {
     const isMale = genderKey === 'Male';
 
     const mergedProfile = {
+      approved: true,
+      verified: true,
+      status: 'approved',
       ...updatedData,
       id: profileId,
       memberId: profileId,
@@ -459,6 +462,7 @@ export const adminService = {
       name: updatedData.name || updatedData.fullName || 'Member',
       fullName: updatedData.name || updatedData.fullName || 'Member',
       age: Number(updatedData.age) || 26,
+      badge: (updatedData.verified !== false) ? (updatedData.badge || '100% Verified') : (updatedData.badge || 'Verification Pending'),
       updatedAt: new Date().toISOString()
     };
 
@@ -494,12 +498,14 @@ export const adminService = {
 
         // Also update current user if it matches
         const user = JSON.parse(localStorage.getItem('saptaganga_user') || 'null');
-        if (user && (user.id === profileId || user.memberId === profileId)) {
+        if (user && (user.id === profileId || user.memberId === profileId || (user.phone && mergedProfile.phone && user.phone === mergedProfile.phone))) {
           localStorage.setItem('saptaganga_user', JSON.stringify({ ...user, ...mergedProfile }));
         }
 
         window.dispatchEvent(new Event('storage'));
         window.dispatchEvent(new CustomEvent('saptaganga_profile_created', { detail: { profile: mergedProfile } }));
+        window.dispatchEvent(new CustomEvent('saptaganga_profile_updated', { detail: { profile: mergedProfile } }));
+        window.dispatchEvent(new CustomEvent('saptaganga_profile_approved', { detail: { profileId, verified: mergedProfile.verified } }));
       } catch (e) {
         console.error('Storage update error in updateProfile:', e);
       }

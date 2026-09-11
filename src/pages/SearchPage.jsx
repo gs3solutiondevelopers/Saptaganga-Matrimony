@@ -58,6 +58,24 @@ export default function SearchPage({
     if (currentUser?.profileCompleted) {
       executeSearch();
     }
+
+    const handleSync = () => {
+      if (currentUser?.profileCompleted) {
+        executeSearch();
+      }
+    };
+
+    window.addEventListener('storage', handleSync);
+    window.addEventListener('saptaganga_profile_created', handleSync);
+    window.addEventListener('saptaganga_profile_updated', handleSync);
+    window.addEventListener('saptaganga_profile_approved', handleSync);
+
+    return () => {
+      window.removeEventListener('storage', handleSync);
+      window.removeEventListener('saptaganga_profile_created', handleSync);
+      window.removeEventListener('saptaganga_profile_updated', handleSync);
+      window.removeEventListener('saptaganga_profile_approved', handleSync);
+    };
   }, [filters, sortBy, currentUser?.profileCompleted]);
 
   const handleReset = () => {
