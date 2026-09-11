@@ -217,6 +217,14 @@
   transform: scale(1);
 }
 
+.hero-slide-1 {
+  background-position: right 24%;
+}
+
+.hero-slide-2 {
+  background-position: right center;
+}
+
 .hero-panoramic-overlay {
   position: absolute;
   inset: 0;

@@ -11,11 +11,15 @@ const HERO_SLIDES = [
     id: 1,
     image: '/imsge 2.webp',
     alt: 'Saptaganga Matrimony - Traditional Values, Modern Connections',
+    bgPosition: 'right 24%',
+    className: 'hero-slide-1'
   },
   {
     id: 2,
     image: '/hero-slide2.webp',
     alt: 'Saptaganga Happy Wedding Couple by the Ghats',
+    bgPosition: 'right center',
+    className: 'hero-slide-2'
   }
 ];
 
@@ -50,8 +54,11 @@ export default function HeroBanner({ onStartJourney, onExploreMatches }) {
         {HERO_SLIDES.map((slide, idx) => (
           <div
             key={slide.id}
-            className={`hero-panoramic-bg ${idx === activeSlide ? 'active' : ''}`}
-            style={{ backgroundImage: `url("${slide.image}")` }}
+            className={`hero-panoramic-bg ${slide.className || ''} ${idx === activeSlide ? 'active' : ''}`}
+            style={{ 
+              backgroundImage: `url("${slide.image}")`,
+              backgroundPosition: slide.bgPosition || 'right center'
+            }}
             aria-hidden={idx !== activeSlide}
           />
         ))}
