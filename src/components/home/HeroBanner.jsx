@@ -120,7 +120,7 @@ export default function HeroBanner({ onStartJourney, onExploreMatches }) {
         <div className="hero-right-box">
           <div className="hero-couple-showcase-frame">
             <img 
-              src="/hero.png" 
+              src="/imsge 2.webp" 
               alt="Saptaganga Happy Wedding Couple" 
               className="hero-couple-main-img" 
             />
