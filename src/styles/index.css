@@ -46,18 +46,18 @@
   --status-heart: #E11D48;
 
   /* Typography */
-  --font-heading: 'Outfit', 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-serif: 'Outfit', 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-classic-serif: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
-  --font-display: 'Outfit', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --font-wedding-moment: 'Wedding Moment', 'Outfit', 'Plus Jakarta Sans', cursive, sans-serif;
-  --font-salita: 'Outfit', 'Plus Jakarta Sans', sans-serif;
-  --font-vebiola: 'Outfit', 'Plus Jakarta Sans', sans-serif;
-  --font-luxury-serif: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-wedding-moment: 'Wedding Moment', 'Plus Jakarta Sans', 'Inter', cursive, sans-serif;
+  --font-salita: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  --font-vebiola: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  --font-luxury-serif: 'Plus Jakarta Sans', 'Inter', sans-serif;
   --font-luxury-script: 'Wedding Moment', 'Pinyon Script', 'Alex Brush', 'Great Vibes', cursive;
   --font-cursive: 'Pinyon Script', 'Alex Brush', 'Great Vibes', cursive;
-  --font-indic: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  --font-indic: 'Plus Jakarta Sans', 'Inter', sans-serif;
 
   /* Elevation & Shadows */
   --shadow-sm: 0 2px 8px rgba(115, 15, 45, 0.06);
@@ -120,9 +120,9 @@ body {
 h1, h2, h3, h4, .font-serif {
   font-family: var(--font-heading);
   color: var(--primary-burgundy-dark);
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.25;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.01em;
 }
 
 .font-cursive {
@@ -181,34 +181,34 @@ input, select, textarea {
 .section-subtitle {
   font-family: var(--font-sans);
   text-transform: uppercase;
-  font-size: 0.8rem;
-  font-weight: 750;
+  font-size: 0.76rem;
+  font-weight: 600;
   letter-spacing: 2px;
   color: var(--primary-burgundy);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   display: inline-block;
   position: relative;
 }
 
 .section-title {
   font-family: var(--font-heading);
-  font-size: 2.25rem;
-  font-weight: 750;
+  font-size: 2.1rem;
+  font-weight: 600;
   color: var(--primary-burgundy-dark);
   margin-bottom: 12px;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.015em;
   line-height: 1.25;
 }
 
 .section-desc {
   font-family: var(--font-sans);
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   color: var(--text-muted);
 }
 
 @media (max-width: 768px) {
   .section-title {
-    font-size: 1.75rem;
+    font-size: 1.7rem;
   }
 }
 
