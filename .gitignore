@@ -11,12 +11,17 @@ node_modules
 dist
 dist-ssr
 *.local
+scripts/
+script/
 
 # Security & Secret Keys
 .env
 .env.*
 !.env.example
 serviceAccountKey.json
+credencial/
+server/.env
+client/.env
 *.pem
 *.key
 
