@@ -50,13 +50,11 @@ export default function FeaturedProfiles({
           ))}
         </div>
 
-        {/* Profiles Grid */}
-        <div className="profiles-grid">
-          {profiles.map(profile => {
-            const isFavorited = shortlistedIds.has(profile.id);
-
-            return (
-              <div className="profile-card" key={profile.id}>
+        {/* Single-Line Animated Profiles Carousel */}
+        <div className="profiles-carousel-wrapper">
+          <div className="profiles-carousel-track">
+            {(profiles.length > 0 ? [...profiles, ...profiles] : []).map((profile, idx) => (
+              <div className="profile-card" key={`${profile.id}-${idx}`}>
                 
                 {/* Photo */}
                 <div 
@@ -96,8 +94,8 @@ export default function FeaturedProfiles({
                 </div>
 
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
 
         {/* View All Matches Button */}
