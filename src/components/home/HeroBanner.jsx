@@ -11,7 +11,7 @@ const HERO_SLIDES = [
     id: 1,
     image: '/imsge 2.webp',
     alt: 'Saptaganga Matrimony - Traditional Values, Modern Connections',
-    bgPosition: 'right 82%',
+    bgPosition: 'right 66%',
     className: 'hero-slide-1'
   },
   {
