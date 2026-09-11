@@ -23,7 +23,7 @@ const HERO_SLIDES = [
   }
 ];
 
-export default function HeroBanner({ onStartJourney, onExploreMatches }) {
+export default function HeroBanner({ onStartJourney, onRegisterClick, onOpenCreateProfile, onExploreMatches, currentUser }) {
   const [activeSlide, setActiveSlide] = useState(0);
 
   useEffect(() => {
@@ -32,6 +32,16 @@ export default function HeroBanner({ onStartJourney, onExploreMatches }) {
     }, 7000);
     return () => clearInterval(timer);
   }, []);
+
+  const handleStart = () => {
+    if (onOpenCreateProfile) {
+      onOpenCreateProfile();
+    } else if (onRegisterClick) {
+      onRegisterClick();
+    } else if (onStartJourney) {
+      onStartJourney();
+    }
+  };
 
   const handleExploreMatches = () => {
     if (onExploreMatches) {
@@ -95,7 +105,7 @@ export default function HeroBanner({ onStartJourney, onExploreMatches }) {
 
           {/* Pill CTA Buttons (Top) */}
           <div className="hero-cta-pill-row">
-            <button onClick={onStartJourney} className="hero-btn-pill-primary">
+            <button onClick={handleStart} className="hero-btn-pill-primary">
               <span>Start Your Journey</span>
             </button>
 

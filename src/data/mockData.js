@@ -305,8 +305,9 @@ export const MEMBERSHIP_PLANS = [
     id: "free",
     name: "Classic Free",
     badge: "Free Forever",
+    tagline: "Perfect For New Members",
     price: "₹0",
-    duration: "Lifetime",
+    duration: "/ lifetime",
     isPopular: false,
     features: [
       "Create & verify your profile",
@@ -315,15 +316,16 @@ export const MEMBERSHIP_PLANS = [
       "Basic horoscope matching",
       "Standard customer support"
     ],
-    cta: "Get Started Free",
-    btnClass: "btn-outline-burgundy"
+    cta: "Start Free",
+    btnClass: "plan-clean-cta"
   },
   {
     id: "gold",
     name: "Gold Advantage",
     badge: "Most Popular",
+    tagline: "Perfect For Fast Matches",
     price: "₹3,499",
-    duration: "for 3 Months",
+    duration: "/ 3 months",
     isPopular: true,
     features: [
       "View 35 Verified Contact Numbers",
@@ -333,15 +335,16 @@ export const MEMBERSHIP_PLANS = [
       "Instant SMS & WhatsApp match alerts",
       "Dedicated Relationship Advisor"
     ],
-    cta: "Upgrade to Gold",
-    btnClass: "btn-gold"
+    cta: "Choose Gold",
+    btnClass: "plan-clean-cta-popular"
   },
   {
     id: "diamond",
     name: "Diamond Royale",
     badge: "Best Value",
+    tagline: "Perfect For Serious Families",
     price: "₹5,999",
-    duration: "for 6 Months",
+    duration: "/ 6 months",
     isPopular: false,
     features: [
       "View 80 Verified Contact Numbers",
@@ -351,15 +354,16 @@ export const MEMBERSHIP_PLANS = [
       "Background & ID verification priority",
       "Astrology consultation session included"
     ],
-    cta: "Upgrade to Diamond",
-    btnClass: "btn-burgundy"
+    cta: "Choose Diamond",
+    btnClass: "plan-clean-cta"
   },
   {
     id: "platinum",
     name: "Platinum Elite",
     badge: "Concierge Matrimony",
+    tagline: "For VIP Personal Concierge",
     price: "₹11,999",
-    duration: "for 12 Months",
+    duration: "/ 12 months",
     isPopular: false,
     features: [
       "Unlimited Verified Contacts Access",
@@ -369,8 +373,8 @@ export const MEMBERSHIP_PLANS = [
       "Invitation to exclusive offline meetups",
       "100% Success Guarantee or Refund"
     ],
-    cta: "Join Platinum Elite",
-    btnClass: "btn-burgundy"
+    cta: "Choose Platinum",
+    btnClass: "plan-clean-cta"
   }
 ];
 

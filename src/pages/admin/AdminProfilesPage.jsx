@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
   Users, 
   Search, 
@@ -12,19 +13,31 @@ import {
   X, 
   Check, 
   Clock,
-  Sparkles
+  Sparkles,
+  Edit2,
+  Upload,
+  Camera,
+  Image as ImageIcon
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 
 export default function AdminProfilesPage() {
+  const [searchParams] = useSearchParams();
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [activeFilter, setActiveFilter] = useState(searchParams.get('filter') || 'all');
+  const [notificationMsg, setNotificationMsg] = useState('');
+
+  useEffect(() => {
+    const f = searchParams.get('filter');
+    if (f) setActiveFilter(f);
+  }, [searchParams]);
 
   // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [viewingProfile, setViewingProfile] = useState(null);
+  const [editingProfile, setEditingProfile] = useState(null);
 
   // New Profile Form State
   const [formData, setFormData] = useState({
@@ -45,9 +58,85 @@ export default function AdminProfilesPage() {
     rashi: 'Kanya (Virgo)',
     nakshatra: 'Hasta',
     manglik: 'Non-Manglik',
+    image: '',
     verified: true,
+    approved: true,
+    status: 'approved',
     about: 'Cultured, family-oriented professional looking for a life partner with mutual respect and progressive outlook.'
   });
+
+  const [editFormData, setEditFormData] = useState(null);
+
+  const handleOpenEdit = (profile) => {
+    setEditingProfile(profile);
+    setEditFormData({
+      ...profile,
+      name: profile.name || profile.fullName || '',
+      gender: profile.gender || 'Female',
+      age: profile.age || 26,
+      height: profile.height || "5' 5\"",
+      religion: profile.religion || 'Hindu',
+      caste: profile.caste || 'Brahmin',
+      motherTongue: profile.motherTongue || 'Bengali',
+      city: profile.city || 'Kolkata',
+      state: profile.state || 'West Bengal',
+      education: profile.education || 'Graduate',
+      profession: profile.profession || 'Professional',
+      company: profile.company || '',
+      annualIncome: profile.annualIncome || '₹10 - 15 LPA',
+      diet: profile.diet || 'Non-Vegetarian',
+      rashi: profile.rashi || 'Kanya (Virgo)',
+      nakshatra: profile.nakshatra || '',
+      manglik: profile.manglik || 'Non-Manglik',
+      image: profile.image || profile.profileImage || '',
+      about: profile.about || profile.aboutMe || ''
+    });
+  };
+
+  const sampleAvatars = {
+    female: [
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=600',
+      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=600',
+      'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=600',
+      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=600'
+    ],
+    male: [
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600',
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=600',
+      'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=600',
+      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=600'
+    ]
+  };
+
+  const handlePhotoFileUpload = (e, isEdit = false) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Please select a photo smaller than 5MB.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (isEdit) {
+          setEditFormData(prev => ({ ...prev, image: reader.result, profileImage: reader.result }));
+        } else {
+          setFormData(prev => ({ ...prev, image: reader.result, profileImage: reader.result }));
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    if (!editingProfile || !editFormData) return;
+    const res = await adminService.updateProfile(editingProfile.id, editFormData);
+    if (res.success) {
+      setProfiles(prev => prev.map(p => (p.id === editingProfile.id || p.memberId === editingProfile.id) ? res.data : p));
+      setEditingProfile(null);
+      setEditFormData(null);
+    }
+  };
 
   const loadProfiles = async () => {
     setLoading(true);
@@ -76,6 +165,7 @@ export default function AdminProfilesPage() {
     window.addEventListener('storage', handleSync);
     window.addEventListener('focus', handleSync);
     window.addEventListener('saptaganga_profile_created', handleSync);
+    window.addEventListener('saptaganga_profile_approved', handleSync);
 
     const interval = setInterval(handleSync, 2500);
 
@@ -83,6 +173,7 @@ export default function AdminProfilesPage() {
       window.removeEventListener('storage', handleSync);
       window.removeEventListener('focus', handleSync);
       window.removeEventListener('saptaganga_profile_created', handleSync);
+      window.removeEventListener('saptaganga_profile_approved', handleSync);
       clearInterval(interval);
     };
   }, []);
@@ -97,8 +188,9 @@ export default function AdminProfilesPage() {
   const handleApproveProfile = async (profileId) => {
     const res = await adminService.approveProfile(profileId);
     if (res.success) {
-      setProfiles(prev => prev.map(p => p.id === profileId ? { ...p, verified: true, approved: true, status: 'approved' } : p));
-      alert(`🎉 Profile ${profileId} has been successfully approved and published live! An approval notification has been delivered to the user.`);
+      setProfiles(prev => prev.map(p => (p.id === profileId || p.memberId === profileId) ? { ...p, verified: true, approved: true, status: 'approved' } : p));
+      setNotificationMsg(`🎉 Profile ${profileId} has been successfully approved and published live!`);
+      setTimeout(() => setNotificationMsg(''), 5000);
     }
   };
 
@@ -178,6 +270,25 @@ export default function AdminProfilesPage() {
           <span>Add New Candidate</span>
         </button>
       </div>
+
+      {/* Success Notification Banner */}
+      {notificationMsg && (
+        <div style={{
+          background: '#ECFDF5',
+          border: '1px solid #A7F3D0',
+          color: '#065F46',
+          padding: '12px 18px',
+          borderRadius: '10px',
+          marginBottom: '16px',
+          fontWeight: 600,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <CheckCircle2 size={18} color="#10B981" />
+          <span>{notificationMsg}</span>
+        </div>
+      )}
 
       {/* Main Table Card */}
       <div className="admin-card">
@@ -396,6 +507,15 @@ export default function AdminProfilesPage() {
                           <Eye size={15} />
                         </button>
 
+                        {/* Edit Candidate */}
+                        <button 
+                          onClick={() => handleOpenEdit(p)}
+                          className="admin-btn-icon"
+                          title="Edit Candidate Details"
+                        >
+                          <Edit2 size={15} />
+                        </button>
+
                         {/* Delete Candidate */}
                         <button 
                           onClick={() => handleDelete(p.id)}
@@ -585,6 +705,142 @@ export default function AdminProfilesPage() {
                 </div>
               </div>
 
+              {/* Profile Photo Section (Upload + URL + Presets) */}
+              <div style={{
+                background: '#FAF6F0',
+                border: '1.5px dashed var(--admin-border-gold)',
+                borderRadius: '10px',
+                padding: '16px',
+                marginBottom: '16px'
+              }}>
+                <label className="admin-form-label" style={{ fontWeight: 700, color: 'var(--primary-burgundy-dark)', marginBottom: '8px', display: 'block' }}>
+                  📸 Candidate Profile Photo
+                </label>
+
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  {/* Photo Preview Circle */}
+                  <div style={{
+                    width: '84px',
+                    height: '84px',
+                    borderRadius: '50%',
+                    overflow: 'hidden',
+                    background: '#EDE8E1',
+                    border: '3px solid var(--accent-gold)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}>
+                    {formData.image ? (
+                      <img 
+                        src={formData.image} 
+                        alt="Candidate Preview" 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      />
+                    ) : (
+                      <div style={{ textAlign: 'center', color: '#8C827A' }}>
+                        <Camera size={24} style={{ margin: '0 auto 2px auto' }} />
+                        <span style={{ fontSize: '0.68rem', display: 'block', fontWeight: 600 }}>No Photo</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions Area */}
+                  <div style={{ flex: 1, minWidth: '220px' }}>
+                    <div style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
+                      <label 
+                        htmlFor="adminAddPhotoInput"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          background: 'linear-gradient(135deg, var(--primary-burgundy) 0%, var(--primary-burgundy-dark) 100%)',
+                          color: '#FFF',
+                          padding: '8px 16px',
+                          borderRadius: '6px',
+                          fontSize: '0.84rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          boxShadow: '0 2px 8px rgba(115, 15, 45, 0.25)'
+                        }}
+                      >
+                        <Upload size={15} />
+                        <span>Upload from Computer / Phone</span>
+                        <input 
+                          id="adminAddPhotoInput"
+                          type="file" 
+                          accept="image/*" 
+                          style={{ display: 'none' }}
+                          onChange={(e) => handlePhotoFileUpload(e, false)}
+                        />
+                      </label>
+
+                      {formData.image && (
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, image: '' })}
+                          style={{
+                            background: 'transparent',
+                            border: '1px solid #DC2626',
+                            color: '#DC2626',
+                            padding: '7px 12px',
+                            borderRadius: '6px',
+                            fontSize: '0.78rem',
+                            cursor: 'pointer',
+                            fontWeight: 600
+                          }}
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Or Paste URL */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '0.76rem', color: '#666', whiteSpace: 'nowrap' }}>Or Image URL:</span>
+                      <input 
+                        type="url" 
+                        className="admin-form-input" 
+                        placeholder="Paste direct photo link (https://...)"
+                        style={{ padding: '6px 10px', fontSize: '0.82rem' }}
+                        value={formData.image || ''}
+                        onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Avatar Presets */}
+                <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #EAE3D8' }}>
+                  <span style={{ fontSize: '0.76rem', color: 'var(--admin-text-muted)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>
+                    Quick Select Sample Avatar:
+                  </span>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    {(formData.gender === 'female' ? sampleAvatars.female : sampleAvatars.male).map((sampleUrl, sIdx) => (
+                      <img 
+                        key={sIdx}
+                        src={sampleUrl}
+                        alt={`Sample ${sIdx + 1}`}
+                        onClick={() => setFormData({ ...formData, image: sampleUrl })}
+                        style={{
+                          width: '38px',
+                          height: '38px',
+                          borderRadius: '50%',
+                          objectFit: 'cover',
+                          cursor: 'pointer',
+                          border: formData.image === sampleUrl ? '2.5px solid var(--primary-burgundy)' : '2px solid #D1D5DB',
+                          opacity: formData.image === sampleUrl ? 1 : 0.75,
+                          transition: 'all 0.2s ease',
+                          boxShadow: formData.image === sampleUrl ? '0 0 8px rgba(115,15,45,0.4)' : 'none'
+                        }}
+                        title="Click to use this photo"
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <div style={{ marginBottom: '16px' }}>
                 <label className="admin-form-label">About / Bio</label>
                 <textarea 
@@ -601,6 +857,337 @@ export default function AdminProfilesPage() {
                 </button>
                 <button type="submit" className="admin-btn-primary">
                   <span>Save Candidate to Firestore</span>
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ✏️ EDIT CANDIDATE MODAL */}
+      {editingProfile && editFormData && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0,0,0,0.6)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 2000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px'
+        }}>
+          <div style={{
+            background: '#FFF',
+            borderRadius: 'var(--radius-md)',
+            width: '100%',
+            maxWidth: '680px',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            padding: '28px',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
+            border: '1px solid var(--admin-border-gold)'
+          }}>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div className="kpi-icon-burgundy" style={{ width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Edit2 size={18} />
+                </div>
+                <div>
+                  <h2 style={{ fontFamily: 'var(--font-serif)', color: 'var(--primary-burgundy-dark)', fontSize: '1.4rem' }}>
+                    Edit Candidate Profile
+                  </h2>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--admin-text-muted)' }}>ID: {editingProfile.id}</span>
+                </div>
+              </div>
+              <button onClick={() => { setEditingProfile(null); setEditFormData(null); }} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit}>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+                <div>
+                  <label className="admin-form-label">Full Name</label>
+                  <input 
+                    type="text" 
+                    className="admin-form-input" 
+                    required 
+                    value={editFormData.name || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="admin-form-label">Gender</label>
+                  <select 
+                    className="admin-form-input"
+                    value={editFormData.gender || 'Female'}
+                    onChange={(e) => setEditFormData({ ...editFormData, gender: e.target.value })}
+                  >
+                    <option value="Female">Bride (Female)</option>
+                    <option value="Male">Groom (Male)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px', marginBottom: '14px' }}>
+                <div>
+                  <label className="admin-form-label">Age</label>
+                  <input 
+                    type="number" 
+                    className="admin-form-input" 
+                    value={editFormData.age || 26}
+                    onChange={(e) => setEditFormData({ ...editFormData, age: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="admin-form-label">Height</label>
+                  <input 
+                    type="text" 
+                    className="admin-form-input" 
+                    value={editFormData.height || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, height: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="admin-form-label">Mother Tongue</label>
+                  <input 
+                    type="text" 
+                    className="admin-form-input" 
+                    value={editFormData.motherTongue || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, motherTongue: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px', marginBottom: '14px' }}>
+                <div>
+                  <label className="admin-form-label">Religion</label>
+                  <input 
+                    type="text" 
+                    className="admin-form-input" 
+                    value={editFormData.religion || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, religion: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="admin-form-label">Caste</label>
+                  <input 
+                    type="text" 
+                    className="admin-form-input" 
+                    value={editFormData.caste || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, caste: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="admin-form-label">City</label>
+                  <input 
+                    type="text" 
+                    className="admin-form-input" 
+                    value={editFormData.city || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, city: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+                <div>
+                  <label className="admin-form-label">Education</label>
+                  <input 
+                    type="text" 
+                    className="admin-form-input" 
+                    value={editFormData.education || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, education: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="admin-form-label">Profession</label>
+                  <input 
+                    type="text" 
+                    className="admin-form-input" 
+                    value={editFormData.profession || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, profession: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+                <div>
+                  <label className="admin-form-label">Annual Income</label>
+                  <input 
+                    type="text" 
+                    className="admin-form-input" 
+                    value={editFormData.annualIncome || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, annualIncome: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="admin-form-label">Rashi / Horoscope</label>
+                  <input 
+                    type="text" 
+                    className="admin-form-input" 
+                    value={editFormData.rashi || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, rashi: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              {/* Profile Photo Section (Upload + URL + Presets) */}
+              <div style={{
+                background: '#FAF6F0',
+                border: '1.5px dashed var(--admin-border-gold)',
+                borderRadius: '10px',
+                padding: '16px',
+                marginBottom: '16px'
+              }}>
+                <label className="admin-form-label" style={{ fontWeight: 700, color: 'var(--primary-burgundy-dark)', marginBottom: '8px', display: 'block' }}>
+                  📸 Candidate Profile Photo
+                </label>
+
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  {/* Photo Preview Circle */}
+                  <div style={{
+                    width: '84px',
+                    height: '84px',
+                    borderRadius: '50%',
+                    overflow: 'hidden',
+                    background: '#EDE8E1',
+                    border: '3px solid var(--accent-gold)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}>
+                    {editFormData.image ? (
+                      <img 
+                        src={editFormData.image} 
+                        alt="Candidate Preview" 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      />
+                    ) : (
+                      <div style={{ textAlign: 'center', color: '#8C827A' }}>
+                        <Camera size={24} style={{ margin: '0 auto 2px auto' }} />
+                        <span style={{ fontSize: '0.68rem', display: 'block', fontWeight: 600 }}>No Photo</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions Area */}
+                  <div style={{ flex: 1, minWidth: '220px' }}>
+                    <div style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
+                      <label 
+                        htmlFor="adminEditPhotoInput"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          background: 'linear-gradient(135deg, var(--primary-burgundy) 0%, var(--primary-burgundy-dark) 100%)',
+                          color: '#FFF',
+                          padding: '8px 16px',
+                          borderRadius: '6px',
+                          fontSize: '0.84rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          boxShadow: '0 2px 8px rgba(115, 15, 45, 0.25)'
+                        }}
+                      >
+                        <Upload size={15} />
+                        <span>Upload from Computer / Phone</span>
+                        <input 
+                          id="adminEditPhotoInput"
+                          type="file" 
+                          accept="image/*" 
+                          style={{ display: 'none' }}
+                          onChange={(e) => handlePhotoFileUpload(e, true)}
+                        />
+                      </label>
+
+                      {editFormData.image && (
+                        <button
+                          type="button"
+                          onClick={() => setEditFormData({ ...editFormData, image: '', profileImage: '' })}
+                          style={{
+                            background: 'transparent',
+                            border: '1px solid #DC2626',
+                            color: '#DC2626',
+                            padding: '7px 12px',
+                            borderRadius: '6px',
+                            fontSize: '0.78rem',
+                            cursor: 'pointer',
+                            fontWeight: 600
+                          }}
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Or Paste URL */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '0.76rem', color: '#666', whiteSpace: 'nowrap' }}>Or Image URL:</span>
+                      <input 
+                        type="url" 
+                        className="admin-form-input" 
+                        placeholder="Paste direct photo link (https://...)"
+                        style={{ padding: '6px 10px', fontSize: '0.82rem' }}
+                        value={editFormData.image || ''}
+                        onChange={(e) => setEditFormData({ ...editFormData, image: e.target.value, profileImage: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Avatar Presets */}
+                <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #EAE3D8' }}>
+                  <span style={{ fontSize: '0.76rem', color: 'var(--admin-text-muted)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>
+                    Quick Select Sample Avatar:
+                  </span>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    {(editFormData.gender?.toLowerCase() === 'female' || editFormData.gender?.toLowerCase() === 'bride' ? sampleAvatars.female : sampleAvatars.male).map((sampleUrl, sIdx) => (
+                      <img 
+                        key={sIdx}
+                        src={sampleUrl}
+                        alt={`Sample ${sIdx + 1}`}
+                        onClick={() => setEditFormData({ ...editFormData, image: sampleUrl, profileImage: sampleUrl })}
+                        style={{
+                          width: '38px',
+                          height: '38px',
+                          borderRadius: '50%',
+                          objectFit: 'cover',
+                          cursor: 'pointer',
+                          border: editFormData.image === sampleUrl ? '2.5px solid var(--primary-burgundy)' : '2px solid #D1D5DB',
+                          opacity: editFormData.image === sampleUrl ? 1 : 0.75,
+                          transition: 'all 0.2s ease',
+                          boxShadow: editFormData.image === sampleUrl ? '0 0 8px rgba(115,15,45,0.4)' : 'none'
+                        }}
+                        title="Click to use this photo"
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '16px' }}>
+                <label className="admin-form-label">About / Bio</label>
+                <textarea 
+                  rows="3"
+                  className="admin-form-input"
+                  value={editFormData.about || ''}
+                  onChange={(e) => setEditFormData({ ...editFormData, about: e.target.value })}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button type="button" onClick={() => { setEditingProfile(null); setEditFormData(null); }} style={{ padding: '10px 18px', borderRadius: '6px', border: '1px solid #CCC', background: '#FFF', cursor: 'pointer', fontWeight: '600' }}>
+                  Cancel
+                </button>
+                <button type="submit" className="admin-btn-primary">
+                  <span>Update & Publish Candidate</span>
                 </button>
               </div>
 

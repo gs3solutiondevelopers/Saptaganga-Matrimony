@@ -62,9 +62,16 @@ export const firestoreService = {
     const defaultFemale = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=600';
     const defaultMale = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600';
 
-    // 1. Add registered profile cache
-    const combinedCandidates = [...adminProfiles, ...registeredProfiles];
-    combinedCandidates.forEach(p => {
+    // 1. Base / mock profiles first
+    baseList.forEach(p => {
+      if (p && (p.id || p.memberId)) {
+        const id = p.id || p.memberId;
+        map.set(id, { ...p, id });
+      }
+    });
+
+    // 2. Add registered profile cache
+    registeredProfiles.forEach(p => {
       if (p && (p.id || p.memberId) && (p.approved || p.status === 'approved' || p.verified)) {
         const id = p.id || p.memberId;
         const genderKey = (p.gender?.toLowerCase() === 'female' || p.gender?.toLowerCase() === 'bride') ? 'Female' : 'Male';
@@ -88,7 +95,7 @@ export const firestoreService = {
       }
     });
 
-    // 2. Add current user if approved
+    // 3. Add current user if approved
     if (userProfile && (userProfile.id || userProfile.memberId) && (userProfile.approved || userProfile.status === 'approved' || userProfile.verified)) {
       const id = userProfile.id || userProfile.memberId;
       const genderKey = (userProfile.gender?.toLowerCase() === 'female' || userProfile.gender?.toLowerCase() === 'bride') ? 'Female' : 'Male';
@@ -111,24 +118,40 @@ export const firestoreService = {
       });
     }
 
-    // 3. Add base / mock profiles
-    baseList.forEach(p => {
+    // 4. Add admin edited profiles (HIGHEST PRIORITY: overrides base & registered profiles)
+    adminProfiles.forEach(p => {
       if (p && (p.id || p.memberId)) {
         const id = p.id || p.memberId;
-        if (!map.has(id)) {
-          map.set(id, p);
-        } else {
-          // If map has this id from registered profiles with custom image, preserve that image!
-          const existing = map.get(id);
-          if (!existing.image || existing.image.includes('photo-1539571696357')) {
-            existing.image = p.image;
-            existing.profileImage = p.profileImage;
-          }
+        const isApproved = Boolean(p.approved === true || p.status === 'approved');
+
+        // If this profile is an unapproved pending registration, do NOT publish live on website until admin approves!
+        if (!isApproved && !map.has(id)) {
+          return;
         }
+
+        const genderKey = (p.gender?.toLowerCase() === 'female' || p.gender?.toLowerCase() === 'bride') ? 'Female' : 'Male';
+        const photo = p.image || p.profileImage || p.profilePhoto;
+        const existing = map.get(id) || {};
+        map.set(id, {
+          ...existing,
+          ...p,
+          id,
+          name: p.name || p.fullName || existing.name || 'Member',
+          fullName: p.name || p.fullName || existing.name || 'Member',
+          gender: genderKey,
+          age: Number(p.age) || existing.age || 26,
+          image: photo || existing.image || (genderKey === 'Female' ? defaultFemale : defaultMale),
+          profileImage: photo || existing.profileImage || (genderKey === 'Female' ? defaultFemale : defaultMale),
+          category: genderKey === 'Female' ? 'brides' : 'grooms',
+          approved: isApproved,
+          status: isApproved ? 'approved' : 'pending_approval',
+          verified: Boolean(p.verified)
+        });
       }
     });
 
-    const allLiveProfiles = Array.from(map.values());
+    // Only approved profiles are shown live on the public website
+    const allLiveProfiles = Array.from(map.values()).filter(p => p.approved === true || p.status === 'approved');
     return this._filterLocalProfiles(allLiveProfiles, filters);
   },
 

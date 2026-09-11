@@ -1,28 +1,91 @@
-import React, { useState } from 'react';
-import { 
-  CheckCircle2, 
-  Heart, 
-  Send, 
-  Eye, 
-  Sparkles, 
-  ArrowRight,
-  Filter
-} from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
 
 export default function FeaturedProfiles({ 
   profiles = [], 
   onSelectProfile, 
-  onSendInterest, 
-  onToggleShortlist, 
-  shortlistedIds = new Set(),
   activeCategory = 'all',
   onCategoryChange
 }) {
+  const containerRef = useRef(null);
+  const trackRef = useRef(null);
+  const animFrameIdRef = useRef(null);
+  const offsetRef = useRef(0);
+  const isPausedRef = useRef(false);
+
   const categories = [
     { id: 'all', label: 'All Matches' },
     { id: 'brides', label: 'Brides' },
     { id: 'grooms', label: 'Grooms' }
   ];
+
+  // Repeat profiles 4 times for a seamless, continuous, infinite gliding stream
+  const repeatedProfiles = profiles.length > 0 
+    ? [...profiles, ...profiles, ...profiles, ...profiles] 
+    : [];
+
+  useEffect(() => {
+    offsetRef.current = 0;
+    const cardWidth = 250;
+    const gap = 24;
+    const singleSetWidth = profiles.length * (cardWidth + gap);
+
+    const animate = () => {
+      if (trackRef.current && containerRef.current && singleSetWidth > 0) {
+        if (!isPausedRef.current) {
+          offsetRef.current += 0.85; // smooth constant gliding velocity
+          if (offsetRef.current >= singleSetWidth) {
+            offsetRef.current -= singleSetWidth;
+          }
+          trackRef.current.style.transform = `translate3d(-${offsetRef.current}px, 0, 0)`;
+        }
+
+        // Dynamically scale each card depending on its real-time distance to the container center
+        const containerRect = containerRef.current.getBoundingClientRect();
+        const containerCenter = containerRect.left + containerRect.width / 2;
+        const cardElements = trackRef.current.children;
+        const centerThreshold = 300; // Radius around the center where cards expand
+
+        for (let i = 0; i < cardElements.length; i++) {
+          const card = cardElements[i];
+          const cardRect = card.getBoundingClientRect();
+          const cardCenter = cardRect.left + cardRect.width / 2;
+          const distance = Math.abs(containerCenter - cardCenter);
+
+          if (distance < centerThreshold) {
+            const ratio = distance / centerThreshold; // 0 at exact center, 1 at edge
+            const scale = 1.15 - (ratio * 0.27); // 1.15 down to 0.88
+            const opacity = 1 - (ratio * 0.18);  // 1.0 down to 0.82
+            const zIndex = Math.round((1 - ratio) * 10) + 1;
+
+            card.style.transform = `scale(${scale.toFixed(3)})`;
+            card.style.opacity = opacity.toFixed(3);
+            card.style.zIndex = zIndex;
+
+            if (distance < 90) {
+              card.classList.add('is-active-center');
+            } else {
+              card.classList.remove('is-active-center');
+            }
+          } else {
+            card.style.transform = 'scale(0.88)';
+            card.style.opacity = '0.78';
+            card.style.zIndex = '1';
+            card.classList.remove('is-active-center');
+          }
+        }
+      }
+
+      animFrameIdRef.current = requestAnimationFrame(animate);
+    };
+
+    animFrameIdRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animFrameIdRef.current) {
+        cancelAnimationFrame(animFrameIdRef.current);
+      }
+    };
+  }, [profiles.length, activeCategory]);
 
   return (
     <section className="profiles-section section-padding" id="featured">
@@ -50,18 +113,25 @@ export default function FeaturedProfiles({
           ))}
         </div>
 
-        {/* Single-Line Animated Profiles Carousel */}
-        <div className="profiles-carousel-wrapper">
-          <div className="profiles-carousel-track">
-            {(profiles.length > 0 ? [...profiles, ...profiles] : []).map((profile, idx) => (
-              <div className="profile-card" key={`${profile.id}-${idx}`}>
+        {/* Continuous Flow Carousel with Dynamic Center Scaling */}
+        <div 
+          className="profiles-continuous-wrapper"
+          ref={containerRef}
+          onMouseEnter={() => { isPausedRef.current = true; }}
+          onMouseLeave={() => { isPausedRef.current = false; }}
+        >
+          <div className="profiles-continuous-track" ref={trackRef}>
+            {repeatedProfiles.map((profile, idx) => (
+              <div 
+                className="profile-continuous-card" 
+                key={`${profile.id}-${idx}`}
+                onClick={() => {
+                  if (onSelectProfile) onSelectProfile(profile);
+                }}
+              >
                 
-                {/* Photo */}
-                <div 
-                  className="profile-img-container" 
-                  onClick={() => onSelectProfile(profile)}
-                  style={{ cursor: 'pointer' }}
-                >
+                {/* Photo Container */}
+                <div className="profile-img-container">
                   <img 
                     src={profile.image} 
                     alt={profile.name} 
@@ -70,10 +140,13 @@ export default function FeaturedProfiles({
                   />
                 </div>
 
-                {/* Profile Information & Action */}
+                {/* Profile Action */}
                 <div className="profile-info" style={{ padding: '14px 16px 16px 16px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                   <button 
-                    onClick={() => onSelectProfile(profile)} 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onSelectProfile) onSelectProfile(profile);
+                    }} 
                     className="profile-btn-view"
                     style={{ 
                       width: '100%', 
@@ -99,7 +172,7 @@ export default function FeaturedProfiles({
         </div>
 
         {/* View All Matches Button */}
-        <div style={{ textAlign: 'center', marginTop: '40px' }}>
+        <div style={{ textAlign: 'center', marginTop: '36px' }}>
           <button 
             onClick={() => onCategoryChange('all')}
             className="btn-outline-burgundy" 

@@ -262,6 +262,11 @@ export const adminService = {
         });
         localStorage.setItem('saptaganga_admin_profiles', JSON.stringify(updated));
 
+        // Also update all registered profiles list
+        const reg = JSON.parse(localStorage.getItem('saptaganga_all_registered_profiles') || '[]');
+        const updatedReg = reg.map(p => (p.id === profileId || p.memberId === profileId) ? { ...p, verified: newStatus, approved: newStatus, status: newStatus ? 'approved' : 'pending_approval', badge: newStatus ? '100% Verified' : 'Verification Pending' } : p);
+        localStorage.setItem('saptaganga_all_registered_profiles', JSON.stringify(updatedReg));
+
         // Update current user if it is their profile
         const user = JSON.parse(localStorage.getItem('saptaganga_user') || 'null');
         if (user && (user.memberId === profileId || user.id === profileId || user.phone === localSaved.find(p => p.id === profileId)?.phone)) {
@@ -308,6 +313,11 @@ export const adminService = {
         const targetProfile = localSaved.find(p => p.id === profileId || p.memberId === profileId);
         const updated = localSaved.map(p => (p.id === profileId || p.memberId === profileId) ? { ...p, approved: true, status: 'approved', verified: true, badge: '100% Verified' } : p);
         localStorage.setItem('saptaganga_admin_profiles', JSON.stringify(updated));
+
+        // Also update all registered profiles list
+        const reg = JSON.parse(localStorage.getItem('saptaganga_all_registered_profiles') || '[]');
+        const updatedReg = reg.map(p => (p.id === profileId || p.memberId === profileId) ? { ...p, approved: true, status: 'approved', verified: true, badge: '100% Verified' } : p);
+        localStorage.setItem('saptaganga_all_registered_profiles', JSON.stringify(updatedReg));
 
         // Update current user if it is their profile
         const user = JSON.parse(localStorage.getItem('saptaganga_user') || 'null');
@@ -378,11 +388,11 @@ export const adminService = {
       rashi: profileData.rashi || 'Kanya (Virgo)',
       nakshatra: profileData.nakshatra || 'Hasta',
       manglik: profileData.manglik || 'Non-Manglik',
-      verified: profileData.verified ?? false,
-      approved: profileData.approved ?? false,
+      verified: profileData.verified !== undefined ? Boolean(profileData.verified) : false,
+      approved: profileData.approved !== undefined ? Boolean(profileData.approved) : false,
       status: profileData.status || (profileData.approved ? 'approved' : 'pending_approval'),
       online: true,
-      isFeatured: profileData.isFeatured ?? true,
+      isFeatured: profileData.isFeatured ?? false,
       category: isMale ? 'grooms' : 'brides',
       badge: profileData.badge || (profileData.verified ? '100% Verified' : 'Verification Pending'),
       image: profileData.image || profileData.profilePhoto || (isMale 
@@ -405,8 +415,9 @@ export const adminService = {
       try {
         await setDoc(doc(db, 'profiles', profileId), {
           ...newProfile,
-          createdAt: serverTimestamp()
-        });
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        }, { merge: true });
       } catch (err) {
         console.warn('Firestore profile save fallback:', err.message);
       }
@@ -417,12 +428,84 @@ export const adminService = {
         const saved = JSON.parse(localStorage.getItem('saptaganga_admin_profiles') || '[]');
         const filtered = saved.filter(p => p.id !== profileId && p.memberId !== profileId);
         localStorage.setItem('saptaganga_admin_profiles', JSON.stringify([newProfile, ...filtered]));
+
+        // Also sync into all registered profiles
+        const reg = JSON.parse(localStorage.getItem('saptaganga_all_registered_profiles') || '[]');
+        const filteredReg = reg.filter(p => p.id !== profileId && p.memberId !== profileId);
+        localStorage.setItem('saptaganga_all_registered_profiles', JSON.stringify([newProfile, ...filteredReg]));
+
+        // Dispatch sync events so website updates immediately without reload
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new CustomEvent('saptaganga_profile_created', { detail: { profile: newProfile } }));
       } catch (e) {
         console.error('Storage save error in createProfile:', e);
       }
     }
 
     return { success: true, data: newProfile };
+  },
+
+  // Update Existing Profile
+  async updateProfile(profileId, updatedData) {
+    const genderKey = (updatedData.gender?.toLowerCase() === 'female' || updatedData.gender?.toLowerCase() === 'bride') ? 'Female' : 'Male';
+    const isMale = genderKey === 'Male';
+
+    const mergedProfile = {
+      ...updatedData,
+      id: profileId,
+      memberId: profileId,
+      gender: genderKey,
+      category: isMale ? 'grooms' : 'brides',
+      name: updatedData.name || updatedData.fullName || 'Member',
+      fullName: updatedData.name || updatedData.fullName || 'Member',
+      age: Number(updatedData.age) || 26,
+      updatedAt: new Date().toISOString()
+    };
+
+    if (isFirebaseConfigured()) {
+      try {
+        await setDoc(doc(db, 'profiles', profileId), {
+          ...mergedProfile,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      } catch (err) {
+        console.warn('Firestore update fallback:', err.message);
+      }
+    }
+
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const saved = JSON.parse(localStorage.getItem('saptaganga_admin_profiles') || '[]');
+        const index = saved.findIndex(p => p.id === profileId || p.memberId === profileId);
+        if (index >= 0) {
+          saved[index] = { ...saved[index], ...mergedProfile };
+        } else {
+          saved.unshift(mergedProfile);
+        }
+        localStorage.setItem('saptaganga_admin_profiles', JSON.stringify(saved));
+
+        // Also update saptaganga_all_registered_profiles if present
+        const reg = JSON.parse(localStorage.getItem('saptaganga_all_registered_profiles') || '[]');
+        const regIdx = reg.findIndex(p => p.id === profileId || p.memberId === profileId);
+        if (regIdx >= 0) {
+          reg[regIdx] = { ...reg[regIdx], ...mergedProfile };
+          localStorage.setItem('saptaganga_all_registered_profiles', JSON.stringify(reg));
+        }
+
+        // Also update current user if it matches
+        const user = JSON.parse(localStorage.getItem('saptaganga_user') || 'null');
+        if (user && (user.id === profileId || user.memberId === profileId)) {
+          localStorage.setItem('saptaganga_user', JSON.stringify({ ...user, ...mergedProfile }));
+        }
+
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new CustomEvent('saptaganga_profile_created', { detail: { profile: mergedProfile } }));
+      } catch (e) {
+        console.error('Storage update error in updateProfile:', e);
+      }
+    }
+
+    return { success: true, data: mergedProfile };
   },
 
   // Delete Profile
@@ -434,6 +517,24 @@ export const adminService = {
         console.warn('Firestore delete error:', err.message);
       }
     }
+
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const saved = JSON.parse(localStorage.getItem('saptaganga_admin_profiles') || '[]');
+        const updated = saved.filter(p => p.id !== profileId && p.memberId !== profileId);
+        localStorage.setItem('saptaganga_admin_profiles', JSON.stringify(updated));
+
+        const reg = JSON.parse(localStorage.getItem('saptaganga_all_registered_profiles') || '[]');
+        const updatedReg = reg.filter(p => p.id !== profileId && p.memberId !== profileId);
+        localStorage.setItem('saptaganga_all_registered_profiles', JSON.stringify(updatedReg));
+
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new CustomEvent('saptaganga_profile_created', { detail: { profileId } }));
+      } catch (e) {
+        console.error('Storage delete error:', e);
+      }
+    }
+
     return { success: true, message: `Profile ${profileId} deleted successfully.` };
   },
 

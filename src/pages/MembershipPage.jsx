@@ -33,42 +33,43 @@ export default function MembershipPage({ onSelectPlan, onOpenAuth }) {
           <p className="section-desc">Choose a plan that fits your family's journey. Unlock contacts, initiate chats, and boost your profile visibility.</p>
         </div>
 
-        {/* Plans Grid */}
-        <div className="membership-grid" style={{ marginBottom: '60px' }}>
+        {/* Clean Plans Grid */}
+        <div className="membership-clean-grid" style={{ marginBottom: '60px' }}>
           {MEMBERSHIP_PLANS.map((plan) => (
             <div 
               key={plan.id}
-              className={`plan-card ${plan.isPopular ? 'featured' : ''}`}
+              className={`plan-clean-card ${plan.isPopular ? 'is-popular-plan' : ''}`}
             >
-              {plan.isPopular && (
-                <div className="plan-popular-tag">
-                  ★ {plan.badge}
+              {/* Top Capsule Header Box */}
+              <div className="plan-clean-header-box">
+                <div className="plan-clean-badge-row">
+                  <span className="plan-clean-badge">{plan.name}</span>
                 </div>
-              )}
 
-              <h3 className="plan-name">{plan.name}</h3>
+                <div className="plan-clean-price-row">
+                  <span className="plan-clean-price">{plan.price}</span>
+                  <span className="plan-clean-duration">{plan.duration}</span>
+                </div>
 
-              <div className="plan-price-row">
-                <span className="plan-price">{plan.price}</span>
-                <span className="plan-duration">/ {plan.duration}</span>
+                <p className="plan-clean-tagline">{plan.tagline}</p>
+
+                <button 
+                  onClick={() => onSelectPlan(plan)}
+                  className={plan.isPopular ? "plan-clean-cta-popular" : "plan-clean-cta"}
+                >
+                  <span>{plan.cta}</span>
+                </button>
               </div>
 
-              <ul className="plan-features-list">
+              {/* Bottom Features Checklist */}
+              <ul className="plan-clean-features">
                 {plan.features.map((feature, idx) => (
-                  <li className="plan-feature-item" key={idx}>
-                    <Check size={16} className="feature-check" />
+                  <li className="plan-clean-feature-item" key={idx}>
+                    <Check size={16} strokeWidth={2.4} className="plan-clean-check" />
                     <span>{feature}</span>
                   </li>
                 ))}
               </ul>
-
-              <button 
-                onClick={() => onSelectPlan(plan)}
-                className={plan.btnClass}
-                style={{ width: '100%' }}
-              >
-                <span>{plan.cta}</span>
-              </button>
             </div>
           ))}
         </div>

@@ -126,6 +126,12 @@ export const authService = {
       const updatedAdminProfiles = [adminCandidate, ...filtered];
       storage.set('saptaganga_admin_profiles', JSON.stringify(updatedAdminProfiles));
 
+      try {
+        const reg = JSON.parse(storage.get('saptaganga_all_registered_profiles') || '[]');
+        const filteredReg = reg.filter(p => p.id !== memberId && p.memberId !== memberId && (!p.phone || !p.phone.replace(/\D/g, '').endsWith(cleanPhone)));
+        storage.set('saptaganga_all_registered_profiles', JSON.stringify([adminCandidate, ...filteredReg]));
+      } catch {}
+
       if (typeof window !== 'undefined') {
         try {
           window.dispatchEvent(new Event('storage'));

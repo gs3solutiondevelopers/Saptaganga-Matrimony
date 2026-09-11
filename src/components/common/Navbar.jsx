@@ -766,14 +766,48 @@ export default function Navbar({
                 )}
               </div>
             ) : (
-              <button 
-                onClick={() => onOpenAuth('login')}
-                className="btn-burgundy"
-                style={{ padding: '9px 20px', borderRadius: '9999px' }}
-              >
-                <Lock size={15} />
-                <span>Login</span>
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button 
+                  onClick={() => onOpenAuth('login')}
+                  style={{ 
+                    padding: '8px 16px', 
+                    borderRadius: '9999px',
+                    background: '#FFFFFF',
+                    color: 'var(--primary-burgundy)',
+                    border: '1.5px solid var(--primary-burgundy)',
+                    fontSize: '0.84rem',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <Lock size={14} />
+                  <span>Login</span>
+                </button>
+
+                <button 
+                  onClick={() => {
+                    if (onOpenCreateProfile) onOpenCreateProfile();
+                    else onOpenAuth('register');
+                  }}
+                  className="btn-burgundy"
+                  style={{ 
+                    padding: '8px 18px', 
+                    borderRadius: '9999px',
+                    fontSize: '0.84rem',
+                    fontWeight: '700',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <UserPlus size={14} />
+                  <span>Register Free</span>
+                </button>
+              </div>
             )}
 
             {/* Mobile Hamburger Menu Toggle */}

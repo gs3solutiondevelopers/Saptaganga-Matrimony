@@ -78,6 +78,14 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleApproveProfile = async (profileId) => {
+    const res = await adminService.approveProfile(profileId);
+    if (res.success) {
+      setRecentProfiles(prev => prev.map(p => (p.id === profileId || p.memberId === profileId) ? { ...p, verified: true, approved: true, status: 'approved' } : p));
+      loadDashboardData();
+    }
+  };
+
   return (
     <div>
       
@@ -96,6 +104,44 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
+      {/* Pending Approvals Alert Banner */}
+      {stats.pendingCount > 0 && (
+        <div style={{
+          background: '#FFF7ED',
+          border: '1px solid #FED7AA',
+          borderRadius: '12px',
+          padding: '14px 20px',
+          marginBottom: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '14px',
+          boxShadow: '0 4px 12px rgba(234, 88, 12, 0.08)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#9A3412', fontSize: '0.92rem', fontWeight: 600 }}>
+            <Clock size={20} color="#EA580C" />
+            <span>🔔 <strong>Action Required:</strong> You have <strong>{stats.pendingCount}</strong> candidate profile registration request(s) awaiting your review and approval.</span>
+          </div>
+          <button 
+            onClick={() => navigate('/admin/profiles?filter=pending')}
+            style={{
+              background: '#EA580C',
+              color: '#FFFFFF',
+              border: 'none',
+              padding: '8px 18px',
+              borderRadius: '8px',
+              fontSize: '0.84rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              flexShrink: 0,
+              boxShadow: '0 2px 6px rgba(234, 88, 12, 0.25)'
+            }}
+          >
+            Review & Approve ({stats.pendingCount})
+          </button>
+        </div>
+      )}
+
       {/* KPI Cards Grid */}
       <div className="admin-kpi-grid">
         
@@ -103,7 +149,7 @@ export default function AdminDashboardPage() {
         <div className="admin-kpi-card">
           <div className="admin-kpi-info">
             <span className="admin-kpi-label">Total Profiles</span>
-            <span className="admin-kpi-value">{stats.totalProfiles || '6'}</span>
+            <span className="admin-kpi-value">{stats.totalProfiles ?? 6}</span>
             <span className="admin-kpi-sub">↑ Active on platform</span>
           </div>
           <div className="admin-kpi-icon kpi-icon-burgundy">
@@ -115,7 +161,7 @@ export default function AdminDashboardPage() {
         <div className="admin-kpi-card">
           <div className="admin-kpi-info">
             <span className="admin-kpi-label">Verified Members</span>
-            <span className="admin-kpi-value">{stats.verifiedCount || '5'}</span>
+            <span className="admin-kpi-value">{stats.verifiedCount ?? 5}</span>
             <span className="admin-kpi-sub">🛡️ Aadhaar/ID verified</span>
           </div>
           <div className="admin-kpi-icon kpi-icon-green">
@@ -124,11 +170,20 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Card 3: Pending Approvals */}
-        <div className="admin-kpi-card">
+        <div 
+          className="admin-kpi-card"
+          onClick={() => navigate('/admin/profiles?filter=pending')}
+          style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
+          title="Click to view pending approval requests"
+        >
           <div className="admin-kpi-info">
             <span className="admin-kpi-label">Pending Approval</span>
-            <span className="admin-kpi-value">{stats.pendingCount || '1'}</span>
-            <span className="admin-kpi-sub" style={{ color: '#D97706' }}>Action required</span>
+            <span className="admin-kpi-value" style={{ color: (stats.pendingCount > 0) ? '#D97706' : 'inherit' }}>
+              {stats.pendingCount ?? 0}
+            </span>
+            <span className="admin-kpi-sub" style={{ color: (stats.pendingCount > 0) ? '#D97706' : '#10B981' }}>
+              {stats.pendingCount > 0 ? '⚠️ Action required' : '✓ All reviewed'}
+            </span>
           </div>
           <div className="admin-kpi-icon kpi-icon-gold">
             <Clock size={24} />
@@ -202,13 +257,38 @@ export default function AdminDashboardPage() {
                       )}
                     </td>
                     <td>
-                      <button 
-                        onClick={() => handleToggleVerify(p.id, p.verified)}
-                        className={`admin-btn-icon ${p.verified ? '' : 'verify-btn'}`}
-                        title={p.verified ? "Remove verification" : "Approve & Verify"}
-                      >
-                        {p.verified ? <XCircle size={15} /> : <CheckCircle2 size={15} />}
-                      </button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-start' }}>
+                        {(!p.approved || p.status === 'pending_approval') && (
+                          <button 
+                            onClick={() => handleApproveProfile(p.id)}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              background: '#10B981',
+                              color: '#FFFFFF',
+                              border: 'none',
+                              padding: '5px 10px',
+                              borderRadius: '6px',
+                              fontSize: '0.74rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              boxShadow: '0 2px 4px rgba(16, 185, 129, 0.25)'
+                            }}
+                            title="Approve & Publish Live"
+                          >
+                            <CheckCircle2 size={12} />
+                            <span>Approve</span>
+                          </button>
+                        )}
+                        <button 
+                          onClick={() => handleToggleVerify(p.id, p.verified)}
+                          className={`admin-btn-icon ${p.verified ? '' : 'verify-btn'}`}
+                          title={p.verified ? "Remove verification" : "Approve & Verify"}
+                        >
+                          {p.verified ? <XCircle size={15} /> : <CheckCircle2 size={15} />}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

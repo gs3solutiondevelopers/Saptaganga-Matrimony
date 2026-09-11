@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { 
   Phone, 
   Mail, 
@@ -61,6 +62,7 @@ export default function Footer() {
               <li><a href="#how-it-works">How It Works</a></li>
               <li><a href="#membership">Membership Plans</a></li>
               <li><a href="#stories">Success Stories</a></li>
+              <li><Link to="/admin/login" style={{ color: 'var(--accent-gold-light)', fontWeight: 600 }}>🔒 Admin Portal</Link></li>
             </ul>
           </div>
 
@@ -119,6 +121,8 @@ export default function Footer() {
             <a href="#" style={{ color: 'rgba(255,255,255,0.7)' }}>Terms & Conditions</a>
             <span>•</span>
             <a href="#" style={{ color: 'rgba(255,255,255,0.7)' }}>Security & Trust</a>
+            <span>•</span>
+            <Link to="/admin/login" style={{ color: 'rgba(255,255,255,0.7)' }}>Admin Login</Link>
           </div>
         </div>
 

@@ -1,57 +1,58 @@
 import React from 'react';
-import { Check, Sparkles, ArrowRight, Shield } from 'lucide-react';
+import { Check, Shield } from 'lucide-react';
 import { MEMBERSHIP_PLANS } from '../../data/mockData';
 
-export default function MembershipPlans({ onSelectPlan }) {
+export default function MembershipPlans({ onSelectPlan, onOpenAuth }) {
   return (
-    <section className="section-padding" id="membership" style={{ background: 'linear-gradient(180deg, #FFF8FA 0%, #FFF 100%)' }}>
+    <section className="membership-section section-padding" id="membership">
       <div className="container">
         
         {/* Section Header */}
-        <div className="section-header">
-          <span className="section-subtitle">Transparent Pricing</span>
-          <h2 className="section-title">Choose Your Perfect Plan</h2>
-          <p className="section-desc">
-            Upgrade to premium to unlock direct contact numbers, unlimited messaging, and priority matchmaking support.
+        <div className="section-header anim-fade-up">
+          <span className="section-subtitle">MEMBERSHIP PLANS</span>
+          <h2 className="section-title">Transparent & Affordable Plans</h2>
+          <p className="section-description">
+            Choose the best plan to connect directly with your soulmate and their family.
           </p>
         </div>
 
-        {/* Membership Plans Grid */}
-        <div className="membership-grid">
+        {/* Clean Modern 3-Column Plan Cards */}
+        <div className="membership-clean-grid">
           {MEMBERSHIP_PLANS.map((plan) => (
             <div 
               key={plan.id}
-              className={`plan-card ${plan.isPopular ? 'featured' : ''}`}
+              className={`plan-clean-card ${plan.isPopular ? 'is-popular-plan' : ''}`}
             >
-              {plan.isPopular && (
-                <div className="plan-popular-tag">
-                  ★ {plan.badge}
+              {/* Top Capsule Header Box */}
+              <div className="plan-clean-header-box">
+                <div className="plan-clean-badge-row">
+                  <span className="plan-clean-badge">{plan.name}</span>
                 </div>
-              )}
 
-              <h3 className="plan-name">{plan.name}</h3>
+                <div className="plan-clean-price-row">
+                  <span className="plan-clean-price">{plan.price}</span>
+                  <span className="plan-clean-duration">{plan.duration}</span>
+                </div>
 
-              <div className="plan-price-row">
-                <span className="plan-price">{plan.price}</span>
-                <span className="plan-duration">/ {plan.duration}</span>
+                <p className="plan-clean-tagline">{plan.tagline}</p>
+
+                <button 
+                  onClick={() => onSelectPlan(plan)}
+                  className={plan.isPopular ? "plan-clean-cta-popular" : "plan-clean-cta"}
+                >
+                  <span>{plan.cta}</span>
+                </button>
               </div>
 
-              <ul className="plan-features-list">
+              {/* Bottom Features Checklist */}
+              <ul className="plan-clean-features">
                 {plan.features.map((feature, idx) => (
-                  <li className="plan-feature-item" key={idx}>
-                    <Check size={16} className="feature-check" />
+                  <li className="plan-clean-feature-item" key={idx}>
+                    <Check size={16} strokeWidth={2.4} className="plan-clean-check" />
                     <span>{feature}</span>
                   </li>
                 ))}
               </ul>
-
-              <button 
-                onClick={() => onSelectPlan(plan)}
-                className={plan.btnClass}
-                style={{ width: '100%' }}
-              >
-                <span>{plan.cta}</span>
-              </button>
             </div>
           ))}
         </div>
@@ -59,19 +60,19 @@ export default function MembershipPlans({ onSelectPlan }) {
         {/* Money-Back Guarantee Assurance */}
         <div style={{
           maxWidth: '680px',
-          margin: '40px auto 0 auto',
+          margin: '44px auto 0 auto',
           padding: '16px 24px',
-          borderRadius: 'var(--radius-md)',
+          borderRadius: '20px',
           background: '#FFF',
-          border: '1px solid var(--romantic-rose-border)',
+          border: '1px solid #EAE5E3',
           display: 'flex',
           alignItems: 'center',
           gap: '14px',
-          boxShadow: 'var(--shadow-sm)'
+          boxShadow: '0 4px 16px rgba(0,0,0,0.03)'
         }}>
-          <Shield size={24} style={{ color: 'var(--accent-gold)', flexShrink: 0 }} />
-          <div style={{ fontSize: '0.84rem', color: 'var(--text-muted)' }}>
-            <strong>100% Safe & Secure Payments:</strong> All transactions are protected with 256-bit bank-grade encryption. Instant activation upon checkout.
+          <Shield size={24} style={{ color: '#D4AF37', flexShrink: 0 }} />
+          <div style={{ fontSize: '0.84rem', color: '#64748B' }}>
+            <strong style={{ color: '#1E293B' }}>100% Safe & Secure Payments:</strong> All transactions are protected with 256-bit bank-grade encryption. Instant activation upon checkout.
           </div>
         </div>
 
@@ -79,3 +80,4 @@ export default function MembershipPlans({ onSelectPlan }) {
     </section>
   );
 }
+
