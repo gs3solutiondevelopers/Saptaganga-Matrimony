@@ -29,12 +29,13 @@ app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Health Check Endpoint (Cloud Run / Load Balancer probe)
-app.get('/api/health', (req, res) => {
+// Root info endpoint
+app.get('/', (req, res) => {
   res.status(200).json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    service: 'Saptaganga Backend API'
+    success: true,
+    message: 'Saptaganga Express Backend API is running',
+    frontend: CLIENT_ORIGIN,
+    healthCheck: `http://localhost:${PORT}/api/health`
   });
 });
 

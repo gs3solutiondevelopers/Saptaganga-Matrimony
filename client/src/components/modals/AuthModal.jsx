@@ -429,12 +429,15 @@ export default function AuthModal({ onClose, onSuccess, isGated = false }) {
               </div>
 
               {/* 6-box OTP inputs */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                gap: '8px',
-                marginBottom: '20px'
-              }}>
+              <div 
+                className="auth-otp-input-group"
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: '6px',
+                  marginBottom: '20px'
+                }}
+              >
                 {otp.map((digit, idx) => (
                   <input
                     key={idx}
@@ -445,18 +448,22 @@ export default function AuthModal({ onClose, onSuccess, isGated = false }) {
                     value={digit}
                     onChange={(e) => handleOtpChange(idx, e.target.value)}
                     onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                    className="auth-otp-input-box"
                     style={{
-                      width: '46px',
-                      height: '52px',
+                      flex: 1,
+                      minWidth: 0,
+                      maxWidth: '46px',
+                      height: '50px',
                       textAlign: 'center',
-                      fontSize: '1.3rem',
+                      fontSize: '1.25rem',
                       fontWeight: 800,
                       color: 'var(--primary-burgundy-dark)',
                       background: '#FDF7F8',
                       border: digit ? '2px solid var(--primary-burgundy)' : '1.5px solid var(--romantic-rose-border)',
                       borderRadius: '10px',
                       outline: 'none',
-                      transition: 'all 0.2s ease'
+                      transition: 'all 0.2s ease',
+                      padding: 0
                     }}
                   />
                 ))}

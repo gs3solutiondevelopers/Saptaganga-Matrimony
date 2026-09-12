@@ -2419,3 +2419,173 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   EXTRA MOBILE & SMALL SCREEN COMPONENT FIXES (320px - 768px)
+   ========================================================================== */
+
+/* Search & Matches Split Layout Responsiveness */
+@media (max-width: 992px) {
+  .search-layout-grid,
+  .matches-layout-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+  
+  .search-sidebar-filter {
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Mobile Cards Grid & Profile Cards */
+@media (max-width: 768px) {
+  .search-results-grid,
+  .matches-results-grid,
+  .stories-grid,
+  .contact-info-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .profile-card {
+    border-radius: 16px !important;
+  }
+
+  .profile-card-image-box {
+    height: 260px !important;
+  }
+
+  .profile-card-body {
+    padding: 16px !important;
+  }
+
+  .profile-card-actions {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .profile-card-actions button {
+    flex: 1 1 calc(50% - 6px) !important;
+    min-width: 110px !important;
+    padding: 9px 10px !important;
+    font-size: 0.82rem !important;
+    justify-content: center !important;
+  }
+
+  /* Modals Mobile Optimization */
+  .modal-overlay {
+    padding: 10px !important;
+    align-items: flex-end !important;
+  }
+
+  .modal-content,
+  .auth-otp-modal-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 92vh !important;
+    border-radius: 20px 20px 0 0 !important;
+    margin: 0 !important;
+  }
+
+  .modal-body {
+    padding: 16px !important;
+    max-height: calc(92vh - 80px) !important;
+  }
+
+  /* Form Grids in Modals */
+  .form-grid-2col,
+  .modal-form-row {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Profile Detail Modal Split View */
+  .profile-detail-split {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .profile-detail-left-col {
+    width: 100% !important;
+    position: static !important;
+  }
+
+  .profile-detail-hero-img {
+    height: 280px !important;
+  }
+
+  .profile-detail-keyval-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 2px !important;
+    padding: 6px 0 !important;
+    border-bottom: 1px dashed #F3F4F6;
+  }
+
+  .profile-detail-keyval-label {
+    width: 100% !important;
+    min-width: 0 !important;
+    font-size: 0.80rem !important;
+    color: #6B7280 !important;
+  }
+
+  .profile-detail-keyval-colon {
+    display: none !important;
+  }
+
+  .profile-detail-keyval-val {
+    width: 100% !important;
+    font-size: 0.88rem !important;
+    font-weight: 600 !important;
+  }
+
+  /* Notification & User Dropdown Position on Mobile */
+  .nav-actions {
+    position: relative;
+  }
+}
+
+/* Extra Small Screen Optimization (414px and below) */
+@media (max-width: 414px) {
+  .container {
+    padding: 0 12px !important;
+  }
+
+  .navbar-container {
+    height: 60px !important;
+    padding: 0 4px !important;
+  }
+
+  .navbar-brand-logo-img {
+    height: 38px !important;
+  }
+
+  .brand-name {
+    font-size: 1.05rem !important;
+  }
+
+  .brand-tagline {
+    font-size: 0.50rem !important;
+    letter-spacing: 0.5px !important;
+  }
+
+  .hero-btn-pill-primary,
+  .hero-btn-pill-outline {
+    font-size: 0.78rem !important;
+    padding: 8px 6px !important;
+  }
+
+  /* 6-box OTP responsive fit */
+  .auth-otp-input-group {
+    gap: 4px !important;
+  }
+
+  .auth-otp-input-box {
+    width: 38px !important;
+    height: 44px !important;
+    font-size: 1.1rem !important;
+  }
+}
+
