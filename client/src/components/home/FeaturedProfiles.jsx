@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { User } from 'lucide-react';
 
 export default function FeaturedProfiles({ 
   profiles = [], 
@@ -132,12 +133,32 @@ export default function FeaturedProfiles({
                 
                 {/* Photo Container */}
                 <div className="profile-img-container">
-                  <img 
-                    src={profile.image} 
-                    alt={profile.name} 
-                    className="profile-img"
-                    loading="lazy"
-                  />
+                  {profile.image || profile.profileImage ? (
+                    <img 
+                      src={profile.image || profile.profileImage} 
+                      alt={profile.name} 
+                      className="profile-img"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <div 
+                    className="profile-img-placeholder"
+                    style={{
+                      display: (profile.image || profile.profileImage) ? 'none' : 'flex',
+                      width: '100%',
+                      height: '100%',
+                      background: 'linear-gradient(135deg, #780E2F 0%, #9E1B43 100%)',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#FFF'
+                    }}
+                  >
+                    <User size={48} color="#FFFFFF" />
+                  </div>
                 </div>
 
                 {/* Profile Action */}

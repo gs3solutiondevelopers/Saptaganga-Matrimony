@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { 
+  User,
   Users, 
   Search, 
   ShieldCheck, 
@@ -17,9 +18,12 @@ import {
   Edit2,
   Upload,
   Camera,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Loader2
 } from 'lucide-react';
+import Swal from 'sweetalert2';
 import { adminService } from '../../services/adminService';
+import { storageService } from '../../services/storageService';
 
 export default function AdminProfilesPage() {
   const [searchParams] = useSearchParams();
@@ -68,6 +72,7 @@ export default function AdminProfilesPage() {
   const [editFormData, setEditFormData] = useState(null);
 
   const handleOpenEdit = (profile) => {
+    const existingPhoto = profile.image || profile.profileImage || profile.photoUrl || profile.profilePhoto || '';
     setEditingProfile(profile);
     setEditFormData({
       ...profile,
@@ -88,60 +93,119 @@ export default function AdminProfilesPage() {
       rashi: profile.rashi || 'Kanya (Virgo)',
       nakshatra: profile.nakshatra || '',
       manglik: profile.manglik || 'Non-Manglik',
-      image: profile.image || profile.profileImage || '',
+      image: existingPhoto,
+      profileImage: existingPhoto,
+      photoUrl: existingPhoto,
+      profilePhoto: existingPhoto,
       about: profile.about || profile.aboutMe || ''
     });
   };
 
-  const sampleAvatars = {
-    female: [
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=600',
-      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=600',
-      'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=600',
-      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=600'
-    ],
-    male: [
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600',
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=600',
-      'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=600',
-      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=600'
-    ]
-  };
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [isSubmittingAdd, setIsSubmittingAdd] = useState(false);
+  const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
 
-  const handlePhotoFileUpload = (e, isEdit = false) => {
+  const handlePhotoFileUpload = async (e, isEdit = false) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        alert('Please select a photo smaller than 5MB.');
+        Swal.fire({
+          icon: 'warning',
+          title: 'File Too Large',
+          text: 'Please select a photo smaller than 5MB.',
+          confirmButtonColor: '#780E2F'
+        });
+        e.target.value = '';
         return;
       }
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (isEdit) {
-          setEditFormData(prev => ({ ...prev, image: reader.result, profileImage: reader.result }));
+      setIsUploadingPhoto(true);
+      try {
+        const res = await storageService.uploadTempPhoto(file);
+        if (res.success && res.tempUrl) {
+          if (isEdit) {
+            setEditFormData(prev => ({ 
+              ...prev, 
+              image: res.tempUrl, 
+              profileImage: res.tempUrl, 
+              photoUrl: res.tempUrl,
+              profilePhoto: res.tempUrl,
+              tempStoragePath: res.storagePath 
+            }));
+          } else {
+            setFormData(prev => ({ 
+              ...prev, 
+              image: res.tempUrl, 
+              profileImage: res.tempUrl, 
+              photoUrl: res.tempUrl,
+              profilePhoto: res.tempUrl,
+              tempStoragePath: res.storagePath 
+            }));
+          }
         } else {
-          setFormData(prev => ({ ...prev, image: reader.result, profileImage: reader.result }));
+          Swal.fire({
+            icon: 'error',
+            title: 'Upload Failed',
+            text: res.error || 'Failed to upload photo. Please try again.',
+            confirmButtonColor: '#780E2F'
+          });
         }
-      };
-      reader.readAsDataURL(file);
+      } catch (err) {
+        console.error('Photo upload error:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Upload Error',
+          text: err.message || 'Photo upload failed. Please try again.',
+          confirmButtonColor: '#780E2F'
+        });
+      } finally {
+        setIsUploadingPhoto(false);
+        e.target.value = '';
+      }
     }
   };
 
   const handleSaveEdit = async (e) => {
     e.preventDefault();
     if (!editingProfile || !editFormData) return;
-    const fullPayload = {
-      ...editingProfile,
-      ...editFormData,
-      approved: editingProfile.approved ?? true,
-      verified: editingProfile.verified ?? true,
-      status: editingProfile.status || 'approved'
-    };
-    const res = await adminService.updateProfile(editingProfile.id, fullPayload);
-    if (res.success) {
-      setProfiles(prev => prev.map(p => (p.id === editingProfile.id || p.memberId === editingProfile.id) ? res.data : p));
-      setEditingProfile(null);
-      setEditFormData(null);
+    setIsSubmittingEdit(true);
+    try {
+      const fullPayload = {
+        ...editingProfile,
+        ...editFormData,
+        approved: editingProfile.approved ?? true,
+        verified: editingProfile.verified ?? true,
+        status: editingProfile.status || 'approved'
+      };
+      const res = await adminService.updateProfile(editingProfile.id, fullPayload);
+      if (res.success) {
+        setProfiles(prev => prev.map(p => (p.id === editingProfile.id || p.memberId === editingProfile.id) ? res.data : p));
+        setEditingProfile(null);
+        setEditFormData(null);
+        Swal.fire({
+          icon: 'success',
+          title: 'Profile Updated!',
+          text: 'Candidate profile has been updated and published successfully.',
+          confirmButtonColor: '#780E2F',
+          timer: 2500,
+          showConfirmButton: false
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Update Failed',
+          text: res.error || 'Failed to update candidate profile. Please try again.',
+          confirmButtonColor: '#780E2F'
+        });
+      }
+    } catch (err) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: err.message || 'Something went wrong. Please try again.',
+        confirmButtonColor: '#780E2F'
+      });
+    } finally {
+      setIsSubmittingEdit(false);
     }
   };
 
@@ -212,31 +276,58 @@ export default function AdminProfilesPage() {
 
   const handleCreateProfile = async (e) => {
     e.preventDefault();
-    const res = await adminService.createProfile(formData);
-    if (res.success) {
-      setProfiles(prev => [res.data, ...prev]);
-      setIsAddModalOpen(false);
-      setFormData({
-        name: '',
-        gender: 'female',
-        age: 26,
-        height: "5' 5\"",
-        religion: 'Hindu',
-        caste: 'Brahmin',
-        motherTongue: 'Bengali',
-        city: 'Kolkata',
-        state: 'West Bengal',
-        education: 'B.Tech / M.Tech',
-        profession: 'Software Engineer',
-        company: 'TCS / Cognizant',
-        annualIncome: '₹12 - 18 LPA',
-        diet: 'Non-Vegetarian',
-        rashi: 'Kanya (Virgo)',
-        nakshatra: 'Hasta',
-        manglik: 'Non-Manglik',
-        verified: true,
-        about: 'Cultured, family-oriented professional looking for a life partner with mutual respect and progressive outlook.'
+    setIsSubmittingAdd(true);
+    try {
+      const res = await adminService.createProfile(formData);
+      if (res.success) {
+        setProfiles(prev => [res.data, ...prev]);
+        setIsAddModalOpen(false);
+        setFormData({
+          name: '',
+          gender: 'female',
+          age: 26,
+          height: "5' 5\"",
+          religion: 'Hindu',
+          caste: 'Brahmin',
+          motherTongue: 'Bengali',
+          city: 'Kolkata',
+          state: 'West Bengal',
+          education: 'B.Tech / M.Tech',
+          profession: 'Software Engineer',
+          company: 'TCS / Cognizant',
+          annualIncome: '₹12 - 18 LPA',
+          diet: 'Non-Vegetarian',
+          rashi: 'Kanya (Virgo)',
+          nakshatra: 'Hasta',
+          manglik: 'Non-Manglik',
+          verified: true,
+          about: 'Cultured, family-oriented professional looking for a life partner with mutual respect and progressive outlook.'
+        });
+        Swal.fire({
+          icon: 'success',
+          title: 'Profile Created!',
+          text: `Candidate ${res.data?.name || ''} has been saved to Firestore successfully.`,
+          confirmButtonColor: '#780E2F',
+          timer: 2500,
+          showConfirmButton: false
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Creation Failed',
+          text: res.error || 'Failed to create candidate profile. Please try again.',
+          confirmButtonColor: '#780E2F'
+        });
+      }
+    } catch (err) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: err.message || 'Something went wrong. Please try again.',
+        confirmButtonColor: '#780E2F'
       });
+    } finally {
+      setIsSubmittingAdd(false);
     }
   };
 
@@ -432,7 +523,33 @@ export default function AdminProfilesPage() {
                   <tr key={p.id}>
                     <td>
                       <div className="admin-user-cell">
-                        <img src={p.image} alt={p.name} className="admin-cell-avatar" />
+                        {p.image || p.profileImage ? (
+                          <img 
+                            src={p.image || p.profileImage} 
+                            alt={p.name} 
+                            className="admin-cell-avatar"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <div 
+                          className="admin-cell-avatar-placeholder" 
+                          style={{ 
+                            display: (p.image || p.profileImage) ? 'none' : 'flex',
+                            width: '40px', 
+                            height: '40px', 
+                            borderRadius: '50%', 
+                            background: 'linear-gradient(135deg, #780E2F 0%, #9E1B43 100%)',
+                            color: '#FFFFFF',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                          }}
+                        >
+                          <User size={18} color="#FFFFFF" />
+                        </div>
                         <div>
                           <div className="admin-cell-name">{p.name}</div>
                           <div className="admin-cell-sub">{p.id} • {p.gender?.toLowerCase() === 'female' ? 'Bride' : 'Groom'}</div>
@@ -568,7 +685,20 @@ export default function AdminProfilesPage() {
             border: '1px solid var(--admin-border-gold)'
           }}>
             
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <div style={{ 
+              position: 'sticky',
+              top: '-28px',
+              zIndex: 50,
+              background: '#FFF',
+              paddingTop: '28px',
+              paddingBottom: '14px',
+              marginTop: '-28px',
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              borderBottom: '1px solid #F3F4F6',
+              marginBottom: '20px' 
+            }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div className="kpi-icon-burgundy" style={{ width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <UserPlus size={18} />
@@ -577,8 +707,25 @@ export default function AdminProfilesPage() {
                   Register New Candidate
                 </h2>
               </div>
-              <button onClick={() => setIsAddModalOpen(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
-                <X size={20} />
+              <button 
+                onClick={() => setIsAddModalOpen(false)} 
+                aria-label="Close modal"
+                style={{ 
+                  background: '#F3F4F6', 
+                  border: 'none', 
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: '#374151',
+                  transition: 'all 0.2s ease',
+                  flexShrink: 0
+                }}
+              >
+                <X size={18} />
               </button>
             </div>
 
@@ -768,16 +915,21 @@ export default function AdminProfilesPage() {
                           borderRadius: '6px',
                           fontSize: '0.84rem',
                           fontWeight: 600,
-                          cursor: 'pointer',
+                          cursor: isUploadingPhoto ? 'not-allowed' : 'pointer',
+                          opacity: isUploadingPhoto ? 0.75 : 1,
                           boxShadow: '0 2px 8px rgba(115, 15, 45, 0.25)'
                         }}
                       >
-                        <Upload size={15} />
-                        <span>Upload from Computer / Phone</span>
+                        {isUploadingPhoto ? (
+                          <><Loader2 size={16} className="spin-animation" /> <span>Uploading Photo...</span></>
+                        ) : (
+                          <><Upload size={15} /> <span>Upload from Computer / Phone</span></>
+                        )}
                         <input 
                           id="adminAddPhotoInput"
                           type="file" 
-                          accept="image/*" 
+                          accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/jpg,image/webp" 
+                          disabled={isUploadingPhoto}
                           style={{ display: 'none' }}
                           onChange={(e) => handlePhotoFileUpload(e, false)}
                         />
@@ -787,63 +939,27 @@ export default function AdminProfilesPage() {
                         <button
                           type="button"
                           onClick={() => setFormData({ ...formData, image: '' })}
+                          disabled={isUploadingPhoto}
+                          title="Delete photo"
                           style={{
-                            background: 'transparent',
-                            border: '1px solid #DC2626',
+                            background: '#FEE2E2',
+                            border: '1px solid #FCA5A5',
                             color: '#DC2626',
                             padding: '7px 12px',
                             borderRadius: '6px',
                             fontSize: '0.78rem',
-                            cursor: 'pointer',
-                            fontWeight: 600
+                            cursor: isUploadingPhoto ? 'not-allowed' : 'pointer',
+                            fontWeight: 600,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
                           }}
                         >
-                          Remove
+                          <Trash2 size={14} />
+                          <span>Delete</span>
                         </button>
                       )}
                     </div>
-
-                    {/* Or Paste URL */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '0.76rem', color: '#666', whiteSpace: 'nowrap' }}>Or Image URL:</span>
-                      <input 
-                        type="url" 
-                        className="admin-form-input" 
-                        placeholder="Paste direct photo link (https://...)"
-                        style={{ padding: '6px 10px', fontSize: '0.82rem' }}
-                        value={formData.image || ''}
-                        onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Quick Avatar Presets */}
-                <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #EAE3D8' }}>
-                  <span style={{ fontSize: '0.76rem', color: 'var(--admin-text-muted)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>
-                    Quick Select Sample Avatar:
-                  </span>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    {(formData.gender === 'female' ? sampleAvatars.female : sampleAvatars.male).map((sampleUrl, sIdx) => (
-                      <img 
-                        key={sIdx}
-                        src={sampleUrl}
-                        alt={`Sample ${sIdx + 1}`}
-                        onClick={() => setFormData({ ...formData, image: sampleUrl })}
-                        style={{
-                          width: '38px',
-                          height: '38px',
-                          borderRadius: '50%',
-                          objectFit: 'cover',
-                          cursor: 'pointer',
-                          border: formData.image === sampleUrl ? '2.5px solid var(--primary-burgundy)' : '2px solid #D1D5DB',
-                          opacity: formData.image === sampleUrl ? 1 : 0.75,
-                          transition: 'all 0.2s ease',
-                          boxShadow: formData.image === sampleUrl ? '0 0 8px rgba(115,15,45,0.4)' : 'none'
-                        }}
-                        title="Click to use this photo"
-                      />
-                    ))}
                   </div>
                 </div>
               </div>
@@ -859,11 +975,28 @@ export default function AdminProfilesPage() {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                <button type="button" onClick={() => setIsAddModalOpen(false)} style={{ padding: '10px 18px', borderRadius: '6px', border: '1px solid #CCC', background: '#FFF', cursor: 'pointer', fontWeight: '600' }}>
+                <button type="button" onClick={() => setIsAddModalOpen(false)} disabled={isSubmittingAdd || isUploadingPhoto} style={{ padding: '10px 18px', borderRadius: '6px', border: '1px solid #CCC', background: '#FFF', cursor: (isSubmittingAdd || isUploadingPhoto) ? 'not-allowed' : 'pointer', fontWeight: '600', opacity: (isSubmittingAdd || isUploadingPhoto) ? 0.7 : 1 }}>
                   Cancel
                 </button>
-                <button type="submit" className="admin-btn-primary">
-                  <span>Save Candidate to Firestore</span>
+                <button 
+                  type="submit" 
+                  className="admin-btn-primary" 
+                  disabled={isSubmittingAdd || isUploadingPhoto} 
+                  style={{ 
+                    opacity: (isSubmittingAdd || isUploadingPhoto) ? 0.7 : 1,
+                    cursor: (isSubmittingAdd || isUploadingPhoto) ? 'not-allowed' : 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  {isSubmittingAdd ? (
+                    <><Loader2 size={16} className="spin-animation" /> <span>Saving...</span></>
+                  ) : isUploadingPhoto ? (
+                    <><Loader2 size={16} className="spin-animation" /> <span>Uploading Photo...</span></>
+                  ) : (
+                    <span>Save Candidate to Firestore</span>
+                  )}
                 </button>
               </div>
 
@@ -897,7 +1030,20 @@ export default function AdminProfilesPage() {
             border: '1px solid var(--admin-border-gold)'
           }}>
             
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <div style={{ 
+              position: 'sticky',
+              top: '-28px',
+              zIndex: 50,
+              background: '#FFF',
+              paddingTop: '28px',
+              paddingBottom: '14px',
+              marginTop: '-28px',
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              borderBottom: '1px solid #F3F4F6',
+              marginBottom: '20px' 
+            }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div className="kpi-icon-burgundy" style={{ width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Edit2 size={18} />
@@ -909,8 +1055,25 @@ export default function AdminProfilesPage() {
                   <span style={{ fontSize: '0.82rem', color: 'var(--admin-text-muted)' }}>ID: {editingProfile.id}</span>
                 </div>
               </div>
-              <button onClick={() => { setEditingProfile(null); setEditFormData(null); }} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
-                <X size={20} />
+              <button 
+                onClick={() => { setEditingProfile(null); setEditFormData(null); }} 
+                aria-label="Close modal"
+                style={{ 
+                  background: '#F3F4F6', 
+                  border: 'none', 
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: '#374151',
+                  transition: 'all 0.2s ease',
+                  flexShrink: 0
+                }}
+              >
+                <X size={18} />
               </button>
             </div>
 
@@ -1070,18 +1233,31 @@ export default function AdminProfilesPage() {
                     flexShrink: 0,
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                   }}>
-                    {editFormData.image ? (
+                    {editFormData.image || editFormData.profileImage || editFormData.photoUrl || editFormData.profilePhoto ? (
                       <img 
-                        src={editFormData.image} 
+                        src={editFormData.image || editFormData.profileImage || editFormData.photoUrl || editFormData.profilePhoto} 
                         alt="Candidate Preview" 
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                        }}
                       />
-                    ) : (
-                      <div style={{ textAlign: 'center', color: '#8C827A' }}>
-                        <Camera size={24} style={{ margin: '0 auto 2px auto' }} />
-                        <span style={{ fontSize: '0.68rem', display: 'block', fontWeight: 600 }}>No Photo</span>
-                      </div>
-                    )}
+                    ) : null}
+                    <div 
+                      style={{ 
+                        display: (editFormData.image || editFormData.profileImage || editFormData.photoUrl || editFormData.profilePhoto) ? 'none' : 'flex', 
+                        flexDirection: 'column', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        color: '#8C827A',
+                        width: '100%',
+                        height: '100%'
+                      }}
+                    >
+                      <Camera size={24} style={{ margin: '0 auto 2px auto' }} />
+                      <span style={{ fontSize: '0.68rem', display: 'block', fontWeight: 600 }}>No Photo</span>
+                    </div>
                   </div>
 
                   {/* Actions Area */}
@@ -1099,82 +1275,51 @@ export default function AdminProfilesPage() {
                           borderRadius: '6px',
                           fontSize: '0.84rem',
                           fontWeight: 600,
-                          cursor: 'pointer',
+                          cursor: isUploadingPhoto ? 'not-allowed' : 'pointer',
+                          opacity: isUploadingPhoto ? 0.75 : 1,
                           boxShadow: '0 2px 8px rgba(115, 15, 45, 0.25)'
                         }}
                       >
-                        <Upload size={15} />
-                        <span>Upload from Computer / Phone</span>
+                        {isUploadingPhoto ? (
+                          <><Loader2 size={16} className="spin-animation" /> <span>Uploading Photo...</span></>
+                        ) : (
+                          <><Upload size={15} /> <span>Upload from Computer / Phone</span></>
+                        )}
                         <input 
                           id="adminEditPhotoInput"
                           type="file" 
-                          accept="image/*" 
+                          accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/jpg,image/webp" 
+                          disabled={isUploadingPhoto}
                           style={{ display: 'none' }}
                           onChange={(e) => handlePhotoFileUpload(e, true)}
                         />
                       </label>
 
-                      {editFormData.image && (
+                      {Boolean(editFormData.image || editFormData.profileImage || editFormData.photoUrl || editFormData.profilePhoto) && (
                         <button
                           type="button"
-                          onClick={() => setEditFormData({ ...editFormData, image: '', profileImage: '' })}
+                          onClick={() => setEditFormData(prev => ({ ...prev, image: '', profileImage: '', photoUrl: '', profilePhoto: '' }))}
+                          disabled={isUploadingPhoto}
+                          title="Delete photo"
                           style={{
-                            background: 'transparent',
-                            border: '1px solid #DC2626',
+                            background: '#FEE2E2',
+                            border: '1px solid #FCA5A5',
                             color: '#DC2626',
                             padding: '7px 12px',
                             borderRadius: '6px',
                             fontSize: '0.78rem',
-                            cursor: 'pointer',
-                            fontWeight: 600
+                            cursor: isUploadingPhoto ? 'not-allowed' : 'pointer',
+                            fontWeight: 600,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
                           }}
                         >
-                          Remove
+                          <Trash2 size={14} />
+                          <span>Delete</span>
                         </button>
                       )}
                     </div>
-
-                    {/* Or Paste URL */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '0.76rem', color: '#666', whiteSpace: 'nowrap' }}>Or Image URL:</span>
-                      <input 
-                        type="url" 
-                        className="admin-form-input" 
-                        placeholder="Paste direct photo link (https://...)"
-                        style={{ padding: '6px 10px', fontSize: '0.82rem' }}
-                        value={editFormData.image || ''}
-                        onChange={(e) => setEditFormData({ ...editFormData, image: e.target.value, profileImage: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Quick Avatar Presets */}
-                <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #EAE3D8' }}>
-                  <span style={{ fontSize: '0.76rem', color: 'var(--admin-text-muted)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>
-                    Quick Select Sample Avatar:
-                  </span>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    {(editFormData.gender?.toLowerCase() === 'female' || editFormData.gender?.toLowerCase() === 'bride' ? sampleAvatars.female : sampleAvatars.male).map((sampleUrl, sIdx) => (
-                      <img 
-                        key={sIdx}
-                        src={sampleUrl}
-                        alt={`Sample ${sIdx + 1}`}
-                        onClick={() => setEditFormData({ ...editFormData, image: sampleUrl, profileImage: sampleUrl })}
-                        style={{
-                          width: '38px',
-                          height: '38px',
-                          borderRadius: '50%',
-                          objectFit: 'cover',
-                          cursor: 'pointer',
-                          border: editFormData.image === sampleUrl ? '2.5px solid var(--primary-burgundy)' : '2px solid #D1D5DB',
-                          opacity: editFormData.image === sampleUrl ? 1 : 0.75,
-                          transition: 'all 0.2s ease',
-                          boxShadow: editFormData.image === sampleUrl ? '0 0 8px rgba(115,15,45,0.4)' : 'none'
-                        }}
-                        title="Click to use this photo"
-                      />
-                    ))}
                   </div>
                 </div>
               </div>
@@ -1190,11 +1335,28 @@ export default function AdminProfilesPage() {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                <button type="button" onClick={() => { setEditingProfile(null); setEditFormData(null); }} style={{ padding: '10px 18px', borderRadius: '6px', border: '1px solid #CCC', background: '#FFF', cursor: 'pointer', fontWeight: '600' }}>
+                <button type="button" onClick={() => { setEditingProfile(null); setEditFormData(null); }} disabled={isSubmittingEdit || isUploadingPhoto} style={{ padding: '10px 18px', borderRadius: '6px', border: '1px solid #CCC', background: '#FFF', cursor: (isSubmittingEdit || isUploadingPhoto) ? 'not-allowed' : 'pointer', fontWeight: '600', opacity: (isSubmittingEdit || isUploadingPhoto) ? 0.7 : 1 }}>
                   Cancel
                 </button>
-                <button type="submit" className="admin-btn-primary">
-                  <span>Update & Publish Candidate</span>
+                <button 
+                  type="submit" 
+                  className="admin-btn-primary" 
+                  disabled={isSubmittingEdit || isUploadingPhoto} 
+                  style={{ 
+                    opacity: (isSubmittingEdit || isUploadingPhoto) ? 0.7 : 1,
+                    cursor: (isSubmittingEdit || isUploadingPhoto) ? 'not-allowed' : 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  {isSubmittingEdit ? (
+                    <><Loader2 size={16} className="spin-animation" /> <span>Updating...</span></>
+                  ) : isUploadingPhoto ? (
+                    <><Loader2 size={16} className="spin-animation" /> <span>Uploading Photo...</span></>
+                  ) : (
+                    <span>Update & Publish Candidate</span>
+                  )}
                 </button>
               </div>
 
@@ -1227,12 +1389,42 @@ export default function AdminProfilesPage() {
             boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
             border: '1px solid var(--admin-border-gold)'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div style={{ 
+              position: 'sticky',
+              top: '-28px',
+              zIndex: 50,
+              background: '#FFF',
+              paddingTop: '28px',
+              paddingBottom: '14px',
+              marginTop: '-28px',
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              borderBottom: '1px solid #F3F4F6',
+              marginBottom: '16px' 
+            }}>
               <h2 style={{ fontFamily: 'var(--font-serif)', color: 'var(--primary-burgundy-dark)', fontSize: '1.4rem' }}>
                 Candidate Bio Details
               </h2>
-              <button onClick={() => setViewingProfile(null)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
-                <X size={20} />
+              <button 
+                onClick={() => setViewingProfile(null)} 
+                aria-label="Close modal"
+                style={{ 
+                  background: '#F3F4F6', 
+                  border: 'none', 
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: '#374151',
+                  transition: 'all 0.2s ease',
+                  flexShrink: 0
+                }}
+              >
+                <X size={18} />
               </button>
             </div>
 

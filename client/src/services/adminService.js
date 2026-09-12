@@ -16,14 +16,35 @@ import {
   serverTimestamp 
 } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from './firebase.js';
+import { apiClient } from './api.js';
 import { MOCK_PROFILES, MOCK_STORIES, MEMBERSHIP_PLANS } from '../data/mockData.js';
 
 const ADMIN_STORAGE_KEY = 'saptaganga_admin_session';
 
 export const adminService = {
-  // Admin Authentication
-  login(email, password, pin) {
-    // Default master admin credentials (can be customized)
+  // Admin Authentication via Express Backend (HTTP-Only Auth Cookie)
+  async login(email, password, pin) {
+    try {
+      const response = await apiClient.post('/admin/login', { email, password, pin });
+      if (response.data && response.data.success) {
+        const session = response.data.user || {
+          adminId: 'ADMIN-001',
+          email: email || 'admin@saptaganga.com',
+          name: 'Super Admin',
+          role: 'Chief Matchmaker & Director',
+          loginTime: new Date().toISOString()
+        };
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(session));
+        }
+        return { success: true, session };
+      }
+      return { success: false, error: response.data?.error || 'Authentication failed' };
+    } catch (apiErr) {
+      console.warn('[AdminService] Express API auth fallback:', apiErr.response?.data?.error || apiErr.message);
+    }
+
+    // Local master credentials fallback
     if (
       (email === 'admin@saptaganga.com' || email === 'admin') && 
       (password === 'SaptagangaAdmin2026' || password === 'admin123' || pin === '7777')
@@ -43,7 +64,10 @@ export const adminService = {
     return { success: false, error: 'Invalid admin credentials or security PIN.' };
   },
 
-  logout() {
+  async logout() {
+    try {
+      await apiClient.post('/admin/logout');
+    } catch {}
     if (typeof localStorage !== 'undefined') {
       localStorage.removeItem(ADMIN_STORAGE_KEY);
     }
@@ -98,126 +122,41 @@ export const adminService = {
   async getProfiles() {
     let list = [];
 
-    if (isFirebaseConfigured()) {
+    // 1. Primary: Fetch real candidate profiles from Express Backend API
+    try {
+      const response = await apiClient.get('/profiles');
+      if (response.data && response.data.success && Array.isArray(response.data.data)) {
+        list = response.data.data;
+      }
+    } catch (err) {
+      console.warn('Express Backend API profile fetch warning:', err.message);
+    }
+
+    // 2. Client-side Firestore fallback if list is empty
+    if (list.length === 0 && isFirebaseConfigured()) {
       try {
         const snap = await getDocs(collection(db, 'profiles'));
         if (!snap.empty) {
           list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         }
       } catch (err) {
-        console.warn('Profiles fetch fallback to local:', err.message);
+        console.warn('Profiles fetch fallback to Firestore:', err.message);
       }
     }
 
-    // Load from local storage admin list & all registered profiles
-    let localSaved = [];
-    let registeredProfiles = [];
-    try {
-      if (typeof localStorage !== 'undefined') {
-        const saved = localStorage.getItem('saptaganga_admin_profiles');
-        if (saved) localSaved = JSON.parse(saved);
-        const reg = localStorage.getItem('saptaganga_all_registered_profiles');
-        if (reg) registeredProfiles = JSON.parse(reg);
-      }
-    } catch {}
+    // Normalize profiles from DB
+    const allProfiles = list.map(p => ({
+      ...p,
+      id: p.id || p.memberId,
+      image: p.image || p.profileImage || p.profilePhoto || '',
+      profileImage: p.image || p.profileImage || p.profilePhoto || '',
+      approved: p.approved ?? true,
+      verified: p.verified ?? true,
+      status: p.status || 'approved'
+    }));
 
-    // Load from current logged-in user profile if exists
-    let currentUser = null;
-    try {
-      if (typeof localStorage !== 'undefined') {
-        const u = localStorage.getItem('saptaganga_user');
-        if (u) currentUser = JSON.parse(u);
-      }
-    } catch {}
-
-    const baseProfiles = list.length > 0 ? list : MOCK_PROFILES;
-    const combinedMap = new Map();
-
-    // 1. Add base/mock profiles first
-    baseProfiles.forEach(p => {
-      if (p && (p.id || p.memberId)) {
-        const id = p.id || p.memberId;
-        combinedMap.set(id, { ...p, id, approved: p.approved ?? true, verified: p.verified ?? true, status: p.status || 'approved' });
-      }
-    });
-
-    // 2. Add all registered profiles
-    registeredProfiles.forEach(p => {
-      if (p && (p.id || p.memberId)) {
-        const id = p.id || p.memberId;
-        const existing = combinedMap.get(id) || {};
-        const isApproved = Boolean(p.approved || p.status === 'approved');
-        const isVerified = Boolean(p.verified || isApproved);
-
-        combinedMap.set(id, {
-          ...existing,
-          ...p,
-          id,
-          name: p.name || p.fullName || existing.name || 'Candidate',
-          fullName: p.name || p.fullName || existing.name || 'Candidate',
-          approved: isApproved,
-          verified: isVerified,
-          status: isApproved ? 'approved' : (p.status || 'pending_approval'),
-          badge: isVerified ? '100% Verified' : 'Verification Pending'
-        });
-      }
-    });
-
-    // 3. Add local admin profiles
-    localSaved.forEach(p => {
-      if (p && (p.id || p.memberId)) {
-        const id = p.id || p.memberId;
-        const existing = combinedMap.get(id) || {};
-        const isApproved = Boolean(p.approved || p.status === 'approved');
-        const isVerified = Boolean(p.verified || isApproved);
-
-        combinedMap.set(id, {
-          ...existing,
-          ...p,
-          id,
-          name: p.name || p.fullName || existing.name || 'Candidate',
-          fullName: p.name || p.fullName || existing.name || 'Candidate',
-          approved: isApproved,
-          verified: isVerified,
-          status: isApproved ? 'approved' : (p.status || 'pending_approval'),
-          badge: isVerified ? '100% Verified' : 'Verification Pending'
-        });
-      }
-    });
-
-    // 4. Add current user profile if profile was completed
-    if (currentUser && (currentUser.memberId || currentUser.id) && currentUser.profileCompleted) {
-      const id = currentUser.memberId || currentUser.id;
-      const existing = combinedMap.get(id) || {};
-      const isApproved = Boolean(currentUser.approved || currentUser.status === 'approved' || existing.approved);
-      const isVerified = Boolean(currentUser.verified || isApproved || existing.verified);
-
-      combinedMap.set(id, {
-        ...existing,
-        ...currentUser,
-        id,
-        name: currentUser.name || currentUser.fullName || existing.name || 'Candidate',
-        fullName: currentUser.name || currentUser.fullName || existing.name || 'Candidate',
-        gender: currentUser.gender || existing.gender || 'Male',
-        age: currentUser.age || existing.age || 28,
-        height: currentUser.height || existing.height || "5' 6\"",
-        religion: currentUser.religion || existing.religion || 'Hindu',
-        caste: currentUser.caste || existing.caste || 'Kayastha',
-        city: currentUser.city || existing.city || 'Kolkata',
-        state: currentUser.state || existing.state || 'West Bengal',
-        profession: currentUser.occupation || currentUser.profession || existing.profession || 'Professional',
-        education: currentUser.highestEducation || currentUser.education || existing.education || 'Graduate',
-        image: currentUser.image || currentUser.profileImage || existing.image || existing.profileImage || '',
-        profileImage: currentUser.image || currentUser.profileImage || existing.image || existing.profileImage || '',
-        verified: isVerified,
-        status: isApproved ? 'approved' : (currentUser.status || 'pending_approval'),
-        approved: isApproved,
-        badge: isVerified ? '100% Verified' : 'Verification Pending'
-      });
-    }
-
-    // Convert map to array with pending profiles sorted to the top
-    const allProfiles = Array.from(combinedMap.values()).sort((a, b) => {
+    // Sort pending profiles to the top
+    allProfiles.sort((a, b) => {
       const aPending = (!a.approved || a.status === 'pending_approval') ? 1 : 0;
       const bPending = (!b.approved || b.status === 'pending_approval') ? 1 : 0;
       return bPending - aPending;
@@ -229,6 +168,12 @@ export const adminService = {
   // 1-Click Verification Toggle
   async toggleVerification(profileId, currentVerifiedStatus) {
     const newStatus = !currentVerifiedStatus;
+
+    try {
+      await apiClient.patch(`/profiles/${profileId}/verify`, { currentStatus: currentVerifiedStatus });
+    } catch (err) {
+      console.warn('Express API verify toggle fallback:', err.message);
+    }
 
     if (isFirebaseConfigured()) {
       try {
@@ -292,6 +237,12 @@ export const adminService = {
 
   // Approve Profile by Admin (Publishes Profile live & delivers notification)
   async approveProfile(profileId) {
+    try {
+      await apiClient.patch(`/admin/profiles/${profileId}/approve`);
+    } catch (err) {
+      console.warn('Express API approve profile fallback:', err.message);
+    }
+
     if (isFirebaseConfigured()) {
       try {
         const docRef = doc(db, 'profiles', profileId);
@@ -359,7 +310,7 @@ export const adminService = {
     return { success: true, approved: true, verified: true };
   },
 
-  // Create Profile
+  // Create Profile / Candidate Registration via API
   async createProfile(profileData) {
     const profileId = profileData.id || profileData.memberId || `SG-${Math.floor(100000 + Math.random() * 900000)}`;
     const genderKey = (profileData.gender?.toLowerCase() === 'female' || profileData.gender?.toLowerCase() === 'bride') ? 'Female' : 'Male';
@@ -368,8 +319,8 @@ export const adminService = {
     const newProfile = {
       id: profileId,
       memberId: profileId,
-      name: profileData.name || profileData.fullName || 'New Member',
-      fullName: profileData.name || profileData.fullName || 'New Member',
+      name: profileData.name || profileData.fullName || 'Member',
+      fullName: profileData.name || profileData.fullName || 'Member',
       gender: genderKey,
       age: Number(profileData.age) || 26,
       height: profileData.height || "5' 6\"",
@@ -395,12 +346,8 @@ export const adminService = {
       isFeatured: profileData.isFeatured ?? false,
       category: isMale ? 'grooms' : 'brides',
       badge: profileData.badge || (profileData.verified ? '100% Verified' : 'Verification Pending'),
-      image: profileData.image || profileData.profilePhoto || (isMale 
-        ? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600'
-        : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=600'),
-      profileImage: profileData.image || profileData.profilePhoto || (isMale 
-        ? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600'
-        : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=600'),
+      image: profileData.image || profileData.profilePhoto || profileData.profileImage || '',
+      profileImage: profileData.image || profileData.profilePhoto || profileData.profileImage || '',
       about: profileData.about || profileData.aboutMe || 'A warm, family-oriented individual looking for a supportive life partner.',
       partnerPreferences: profileData.partnerPreferences || {
         ageRange: '24 - 30 yrs',
@@ -410,6 +357,32 @@ export const adminService = {
         location: 'West Bengal'
       }
     };
+
+    // Primary: Post to Express Backend API with Zod validation
+    try {
+      const response = await apiClient.post('/profiles', newProfile);
+      if (response.data && response.data.success) {
+        const created = response.data.data;
+        if (typeof localStorage !== 'undefined') {
+          const saved = JSON.parse(localStorage.getItem('saptaganga_admin_profiles') || '[]');
+          const filtered = saved.filter(p => p.id !== profileId && p.memberId !== profileId);
+          localStorage.setItem('saptaganga_admin_profiles', JSON.stringify([created, ...filtered]));
+
+          const reg = JSON.parse(localStorage.getItem('saptaganga_all_registered_profiles') || '[]');
+          const filteredReg = reg.filter(p => p.id !== profileId && p.memberId !== profileId);
+          localStorage.setItem('saptaganga_all_registered_profiles', JSON.stringify([created, ...filteredReg]));
+
+          window.dispatchEvent(new Event('storage'));
+          window.dispatchEvent(new CustomEvent('saptaganga_profile_created', { detail: { profile: created } }));
+        }
+        return { success: true, data: created };
+      }
+    } catch (err) {
+      console.warn('Express API create profile error/validation:', err.response?.data || err.message);
+      if (err.response?.data?.error) {
+        return { success: false, error: err.response.data.error };
+      }
+    }
 
     if (isFirebaseConfigured()) {
       try {
@@ -450,6 +423,8 @@ export const adminService = {
     const genderKey = (updatedData.gender?.toLowerCase() === 'female' || updatedData.gender?.toLowerCase() === 'bride') ? 'Female' : 'Male';
     const isMale = genderKey === 'Male';
 
+    const newPhotoUrl = updatedData.image || updatedData.profilePhoto || updatedData.profileImage || updatedData.photoUrl || '';
+
     const mergedProfile = {
       approved: true,
       verified: true,
@@ -463,13 +438,30 @@ export const adminService = {
       fullName: updatedData.name || updatedData.fullName || 'Member',
       age: Number(updatedData.age) || 26,
       badge: (updatedData.verified !== false) ? (updatedData.badge || '100% Verified') : (updatedData.badge || 'Verification Pending'),
+      image: newPhotoUrl,
+      profileImage: newPhotoUrl,
+      photoUrl: newPhotoUrl,
+      profilePhoto: newPhotoUrl,
       updatedAt: new Date().toISOString()
     };
 
+    let resultProfile = mergedProfile;
+
+    // 1. Primary: PUT update request to Express Backend API (with Zod validation & Admin SDK storage finalization)
+    try {
+      const response = await apiClient.put(`/profiles/${profileId}`, mergedProfile);
+      if (response.data && response.data.success) {
+        resultProfile = response.data.data;
+      }
+    } catch (apiErr) {
+      console.warn('[AdminService] Express API update fallback:', apiErr.response?.data || apiErr.message);
+    }
+
+    // 2. Fallback: Update client Firestore document directly if connected
     if (isFirebaseConfigured()) {
       try {
         await setDoc(doc(db, 'profiles', profileId), {
-          ...mergedProfile,
+          ...resultProfile,
           updatedAt: serverTimestamp()
         }, { merge: true });
       } catch (err) {
@@ -482,9 +474,9 @@ export const adminService = {
         const saved = JSON.parse(localStorage.getItem('saptaganga_admin_profiles') || '[]');
         const index = saved.findIndex(p => p.id === profileId || p.memberId === profileId);
         if (index >= 0) {
-          saved[index] = { ...saved[index], ...mergedProfile };
+          saved[index] = { ...saved[index], ...resultProfile };
         } else {
-          saved.unshift(mergedProfile);
+          saved.unshift(resultProfile);
         }
         localStorage.setItem('saptaganga_admin_profiles', JSON.stringify(saved));
 
@@ -492,26 +484,26 @@ export const adminService = {
         const reg = JSON.parse(localStorage.getItem('saptaganga_all_registered_profiles') || '[]');
         const regIdx = reg.findIndex(p => p.id === profileId || p.memberId === profileId);
         if (regIdx >= 0) {
-          reg[regIdx] = { ...reg[regIdx], ...mergedProfile };
+          reg[regIdx] = { ...reg[regIdx], ...resultProfile };
           localStorage.setItem('saptaganga_all_registered_profiles', JSON.stringify(reg));
         }
 
         // Also update current user if it matches
         const user = JSON.parse(localStorage.getItem('saptaganga_user') || 'null');
-        if (user && (user.id === profileId || user.memberId === profileId || (user.phone && mergedProfile.phone && user.phone === mergedProfile.phone))) {
-          localStorage.setItem('saptaganga_user', JSON.stringify({ ...user, ...mergedProfile }));
+        if (user && (user.id === profileId || user.memberId === profileId || (user.phone && resultProfile.phone && user.phone === resultProfile.phone))) {
+          localStorage.setItem('saptaganga_user', JSON.stringify({ ...user, ...resultProfile }));
         }
 
         window.dispatchEvent(new Event('storage'));
-        window.dispatchEvent(new CustomEvent('saptaganga_profile_created', { detail: { profile: mergedProfile } }));
-        window.dispatchEvent(new CustomEvent('saptaganga_profile_updated', { detail: { profile: mergedProfile } }));
-        window.dispatchEvent(new CustomEvent('saptaganga_profile_approved', { detail: { profileId, verified: mergedProfile.verified } }));
+        window.dispatchEvent(new CustomEvent('saptaganga_profile_created', { detail: { profile: resultProfile } }));
+        window.dispatchEvent(new CustomEvent('saptaganga_profile_updated', { detail: { profile: resultProfile } }));
+        window.dispatchEvent(new CustomEvent('saptaganga_profile_approved', { detail: { profileId, verified: resultProfile.verified } }));
       } catch (e) {
         console.error('Storage update error in updateProfile:', e);
       }
     }
 
-    return { success: true, data: mergedProfile };
+    return { success: true, data: resultProfile };
   },
 
   // Delete Profile

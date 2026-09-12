@@ -18,11 +18,14 @@ import {
   Globe,
   Link2,
   AtSign,
-  Share2
+  Share2,
+  Loader2
 } from 'lucide-react';
+import Swal from 'sweetalert2';
 import confetti from 'canvas-confetti';
 import { INDIAN_STATES, STATE_CITIES_MAP } from '../../data/locationData';
 import { adminService } from '../../services/adminService';
+import { storageService } from '../../services/storageService';
 
 // Custom Crisp SVG Icons for Instagram & Facebook
 const InstagramIcon = ({ size = 18 }) => (
@@ -111,29 +114,14 @@ const HOBBIES_LIST = [
   "Cricket & Sports"
 ];
 
-const SAMPLE_AVATARS = {
-  Male: [
-    { label: "Classic Groom 1", url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400" },
-    { label: "Corporate Groom 2", url: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400" },
-    { label: "Modern Groom 3", url: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=400" },
-    { label: "Smart Groom 4", url: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=400" },
-    { label: "Professional Groom 5", url: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=400" }
-  ],
-  Female: [
-    { label: "Traditional Bride 1", url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400" },
-    { label: "Modern Bride 2", url: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=400" },
-    { label: "Elegant Bride 3", url: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=400" },
-    { label: "Cultured Bride 4", url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400" },
-    { label: "Graceful Bride 5", url: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400" }
-  ]
-};
-
 export default function CreateProfileModal({ currentUser, onClose, onSave }) {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [createdUser, setCreatedUser] = useState(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Top-level 5-step form state (3 fields per step)
   const [formData, setFormData] = useState({
@@ -228,19 +216,32 @@ export default function CreateProfileModal({ currentUser, onClose, onSave }) {
   };
 
   // Handle Photo File Upload
-  const handlePhotoUpload = (e) => {
+  const handlePhotoUpload = async (e) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
         setError('Photo size should be less than 5MB.');
         return;
       }
-      const reader = new FileReader();
-      reader.onload = () => {
-        setFormData(prev => ({ ...prev, profilePhoto: reader.result }));
-        setError('');
-      };
-      reader.readAsDataURL(file);
+      setUploadingPhoto(true);
+      setError('');
+      try {
+        const res = await storageService.uploadTempPhoto(file);
+        if (res.success && res.tempUrl) {
+          setFormData(prev => ({
+            ...prev,
+            profilePhoto: res.tempUrl,
+            image: res.tempUrl,
+            tempStoragePath: res.storagePath
+          }));
+        } else {
+          setError(res.error || 'Failed to upload photo.');
+        }
+      } catch (err) {
+        setError('Failed to upload photo. Please try again.');
+      } finally {
+        setUploadingPhoto(false);
+      }
     }
   };
 
@@ -334,10 +335,9 @@ export default function CreateProfileModal({ currentUser, onClose, onSave }) {
 
   // Step 5 Validation & Final Submit (3 fields/options)
   const validateStep5AndSubmit = async () => {
+    setIsSubmitting(true);
     const memberId = currentUser?.memberId || "SG-" + Math.floor(100000 + Math.random() * 900000);
-    const genderKey = formData.gender === 'Female' ? 'Female' : 'Male';
-    const finalPhoto = formData.profilePhoto || 
-      (SAMPLE_AVATARS[genderKey] && SAMPLE_AVATARS[genderKey][0]?.url) || '';
+    const finalPhoto = formData.profilePhoto || '';
 
     const updatedUser = {
       ...currentUser,
@@ -386,24 +386,40 @@ export default function CreateProfileModal({ currentUser, onClose, onSave }) {
         localStorage.setItem('saptaganga_all_registered_profiles', JSON.stringify([newAdminCandidate, ...filteredRegistered]));
       } catch {}
 
-      // Also register into adminService directly
-      try {
-        await adminService.createProfile(newAdminCandidate);
-      } catch (err) {
-        console.warn('Admin profile direct sync error:', err);
+      // Register candidate into Express Backend API (with Zod validation)
+      const apiRes = await adminService.createProfile(newAdminCandidate);
+      if (apiRes && apiRes.success === false) {
+        setError(apiRes.error || 'Failed to submit profile registration.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Registration Failed',
+          text: apiRes.error || 'Failed to submit profile registration. Please try again.',
+          confirmButtonColor: '#780E2F'
+        });
+        setIsSubmitting(false);
+        return;
       }
 
       // Notify open windows/tabs and components to refresh candidate lists
       try {
         window.dispatchEvent(new Event('storage'));
-        window.dispatchEvent(new CustomEvent('saptaganga_profile_created', { detail: newAdminCandidate }));
+        window.dispatchEvent(new CustomEvent('saptaganga_profile_created', { detail: apiRes?.data || newAdminCandidate }));
       } catch {}
     } catch (e) {
       console.error('Storage save error:', e);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: e.message || 'Something went wrong. Please try again.',
+        confirmButtonColor: '#780E2F'
+      });
+      setIsSubmitting(false);
+      return;
     }
 
     setCreatedUser(updatedUser);
     setIsSubmitted(true);
+    setIsSubmitting(false);
 
     if (onSave) {
       onSave(updatedUser);
@@ -1119,17 +1135,22 @@ export default function CreateProfileModal({ currentUser, onClose, onSave }) {
                           borderRadius: '8px',
                           fontSize: '0.84rem',
                           fontWeight: 600,
-                          cursor: 'pointer',
+                          cursor: uploadingPhoto ? 'not-allowed' : 'pointer',
+                          opacity: uploadingPhoto ? 0.75 : 1,
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: '6px'
                         }}
                       >
-                        <Upload size={14} />
-                        <span>Upload Custom Photo</span>
+                        {uploadingPhoto ? (
+                          <><Loader2 size={16} className="spin-animation" /> <span>Uploading Photo...</span></>
+                        ) : (
+                          <><Upload size={14} /> <span>Upload Custom Photo</span></>
+                        )}
                         <input 
                           type="file" 
-                          accept="image/*" 
+                          accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/jpg,image/webp" 
+                          disabled={uploadingPhoto}
                           onChange={handlePhotoUpload}
                           style={{ display: 'none' }}
                         />
@@ -1139,17 +1160,17 @@ export default function CreateProfileModal({ currentUser, onClose, onSave }) {
                         <button
                           type="button"
                           onClick={() => setFormData(prev => ({ ...prev, profilePhoto: '' }))}
+                          disabled={uploadingPhoto}
                           style={{
                             background: '#FEE2E2',
-                            color: '#991B1B',
-                            border: 'none',
-                            padding: '8px 12px',
+                            color: '#DC2626',
+                            padding: '8px 14px',
                             borderRadius: '8px',
                             fontSize: '0.84rem',
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px'
+                            fontWeight: 600,
+                            border: 'none',
+                            cursor: uploadingPhoto ? 'not-allowed' : 'pointer',
+                            opacity: uploadingPhoto ? 0.7 : 1
                           }}
                         >
                           <Trash2 size={14} />
@@ -1162,68 +1183,7 @@ export default function CreateProfileModal({ currentUser, onClose, onSave }) {
                       Supports JPG, PNG up to 5MB. Clear face photo recommended.
                     </span>
                   </div>
-                </div>
-
-                {/* Avatar Picker Gallery */}
-                <div style={{
-                  marginTop: '12px',
-                  background: '#FFF8FA',
-                  padding: '12px 14px',
-                  borderRadius: '12px',
-                  border: '1px solid #FCE7EB'
-                }}>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--primary-burgundy-dark)', marginBottom: '8px' }}>
-                    Or Select a Photo from {formData.gender === 'Female' ? 'Bride' : 'Groom'} Avatars:
-                  </div>
-                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                    {(SAMPLE_AVATARS[formData.gender === 'Female' ? 'Female' : 'Male'] || SAMPLE_AVATARS.Male).map((avatar, idx) => {
-                      const isSelected = formData.profilePhoto === avatar.url;
-                      return (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => setFormData(prev => ({ ...prev, profilePhoto: avatar.url }))}
-                          style={{
-                            width: '54px',
-                            height: '54px',
-                            borderRadius: '50%',
-                            padding: 0,
-                            border: isSelected ? '3px solid var(--primary-burgundy)' : '2px solid #E5E7EB',
-                            cursor: 'pointer',
-                            overflow: 'hidden',
-                            position: 'relative',
-                            boxShadow: isSelected ? '0 0 0 3px #FECDD3, 0 4px 10px rgba(120, 14, 47, 0.25)' : '0 2px 6px rgba(0,0,0,0.06)',
-                            transform: isSelected ? 'scale(1.08)' : 'scale(1)',
-                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
-                          }}
-                          title={avatar.label}
-                        >
-                          <img 
-                            src={avatar.url} 
-                            alt={avatar.label} 
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} 
-                          />
-                          {isSelected && (
-                            <div style={{
-                              position: 'absolute',
-                              inset: 0,
-                              background: 'rgba(120, 14, 47, 0.35)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              color: '#FFF',
-                              fontSize: '1rem',
-                              fontWeight: 900
-                            }}>
-                              ✓
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
+                </div>              </div>
 
               {/* Option 2: Hobbies & Interests (Optional) */}
               <div style={{ marginBottom: '20px' }}>
@@ -1409,6 +1369,7 @@ export default function CreateProfileModal({ currentUser, onClose, onSave }) {
           <button
             type="button"
             onClick={handleNext}
+            disabled={isSubmitting || uploadingPhoto}
             className="btn-burgundy"
             style={{
               padding: '12px 30px',
@@ -1418,10 +1379,18 @@ export default function CreateProfileModal({ currentUser, onClose, onSave }) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              cursor: 'pointer'
+              gap: '8px',
+              cursor: (isSubmitting || uploadingPhoto) ? 'not-allowed' : 'pointer',
+              opacity: (isSubmitting || uploadingPhoto) ? 0.7 : 1
             }}
           >
-            <span>{currentStep === 5 ? "Complete & Create Profile" : "Next Step"}</span>
+            {currentStep === 5 && isSubmitting ? (
+              <><Loader2 size={16} className="spin-animation" /> <span>Submitting...</span></>
+            ) : uploadingPhoto ? (
+              <><Loader2 size={16} className="spin-animation" /> <span>Uploading Photo...</span></>
+            ) : (
+              <span>{currentStep === 5 ? "Complete & Create Profile" : "Next Step"}</span>
+            )}
           </button>
         </div>
 

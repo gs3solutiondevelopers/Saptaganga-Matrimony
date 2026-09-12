@@ -6,10 +6,11 @@ import { MOCK_PROFILES, MOCK_STORIES, MEMBERSHIP_PLANS } from '../data/mockData.
 
 const API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) || 'http://localhost:5000/api';
 
-// Create Axios Client Instance
+// Create Axios Client Instance (withCredentials enabled for HTTP-Only Auth Cookies)
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 5000,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
   }

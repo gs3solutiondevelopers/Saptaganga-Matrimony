@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Search, Filter, RefreshCw, CheckCircle2, Heart, Send, Sparkles, Lock, UserPlus, ArrowRight } from 'lucide-react';
+import { Search, Filter, RefreshCw, CheckCircle2, Heart, Send, Sparkles, Lock, UserPlus, ArrowRight, User } from 'lucide-react';
 import { api } from '../services/api';
 
 export default function SearchPage({
@@ -291,35 +291,89 @@ export default function SearchPage({
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '20px' }}>
                 {profiles.map(profile => {
-                  const isFavorited = shortlistedIds.has(profile.id);
+                  const photoUrl = (typeof profile.image === 'string' && profile.image.trim()) || 
+                                   (typeof profile.profileImage === 'string' && profile.profileImage.trim()) || 
+                                   null;
+                  const profileId = profile.id || profile.memberId;
+                  const isFavorited = shortlistedIds && typeof shortlistedIds.has === 'function' ? shortlistedIds.has(profileId) : false;
 
                   return (
-                    <div className="profile-card" key={profile.id}>
-                      <div className="profile-img-container">
-                        <img src={profile.image} alt={profile.name} className="profile-img" />
-                      </div>
-
-                      {/* Profile Action */}
-                      <div className="profile-info" style={{ padding: '14px 16px 16px 16px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <div className="profile-card" key={profileId}>
+                      <div className="profile-img-container" style={{ position: 'relative' }}>
+                        {/* Shortlist Heart Button */}
                         <button 
-                          onClick={() => onSelectProfile(profile)} 
-                          className="profile-btn-view"
-                          style={{ 
-                            width: '100%', 
-                            maxWidth: '180px',
-                            padding: '9px 16px',
-                            borderRadius: '8px',
-                            display: 'flex',
+                          className={`profile-shortlist-btn ${isFavorited ? 'favorited' : ''}`}
+                          onClick={() => onToggleShortlist && onToggleShortlist(profileId)}
+                          title={isFavorited ? 'Remove from shortlist' : 'Shortlist profile'}
+                          aria-label="Shortlist profile"
+                        >
+                          <Heart size={18} fill={isFavorited ? 'var(--status-heart)' : 'none'} />
+                        </button>
+
+                        {photoUrl ? (
+                          <img 
+                            src={photoUrl} 
+                            alt={profile.name || 'Candidate Profile'} 
+                            className="profile-img" 
+                            loading="lazy" 
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        
+                        <div 
+                          className="profile-img-placeholder"
+                          style={{
+                            display: photoUrl ? 'none' : 'flex',
+                            width: '100%',
+                            height: '100%',
+                            background: 'linear-gradient(135deg, #780E2F 0%, #9E1B43 100%)',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            margin: '0 auto',
-                            fontSize: '0.86rem',
-                            fontWeight: 600,
-                            cursor: 'pointer'
+                            color: '#FFF'
                           }}
                         >
-                          View Profile
-                        </button>
+                          <User size={56} color="#FFFFFF" />
+                        </div>
+                      </div>
+
+                      {/* Profile Info Details */}
+                      <div className="profile-info" style={{ padding: '16px' }}>
+                        <div className="profile-name-row" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                          <h4 className="profile-name" style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>
+                            {profile.name || 'Candidate Profile'}
+                          </h4>
+                          <CheckCircle2 size={15} className="profile-verified-check" color="#10B981" />
+                        </div>
+
+                        <div className="profile-meta" style={{ fontSize: '0.82rem', color: '#6B7280', marginBottom: '6px' }}>
+                          {[profile.age ? `${profile.age} yrs` : null, profile.height, profile.religion, profile.caste].filter(Boolean).join(' • ')}
+                        </div>
+
+                        <div className="profile-profession" style={{ fontSize: '0.84rem', fontWeight: 600, color: '#780E2F', marginBottom: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {profile.profession || profile.education || 'Professional'}
+                        </div>
+
+                        {/* Card Action Buttons */}
+                        <div className="profile-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: 'auto' }}>
+                          <button 
+                            onClick={() => onSelectProfile && onSelectProfile(profile)} 
+                            className="profile-btn-view"
+                            style={{ cursor: 'pointer' }}
+                          >
+                            View Profile
+                          </button>
+
+                          <button 
+                            onClick={() => onSendInterest && onSendInterest(profile)} 
+                            className="profile-btn-connect"
+                            style={{ cursor: 'pointer' }}
+                          >
+                            <Send size={13} style={{ marginRight: '4px' }} /> Connect
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );

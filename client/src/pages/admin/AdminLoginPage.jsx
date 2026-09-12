@@ -12,12 +12,12 @@ export default function AdminLoginPage() {
 
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    const res = adminService.login(email, password, pin);
+    const res = await adminService.login(email, password, pin);
     if (res.success) {
       navigate('/admin');
     } else {

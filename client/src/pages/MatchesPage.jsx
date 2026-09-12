@@ -1,12 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, CheckCircle2, Heart, Send, Users, Lock, UserPlus, ArrowRight } from 'lucide-react';
+import { 
+  Sparkles, 
+  CheckCircle2, 
+  Heart, 
+  Send, 
+  Users, 
+  Lock, 
+  UserPlus, 
+  ArrowRight, 
+  User, 
+  MapPin, 
+  Briefcase,
+  ShieldCheck
+} from 'lucide-react';
 import { api } from '../services/api';
 
 export default function MatchesPage({
   onSelectProfile,
   onSendInterest,
   onToggleShortlist,
-  shortlistedIds,
+  shortlistedIds = new Set(),
   currentUser,
   onOpenCreateProfile
 }) {
@@ -20,11 +33,23 @@ export default function MatchesPage({
 
       const res = await api.getProfiles();
       if (res.success) {
-        let list = res.data;
+        let list = res.data || [];
+
+        // Filter out current user's own profile
+        if (currentUser?.id || currentUser?.memberId) {
+          const currentUserId = currentUser.id || currentUser.memberId;
+          list = list.filter(p => p.id !== currentUserId && p.memberId !== currentUserId);
+        }
+
         // Automatic opposite gender matchmaking filtering
         if (currentUser?.gender) {
-          const oppositeGender = currentUser.gender.toLowerCase() === 'male' ? 'female' : 'male';
-          const genderMatched = list.filter(p => p.gender?.toLowerCase() === oppositeGender);
+          const userGender = currentUser.gender.toLowerCase();
+          const oppositeGender = userGender === 'male' || userGender === 'groom' ? 'female' : 'male';
+          const genderMatched = list.filter(p => {
+            const pGender = p.gender?.toLowerCase() || '';
+            if (oppositeGender === 'female') return pGender === 'female' || pGender === 'bride';
+            return pGender === 'male' || pGender === 'groom';
+          });
           if (genderMatched.length > 0) {
             list = genderMatched;
           }
@@ -50,7 +75,7 @@ export default function MatchesPage({
       window.removeEventListener('saptaganga_profile_updated', handleSync);
       window.removeEventListener('saptaganga_profile_approved', handleSync);
     };
-  }, [currentUser?.profileCompleted, currentUser?.gender]);
+  }, [currentUser?.profileCompleted, currentUser?.gender, currentUser?.id, currentUser?.memberId]);
 
   return (
     <div style={{ background: '#FFF8FA', minHeight: '80vh', padding: '40px 0 80px 0' }}>
@@ -58,7 +83,7 @@ export default function MatchesPage({
         
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '36px' }}>
-          <span className="section-subtitle">AI & Astrology Powered</span>
+          <span className="section-subtitle">AI & Culture Powered</span>
           <h1 className="section-title">Your Personalized Matches</h1>
           <p className="section-desc">Handpicked profiles curated to match your cultural values, education, and Kundali compatibility.</p>
         </div>
@@ -107,37 +132,110 @@ export default function MatchesPage({
             </button>
           </div>
         ) : loading ? (
-          <div style={{ textAlign: 'center', padding: '60px 0' }}>Loading your matches...</div>
+          <div style={{ textAlign: 'center', padding: '60px 0', fontSize: '1.1rem', color: 'var(--primary-burgundy)' }}>
+            <Sparkles size={24} className="spin-animation inline mr-2" />
+            Loading your matches...
+          </div>
+        ) : profiles.length === 0 ? (
+          <div style={{ textAlign: 'center', background: '#FFF', padding: '60px 20px', borderRadius: 'var(--radius-lg)', maxWidth: '600px', margin: '0 auto' }}>
+            <Users size={48} color="#780E2F" style={{ margin: '0 auto 16px auto' }} />
+            <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.3rem', color: '#780E2F' }}>No Matches Found Yet</h3>
+            <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>We are continually adding verified profiles. Check back soon!</p>
+          </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '24px' }}>
             {profiles.map((profile) => {
-              return (
-                <div className="profile-card" key={profile.id}>
-                  <div className="profile-img-container">
-                    <img src={profile.image} alt={profile.name} className="profile-img" loading="lazy" />
-                  </div>
+              const photoUrl = (typeof profile.image === 'string' && profile.image.trim()) || 
+                               (typeof profile.profileImage === 'string' && profile.profileImage.trim()) || 
+                               null;
+              const profileId = profile.id || profile.memberId;
+              const isFavorited = shortlistedIds && typeof shortlistedIds.has === 'function' ? shortlistedIds.has(profileId) : false;
 
-                  {/* Profile Action */}
-                  <div className="profile-info" style={{ padding: '14px 16px 16px 16px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              return (
+                <div className="profile-card" key={profileId}>
+                  <div className="profile-img-container" style={{ position: 'relative' }}>
+                    {/* Badge */}
+                    <div className="profile-badge-top-left" style={{ display: 'flex', gap: '6px' }}>
+                      <span className="badge badge-gold" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem' }}>
+                        <ShieldCheck size={12} /> Verified
+                      </span>
+                    </div>
+
+                    {/* Shortlist Heart Button */}
                     <button 
-                      onClick={() => onSelectProfile(profile)} 
-                      className="profile-btn-view"
-                      style={{ 
-                        width: '100%', 
-                        maxWidth: '180px',
-                        padding: '9px 16px',
-                        borderRadius: '8px',
-                        display: 'flex',
+                      className={`profile-shortlist-btn ${isFavorited ? 'favorited' : ''}`}
+                      onClick={() => onToggleShortlist && onToggleShortlist(profileId)}
+                      title={isFavorited ? 'Remove from shortlist' : 'Shortlist profile'}
+                      aria-label="Shortlist profile"
+                    >
+                      <Heart size={18} fill={isFavorited ? 'var(--status-heart)' : 'none'} />
+                    </button>
+
+                    {/* Image or Fallback Avatar */}
+                    {photoUrl ? (
+                      <img 
+                        src={photoUrl} 
+                        alt={profile.name || 'Candidate Profile'} 
+                        className="profile-img" 
+                        loading="lazy" 
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    
+                    <div 
+                      className="profile-img-placeholder"
+                      style={{
+                        display: photoUrl ? 'none' : 'flex',
+                        width: '100%',
+                        height: '100%',
+                        background: 'linear-gradient(135deg, #780E2F 0%, #9E1B43 100%)',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        margin: '0 auto',
-                        fontSize: '0.86rem',
-                        fontWeight: 600,
-                        cursor: 'pointer'
+                        color: '#FFF'
                       }}
                     >
-                      View Profile
-                    </button>
+                      <User size={56} color="#FFFFFF" />
+                    </div>
+                  </div>
+
+                  {/* Profile Info Details */}
+                  <div className="profile-info" style={{ padding: '16px' }}>
+                    <div className="profile-name-row" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                      <h4 className="profile-name" style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>
+                        {profile.name || 'Candidate Profile'}
+                      </h4>
+                      <CheckCircle2 size={15} className="profile-verified-check" color="#10B981" />
+                    </div>
+
+                    <div className="profile-meta" style={{ fontSize: '0.82rem', color: '#6B7280', marginBottom: '6px' }}>
+                      {[profile.age ? `${profile.age} yrs` : null, profile.height, profile.religion, profile.caste].filter(Boolean).join(' • ')}
+                    </div>
+
+                    <div className="profile-profession" style={{ fontSize: '0.84rem', fontWeight: 600, color: '#780E2F', marginBottom: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {profile.profession || profile.education || 'Professional'}
+                    </div>
+
+                    {/* Card Action Buttons */}
+                    <div className="profile-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: 'auto' }}>
+                      <button 
+                        onClick={() => onSelectProfile && onSelectProfile(profile)} 
+                        className="profile-btn-view"
+                        style={{ cursor: 'pointer' }}
+                      >
+                        View Profile
+                      </button>
+
+                      <button 
+                        onClick={() => onSendInterest && onSendInterest(profile)} 
+                        className="profile-btn-connect"
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <Send size={13} style={{ marginRight: '4px' }} /> Connect
+                      </button>
+                    </div>
                   </div>
                 </div>
               );

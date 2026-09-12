@@ -260,16 +260,35 @@ export default function ProfileDetailModal({
                     background: '#1F2937'
                   }}
                 >
-                  <img 
-                    src={p.image || p.profileImage} 
-                    alt={p.name}
+                  {p.image || p.profileImage ? (
+                    <img 
+                      src={p.image || p.profileImage} 
+                      alt={p.name}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block'
+                      }}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <div 
                     style={{
+                      display: (p.image || p.profileImage) ? 'none' : 'flex',
                       width: '100%',
                       height: '100%',
-                      objectFit: 'cover',
-                      display: 'block'
+                      background: 'linear-gradient(135deg, #780E2F 0%, #9E1B43 100%)',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#FFF'
                     }}
-                  />
+                  >
+                    <User size={24} color="#FFFFFF" />
+                  </div>
                   {p.isFeatured && (
                     <span 
                       style={{
@@ -349,16 +368,35 @@ export default function ProfileDetailModal({
               justifyContent: 'center',
               overflow: 'hidden'
             }}>
-              <img 
-                src={profile.image || profile.profileImage} 
-                alt={profile.name} 
+              {profile.image || profile.profileImage ? (
+                <img 
+                  src={profile.image || profile.profileImage} 
+                  alt={profile.name} 
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }}
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div 
                 style={{
+                  display: (profile.image || profile.profileImage) ? 'none' : 'flex',
                   width: '100%',
                   height: '100%',
-                  objectFit: 'cover',
-                  display: 'block'
+                  background: 'linear-gradient(135deg, #780E2F 0%, #9E1B43 100%)',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#FFF'
                 }}
-              />
+              >
+                <User size={64} color="#FFFFFF" />
+              </div>
 
               {/* Bottom Dark Gradient & Indicator Bar */}
               <div style={{

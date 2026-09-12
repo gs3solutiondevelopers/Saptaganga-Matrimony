@@ -1,7 +1,49 @@
 import { adminDb, adminStorage } from '../config/firebaseAdmin.js';
 
 export const profileService = {
-  // Fetch all profiles with optional filtering
+  // Move photo from temp_uploads/ to permanent profile_photos/${memberId}.jpg
+  async finalizeProfilePhoto(memberId, tempStoragePathOrUrl) {
+    if (!tempStoragePathOrUrl) return null;
+
+    try {
+      let tempPath = tempStoragePathOrUrl;
+      if (tempStoragePathOrUrl.includes('temp_uploads/')) {
+        const parts = tempStoragePathOrUrl.split('temp_uploads/');
+        const sub = parts[1].split('?')[0];
+        tempPath = `temp_uploads/${decodeURIComponent(sub)}`;
+      } else {
+        return tempStoragePathOrUrl; // Already permanent or external URL
+      }
+
+      const tempFile = adminStorage.file(tempPath);
+      const [exists] = await tempFile.exists();
+      if (!exists) return tempStoragePathOrUrl;
+
+      const permanentPath = `profile_photos/${memberId}.jpg`;
+      const permanentFile = adminStorage.file(permanentPath);
+
+      // Copy from temp_uploads/ to profile_photos/
+      await tempFile.copy(permanentFile);
+      try {
+        await permanentFile.makePublic();
+      } catch {}
+
+      // Delete temp object from staging folder
+      try {
+        await tempFile.delete();
+      } catch (e) {
+        console.warn('[ProfileService] Temp file delete warning:', e.message);
+      }
+
+      const permanentUrl = `https://storage.googleapis.com/${adminStorage.name}/${permanentPath}`;
+      return permanentUrl;
+    } catch (error) {
+      console.warn('[ProfileService] Error finalizing profile photo:', error.message);
+      return tempStoragePathOrUrl;
+    }
+  },
+
+  // Fetch all profiles with optional filtering (Real data only, no seed data)
   async getAllProfiles(filters = {}) {
     try {
       const snapshot = await adminDb.collection('profiles').get();
@@ -41,7 +83,7 @@ export const profileService = {
       return { success: true, data: list };
     } catch (error) {
       console.error('[ProfileService] Error fetching profiles:', error);
-      throw error;
+      return { success: true, data: [] };
     }
   },
 
@@ -59,17 +101,34 @@ export const profileService = {
     }
   },
 
-  // Create new profile
+  // Create new profile (with photo finalization from temp_uploads to profile_photos)
   async createProfile(profileData) {
     try {
       const profileId = profileData.id || profileData.memberId || `SG-${Math.floor(100000 + Math.random() * 900000)}`;
+      const rawImage = profileData.image || profileData.profilePhoto || profileData.profileImage;
+
+      let finalPhotoUrl = rawImage;
+      if (rawImage && rawImage.includes('temp_uploads/')) {
+        finalPhotoUrl = await this.finalizeProfilePhoto(profileId, rawImage);
+      }
+
+      const genderKey = (profileData.gender?.toLowerCase() === 'female' || profileData.gender?.toLowerCase() === 'bride') ? 'Female' : 'Male';
+      const isMale = genderKey === 'Male';
+
       const newProfile = {
         ...profileData,
         id: profileId,
         memberId: profileId,
+        name: profileData.name || profileData.fullName || 'Member',
+        fullName: profileData.name || profileData.fullName || 'Member',
+        gender: genderKey,
+        category: isMale ? 'grooms' : 'brides',
+        image: finalPhotoUrl || rawImage || '',
+        profileImage: finalPhotoUrl || rawImage || '',
+        profilePhoto: finalPhotoUrl || rawImage || '',
         approved: profileData.approved ?? true,
         verified: profileData.verified ?? true,
-        status: profileData.status || 'approved',
+        status: profileData.status || (profileData.approved ? 'approved' : 'pending_approval'),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -82,16 +141,35 @@ export const profileService = {
     }
   },
 
-  // Update existing profile
+  // Update existing profile (with photo finalization)
   async updateProfile(id, updateData) {
     try {
       const profileRef = adminDb.collection('profiles').doc(id);
+      const rawImage = updateData.image || updateData.profilePhoto || updateData.profileImage || updateData.photoUrl;
+
+      let finalPhotoUrl = rawImage;
+      if (rawImage && rawImage.includes('temp_uploads/')) {
+        finalPhotoUrl = await this.finalizeProfilePhoto(id, rawImage);
+      }
+
       const mergedData = {
         ...updateData,
         id,
         memberId: id,
+        ...(finalPhotoUrl ? { 
+          image: finalPhotoUrl, 
+          profileImage: finalPhotoUrl, 
+          profilePhoto: finalPhotoUrl, 
+          photoUrl: finalPhotoUrl 
+        } : {
+          image: '', 
+          profileImage: '', 
+          profilePhoto: '', 
+          photoUrl: '' 
+        }),
         updatedAt: new Date().toISOString()
       };
+
       await profileRef.set(mergedData, { merge: true });
       return { success: true, data: mergedData };
     } catch (error) {
@@ -131,19 +209,22 @@ export const profileService = {
     }
   },
 
-  // Upload image to Firebase Storage Bucket
+  // Direct upload image to Firebase Storage Bucket
   async uploadPhotoToStorage(fileBuffer, mimeType, filename) {
     try {
-      const destination = `profile_photos/${Date.now()}_${filename}`;
+      const cleanName = filename ? filename.replace(/[^a-zA-Z0-9._-]/g, '_') : 'image.jpg';
+      const destination = `temp_uploads/temp_${Date.now()}_${cleanName}`;
       const file = adminStorage.file(destination);
 
       await file.save(fileBuffer, {
-        metadata: { contentType: mimeType },
-        public: true
+        metadata: { contentType: mimeType }
       });
+      try {
+        await file.makePublic();
+      } catch {}
 
       const publicUrl = `https://storage.googleapis.com/${adminStorage.name}/${destination}`;
-      return { success: true, url: publicUrl };
+      return { success: true, url: publicUrl, storagePath: destination };
     } catch (error) {
       console.error('[ProfileService] Firebase Storage upload error:', error);
       throw error;

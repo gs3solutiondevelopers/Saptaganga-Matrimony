@@ -16,8 +16,7 @@ const initializeFirebaseAdmin = () => {
   // 1. Try local serviceAccountKey.json path if provided or exists
   const candidatePaths = [
     process.env.GOOGLE_APPLICATION_CREDENTIALS,
-    path.resolve(__dirname, '../../credencial/serviceAccountKey.json'),
-    path.resolve(__dirname, '../credencial/serviceAccountKey.json')
+    path.resolve(__dirname, '../../credencial/serviceAccountKey.json')
   ].filter(Boolean);
 
   let keyPathFound = null;

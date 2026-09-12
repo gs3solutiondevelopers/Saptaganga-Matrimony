@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
+  User,
   Users, 
   ShieldCheck, 
   Clock, 
@@ -232,7 +233,33 @@ export default function AdminDashboardPage() {
                   <tr key={p.id}>
                     <td>
                       <div className="admin-user-cell">
-                        <img src={p.image} alt={p.name} className="admin-cell-avatar" />
+                        {p.image || p.profileImage ? (
+                          <img 
+                            src={p.image || p.profileImage} 
+                            alt={p.name} 
+                            className="admin-cell-avatar" 
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <div 
+                          className="admin-cell-avatar-placeholder" 
+                          style={{ 
+                            display: (p.image || p.profileImage) ? 'none' : 'flex',
+                            width: '40px', 
+                            height: '40px', 
+                            borderRadius: '50%', 
+                            background: 'linear-gradient(135deg, #780E2F 0%, #9E1B43 100%)',
+                            color: '#FFFFFF',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                          }}
+                        >
+                          <User size={18} color="#FFFFFF" />
+                        </div>
                         <div>
                           <div className="admin-cell-name">{p.name}</div>
                           <div className="admin-cell-sub">{p.id} • {p.gender === 'female' ? 'Bride' : 'Groom'}</div>
