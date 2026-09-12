@@ -10,17 +10,17 @@ import {
 const HERO_SLIDES = [
   {
     id: 1,
-    image: '/imsge 2.webp',
-    alt: 'Saptaganga Matrimony - Traditional Values, Modern Connections',
-    bgPosition: 'right 66%',
-    className: 'hero-slide-1'
-  },
-  {
-    id: 2,
     image: '/hero-slide2.webp',
     alt: 'Saptaganga Happy Wedding Couple by the Ghats',
     bgPosition: 'right center',
     className: 'hero-slide-2'
+  },
+  {
+    id: 2,
+    image: '/imsge 2.webp',
+    alt: 'Saptaganga Matrimony - Traditional Values, Modern Connections',
+    bgPosition: 'right 66%',
+    className: 'hero-slide-1'
   }
 ];
 
