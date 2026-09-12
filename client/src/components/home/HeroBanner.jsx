@@ -3,7 +3,8 @@ import {
   Users, 
   Heart, 
   ShieldCheck, 
-  Headphones 
+  Headphones,
+  ArrowRight 
 } from 'lucide-react';
 
 const HERO_SLIDES = [
@@ -107,6 +108,7 @@ export default function HeroBanner({ onStartJourney, onRegisterClick, onOpenCrea
           <div className="hero-cta-pill-row">
             <button onClick={handleStart} className="hero-btn-pill-primary">
               <span>Start Your Journey</span>
+              <ArrowRight size={15} />
             </button>
 
             <button onClick={handleExploreMatches} className="hero-btn-pill-outline">

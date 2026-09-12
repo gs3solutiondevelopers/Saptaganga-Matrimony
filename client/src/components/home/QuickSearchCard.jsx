@@ -133,6 +133,7 @@ export default function QuickSearchCard({ onSearch, onRegisterClick, onOpenCreat
             <div className="search-field-group">
               <label className="search-field-label" style={{ opacity: 0 }}>Action</label>
               <button type="submit" className="search-submit-btn">
+                <Search size={17} />
                 <span>Search Matches</span>
               </button>
             </div>
